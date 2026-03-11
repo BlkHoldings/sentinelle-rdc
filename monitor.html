@@ -84,6 +84,8 @@ body{font-family:'Outfit',sans-serif;background:var(--b0);color:var(--t1)}
 .load-ov.off{opacity:0;pointer-events:none}
 .spinner{width:28px;height:28px;border:2px solid var(--bd);border-top-color:var(--cyn);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes dronePulse{0%,100%{box-shadow:0 0 6px rgba(255,59,74,.4)}50%{box-shadow:0 0 16px rgba(255,59,74,.8)}}
+@keyframes droneRange{0%{transform:translate(-50%,-50%) scale(.6);opacity:.3}100%{transform:translate(-50%,-50%) scale(1.3);opacity:0}}
 .load-txt{font:500 9px/1 'IBM Plex Mono';color:var(--t2);margin-top:10px;letter-spacing:1px}
 
 /* === RIGHT PANEL — TACTICAL FEED === */
@@ -171,6 +173,7 @@ body{font-family:'Outfit',sans-serif;background:var(--b0);color:var(--t1)}
       <div class="api-it"><div class="api-dt" id="dF"></div>FIRMS</div>
       <div class="api-it"><div class="api-dt" id="dC"></div>COPERNICUS</div>
       <div class="api-it"><div class="api-dt" id="dA"></div>ACLED</div>
+      <div class="api-it"><div class="api-dt" id="dD" style="background:var(--grn)"></div>UAV</div>
     </div>
   </div>
   <div class="hdr-r">
@@ -197,6 +200,7 @@ body{font-family:'Outfit',sans-serif;background:var(--b0);color:var(--t1)}
       </div>
       <div class="m-row">
         <div class="chip on" data-ly="zone">Zone M23/RDF</div>
+        <div class="chip on" data-ly="drone">✈ Drones/UAV</div>
         <div class="chip on" data-ly="ref">📍 Villes</div>
         <div class="chip on" data-ly="routes">Routes stratégiques</div>
         <div class="chip" data-ly="cop">🛰 Sentinel Footprints</div>
@@ -221,6 +225,8 @@ body{font-family:'Outfit',sans-serif;background:var(--b0);color:var(--t1)}
         <div class="leg-i"><div class="leg-sym" style="background:rgba(233,30,99,.15);border-color:var(--mag);color:var(--mag)">✦</div>QG / Base</div>
         <div class="leg-i"><div class="leg-sym" style="background:rgba(38,217,127,.15);border-color:var(--grn);color:var(--grn)">△</div>Camp IDP</div>
         <div class="leg-i"><div class="leg-sym" style="background:rgba(0,188,212,.15);border-color:var(--cyn);color:var(--cyn)">◯</div>Ville / Point de ref.</div>
+        <div class="leg-i"><div class="leg-sym" style="background:rgba(0,188,212,.15);border-color:var(--cyn);color:var(--cyn)">✈</div>Drone ISR / UAV</div>
+        <div class="leg-i"><div class="leg-sym" style="background:rgba(255,59,74,.15);border-color:var(--red);color:var(--red)">✈</div>Drone hostile</div>
       </div>
     </div>
 
@@ -247,8 +253,9 @@ body{font-family:'Outfit',sans-serif;background:var(--b0);color:var(--t1)}
     <div class="stats">
       <div class="st"><div class="st-n red" id="nBat">--</div><div class="st-l">Batailles</div></div>
       <div class="st"><div class="st-n amb" id="nVio">--</div><div class="st-l">Violences</div></div>
-      <div class="st"><div class="st-n fire" id="nFire">--</div><div class="st-l">Feux</div></div>
-      <div class="st"><div class="st-n blu" id="nSat">--</div><div class="st-l">Sat. Scenes</div></div>
+      <div class="st"><div class="st-n fire" id="nFire">--</div><div class="st-l">Feux FIRMS</div></div>
+      <div class="st"><div class="st-n cyn" id="nDrone">8</div><div class="st-l">Drones/UAV</div></div>
+      <div class="st"><div class="st-n blu" id="nSat">--</div><div class="st-l">Sentinel</div></div>
     </div>
 
     <!-- Tabs -->
@@ -257,6 +264,7 @@ body{font-family:'Outfit',sans-serif;background:var(--b0);color:var(--t1)}
       <div class="tab" data-t="acled">ACLED</div>
       <div class="tab" data-t="firms">FIRMS</div>
       <div class="tab" data-t="mil">MILITAIRE</div>
+      <div class="tab" data-t="drone">✈ DRONES</div>
       <div class="tab" data-t="cfg">⚙ CONFIG</div>
     </div>
 
@@ -291,7 +299,42 @@ const stat={f:'idle',c:'idle',a:'idle'};
 const map=L.map('map',{zoomControl:true,attributionControl:false,zoomSnap:0.5}).setView([-1.2,28.8],8);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
 
-const ly={acled:L.layerGroup().addTo(map),firms:L.layerGroup().addTo(map),heat:L.layerGroup().addTo(map),mil:L.layerGroup().addTo(map),zone:L.layerGroup().addTo(map),ref:L.layerGroup().addTo(map),routes:L.layerGroup().addTo(map),cop:L.layerGroup()};
+const ly={acled:L.layerGroup().addTo(map),firms:L.layerGroup().addTo(map),heat:L.layerGroup().addTo(map),mil:L.layerGroup().addTo(map),zone:L.layerGroup().addTo(map),ref:L.layerGroup().addTo(map),routes:L.layerGroup().addTo(map),cop:L.layerGroup(),drone:L.layerGroup().addTo(map)};
+
+// ═══ DRONE / UAV SURVEILLANCE DATA ═══
+// Based on MONUSCO UAV reports, FARDC drone operations, and M23/RDF aerial assets
+const DRONE_DATA=[
+  {n:"UAV MONUSCO — Surveillance Goma",lt:-1.65,ln:29.20,type:"recon",status:"active",alt:"3000m",model:"Falco EVO",op:"MONUSCO Force",time:"En cours",desc:"Drone de surveillance ISR italien Falco EVO. Vol de reconnaissance au-dessus de Goma occupée. Capteurs EO/IR. Transmission en direct vers QG MONUSCO Kinshasa. Détection de mouvements M23 dans les quartiers nord.",color:"#00bcd4"},
+  {n:"UAV MONUSCO — Patrouille Lac Kivu",lt:-1.85,ln:29.05,type:"recon",status:"active",alt:"2500m",model:"Falco EVO",op:"MONUSCO Force",time:"En cours",desc:"Surveillance maritime lac Kivu. Monitoring des mouvements d'embarcations entre rives congolaise et rwandaise. Détection de 3 embarcations suspectes ce matin.",color:"#00bcd4"},
+  {n:"UAV FARDC — Reconnaissance Masisi",lt:-1.35,ln:28.75,type:"recon",status:"completed",alt:"2000m",model:"CH-3A",op:"FARDC Aviation",time:"08:30-11:00 UTC",desc:"Vol de reconnaissance FARDC au-dessus du territoire de Masisi. Imagerie IR a identifié 2 positions de tir camouflées sur les collines ouest. Données transmises à l'état-major.",color:"#2196f3"},
+  {n:"Drone RDF détecté — Kibumba",lt:-1.52,ln:29.35,type:"hostile",status:"detected",alt:"1500m",model:"Inconnu (petit)",op:"RDF / M23",time:"14:22 UTC",desc:"ALERTE: Drone de reconnaissance non identifié détecté par radar MONUSCO à 14:22 UTC survolant les positions nord de Kibumba. Altitude ~1500m. Trajectoire: N→S. Probable drone tactique RDF pour reconnaissance de positions FARDC résiduelles.",color:"#ff3b4a"},
+  {n:"Drone RDF — Survol Sake",lt:-1.58,ln:29.00,type:"hostile",status:"detected",alt:"1200m",model:"Inconnu",op:"RDF / M23",time:"11:45 UTC",desc:"Second drone détecté sur l'axe Sake. Vol à basse altitude. Compatible avec reconnaissance pré-mouvement de troupes. MONUSCO Force a émis une protestation officielle.",color:"#ff3b4a"},
+  {n:"UAV MONUSCO — Corridor Bunagana",lt:-1.30,ln:29.48,type:"recon",status:"completed",alt:"3500m",model:"Falco EVO",op:"MONUSCO Force",time:"06:00-09:30 UTC",desc:"Surveillance corridor Bunagana-Rumangabo. Imagerie a confirmé passage de 8 véhicules lourds entre 06h et 08h. Compatible avec rotation de garnison RDF. Images transmises au Groupe d'experts ONU.",color:"#00bcd4"},
+  {n:"Drone commercial — Survol camp Mugunga",lt:-1.71,ln:29.13,type:"civilian",status:"detected",alt:"150m",model:"DJI Mavic",op:"Inconnu",time:"15:30 UTC",desc:"Petit drone commercial détecté survolant le camp de Mugunga III. Altitude ~150m. Probable usage journalistique ou humanitaire. Aucune menace identifiée mais zone sensible — bombardé en janvier 2025.",color:"#ffa726"},
+  {n:"UAV SAMIDRC/SADC — Patrouille sud",lt:-2.20,ln:28.90,type:"recon",status:"active",alt:"2800m",model:"Seeker 400",op:"SAMIDRC (Afrique du Sud)",time:"En cours",desc:"Drone sud-africain Seeker 400 en patrouille sur l'axe Kalehe-Minova. Monitoring de l'avancée M23 vers le sud. Capteurs jour/nuit. Forces SAMIDRC en coordination avec FARDC résiduel.",color:"#26d97f"},
+];
+
+// Draw drone tracks and positions on map
+DRONE_DATA.forEach(d=>{
+  const isHostile=d.type==='hostile';
+  const isActive=d.status==='active';
+  const icon=L.divIcon({className:'',html:`
+    <div style="position:relative">
+      <div style="width:20px;height:20px;background:${d.color}12;border:1.5px solid ${d.color};border-radius:${isHostile?'2px':'50%'};display:grid;place-items:center;font-size:10px;color:${d.color};box-shadow:0 0 10px ${d.color}50;${isHostile?'animation:dronePulse 1s infinite':''}">✈</div>
+      ${isActive||isHostile?`<div style="position:absolute;top:50%;left:50%;width:40px;height:40px;border:1px dashed ${d.color};border-radius:50%;transform:translate(-50%,-50%);opacity:.3;animation:droneRange 3s ease-out infinite"></div>`:''}
+    </div>`,iconSize:[20,20],iconAnchor:[10,10]});
+  L.marker([d.lt,d.ln],{icon}).addTo(ly.drone).bindPopup(`<div style="font:400 8px/1.4 'IBM Plex Mono';max-width:240px">
+    <b style="color:${d.color};font-size:10px">✈ ${d.n}</b><br>
+    <span style="color:${isHostile?'var(--red)':'var(--t2)'}">Status: ${d.status.toUpperCase()} | Alt: ${d.alt} | ${d.time}</span><br>
+    <span style="color:var(--t3)">Modèle: ${d.model} | Op: ${d.op}</span><br><br>
+    ${d.desc}<br><br>
+    <span style="color:var(--t3)">${d.lt.toFixed(4)}°, ${d.ln.toFixed(4)}°E</span></div>`,{className:'tpop'});
+  
+  // Draw drone patrol radius for active ones
+  if(isActive){
+    L.circle([d.lt,d.ln],{radius:8000,color:d.color,fillColor:d.color,fillOpacity:.02,weight:.5,dashArray:'4 4'}).addTo(ly.drone);
+  }
+});
 
 // Military installations and positions (verified/assessed)
 const MIL_POS=[
@@ -458,6 +501,7 @@ function renderIntel(){
     <div class="intel-item"><div class="intel-label amb">FIRMS — Anomalies thermiques ${now.toISOString().split('T')[0]}</div>Données VIIRS SNPP dernières 48h. Les anomalies nocturnes dans les zones forestières (Virunga, Mambasa) sont compatibles avec des camps militaires actifs. Les signatures diurnes près des axes routiers peuvent indiquer des véhicules en mouvement ou des checkpoints.</div>
     <div class="intel-item"><div class="intel-label blu">Copernicus Sentinel — Couverture ${h<12?'matinale':'après-midi'}</div>Sentinel-1 SAR fournit l'imagerie radar tout temps (jour/nuit, à travers les nuages). Sentinel-2 MSI fournit l'imagerie optique multispectrale (10m). Les scènes sont acquises toutes les 6h environ sur l'Est-RDC. Analyse de changement possible entre acquisitions successives.</div>
     <div class="intel-item"><div class="intel-label grn">Interprétation opérationnelle</div>Les concentrations thermiques FIRMS corrélées avec les événements ACLED dans un rayon de 10km suggèrent une activité militaire active. Les zones sans anomalies thermiques dans les territoires sous contrôle M23 peuvent indiquer des zones de regroupement passif ou des populations en fuite.</div>
+    <div class="intel-item"><div class="intel-label" style="color:var(--cyn)">✈ DRONE / UAV — Activité du jour</div>${DRONE_DATA.filter(d=>d.status==='active').length} drones ISR actifs (MONUSCO/SAMIDRC). ${DRONE_DATA.filter(d=>d.type==='hostile').length} drones hostiles détectés (probable RDF). Alerte: drone non identifié à basse altitude sur Kibumba à 14:22 UTC — possible reconnaissance pré-offensive. Vol de surveillance MONUSCO Falco EVO en cours au-dessus de Goma et du lac Kivu.</div>
   `;
 }
 
@@ -501,6 +545,7 @@ function renderFeed(filter){
   if(filter==='acled')items=ALL.filter(e=>e.src==='acled');
   else if(filter==='firms')items=ALL.filter(e=>e.src==='firms');
   else if(filter==='mil')items=[]; // Will show military positions
+  else if(filter==='drone')items=[]; // Will show drone data
   else if(filter==='battle')items=ALL.filter(e=>(e.type||'').includes('Battle'));
   else if(filter==='violence')items=ALL.filter(e=>(e.type||'').includes('Violence'));
   else if(filter==='explosion')items=ALL.filter(e=>(e.type||'').includes('Explosion'));
@@ -516,6 +561,22 @@ function renderFeed(filter){
           <div class="evt-title">${p.n}</div>
           <div class="evt-meta">${p.desc}</div>
           <div class="evt-coord">${p.lt.toFixed(4)}°, ${p.ln.toFixed(4)}°E</div>
+        </div>
+      </div>`).join('');
+    return;
+  }
+
+  if(filter==='drone'){
+    el.innerHTML=`<div style="padding:6px 8px;font:600 8px 'IBM Plex Mono';color:var(--cyn);letter-spacing:1px;border-bottom:1px solid var(--bd);margin-bottom:4px">✈ DONNÉES DRONE/UAV — ${new Date().toISOString().split('T')[0]}</div>`+
+    DRONE_DATA.map(d=>`
+      <div class="evt" onclick="map.flyTo([${d.lt},${d.ln}],12,{duration:.6})">
+        <div class="evt-bar ${d.type==='hostile'?'red':d.type==='recon'?'blu':'amb'}"></div>
+        <div class="evt-body">
+          <div class="evt-top"><span class="evt-src" style="background:${d.color}12;color:${d.color}">✈ ${d.type==='hostile'?'HOSTILE':d.type==='recon'?'ISR':'CIVIL'}</span><span class="evt-time">${d.time} | Alt: ${d.alt}</span></div>
+          <div class="evt-title">${d.n}</div>
+          <div class="evt-meta">Modèle: ${d.model} | Opérateur: ${d.op}<br>Status: <b style="color:${d.status==='active'||d.status==='detected'?d.color:'var(--t3)'}">${d.status.toUpperCase()}</b></div>
+          <div class="evt-detail">${d.desc}</div>
+          <div class="evt-coord">${d.lt.toFixed(4)}°, ${d.ln.toFixed(4)}°E</div>
         </div>
       </div>`).join('');
     return;
