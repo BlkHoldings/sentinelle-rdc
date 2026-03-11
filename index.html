@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINELLE-RDC | Accès Sécurisé</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050810;--bg1:#0a0f1a;--bg2:#0f1624;--bg3:#151e30;--bd:#1a2640;--t1:#e4eaf2;--t2:#7a90aa;--t3:#3e506a;--cyn:#00d4d8;--blu:#1a8cff;--red:#ff4055;--grn:#22d67a;--amb:#ffaa00}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,216,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,216,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.bg-glow{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(26,140,255,.06),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(0,212,216,.04),transparent 50%);pointer-events:none}
+.scanline{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px);z-index:9998;pointer-events:none}
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.classbar{position:fixed;top:0;left:0;right:0;height:28px;background:rgba(255,64,85,.12);border-bottom:1px solid rgba(255,64,85,.25);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:10px;color:var(--red);letter-spacing:2px;font-weight:600;z-index:100;backdrop-filter:blur(10px)}
+.logo-block{text-align:center;margin-bottom:36px;animation:fd .8s ease-out}
+@keyframes fd{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.logo-icon{width:60px;height:60px;margin:0 auto 14px;background:linear-gradient(135deg,var(--blu),var(--cyn));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-weight:700;font-size:26px;color:#fff;box-shadow:0 0 36px rgba(0,212,216,.2);position:relative}
+.logo-icon::after{content:'';position:absolute;inset:-3px;border-radius:15px;border:1px solid rgba(0,212,216,.2);animation:lp 3s ease-in-out infinite}
+@keyframes lp{0%,100%{border-color:rgba(0,212,216,.2)}50%{border-color:rgba(0,212,216,.4)}}
+.logo-nm{font-weight:800;font-size:24px;letter-spacing:4px;background:linear-gradient(90deg,var(--cyn),var(--blu));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-family:'IBM Plex Mono';font-size:10px;color:var(--t3);letter-spacing:2px;margin-top:4px}
+.card{width:100%;max-width:400px;background:var(--bg1);border:1px solid var(--bd);border-radius:10px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.5);animation:ci .5s ease-out .2s both}
+@keyframes ci{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card-h{padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.card-t{font-weight:700;font-size:14px}.card-badge{font-family:'IBM Plex Mono';font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(0,212,216,.08);border:1px solid rgba(0,212,216,.2);color:var(--cyn);letter-spacing:1px}
+.card-b{padding:20px}
+.levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px}
+.lv{padding:8px 6px;background:var(--bg2);border:1px solid var(--bd);border-radius:5px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.lv:hover{border-color:var(--t3)}.lv.act{border-color:var(--cyn);background:rgba(0,212,216,.03)}
+.lv.act::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--cyn);border-radius:1px}
+.lv-i{font-size:16px;margin-bottom:3px}.lv-n{font-size:9px;font-weight:600}.lv-d{font-size:7px;color:var(--t3);font-family:'IBM Plex Mono';margin-top:1px}
+.fld{margin-bottom:14px}
+.fld-l{display:block;font-family:'IBM Plex Mono';font-size:8px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.fld-i{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:5px;color:var(--t1);font-size:12px;font-family:'Outfit';outline:none;transition:all .2s}
+.fld-i:focus{border-color:var(--cyn);box-shadow:0 0 0 2px rgba(0,212,216,.08)}
+.fld-i::placeholder{color:var(--t3)}
+.hint{background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:8px 12px;margin-bottom:14px;font-family:'IBM Plex Mono';font-size:8px;color:var(--t2);line-height:1.6}
+.hint b{color:var(--cyn)}
+.btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--blu),var(--cyn));border:none;border-radius:5px;color:#fff;font-size:12px;font-weight:700;font-family:'Outfit';letter-spacing:1px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.btn:hover{box-shadow:0 4px 18px rgba(0,212,216,.3);transform:translateY(-1px)}
+.btn.load{pointer-events:none;color:transparent}
+.btn.load::after{content:'';position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err{background:rgba(255,64,85,.08);border:1px solid rgba(255,64,85,.2);border-radius:5px;padding:8px 12px;margin-top:10px;font-size:10px;color:var(--red);display:none;animation:sh .4s ease}
+@keyframes sh{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-3px)}40%,80%{transform:translateX(3px)}}
+.card-f{padding:12px 20px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono';font-size:7px;color:var(--t3)}
+.card-f a{color:var(--cyn);text-decoration:none}
+.ext{width:100%;max-width:400px;margin-top:20px;animation:ci .5s ease-out .4s both}
+.ext-c{background:var(--bg1);border:1px solid var(--bd);border-radius:8px;padding:16px 20px}
+.ext-t{font-family:'IBM Plex Mono';font-size:8px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.ext-row{display:flex;gap:6px;align-items:center}
+.ext-lnk{flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--bd);border-radius:4px;font-family:'IBM Plex Mono';font-size:9px;color:var(--cyn);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:all}
+.cp-btn{padding:8px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:4px;color:var(--t2);font-size:9px;font-family:'IBM Plex Mono';cursor:pointer;transition:all .2s;white-space:nowrap}
+.cp-btn:hover{border-color:var(--cyn);color:var(--cyn)}
+.cp-btn.ok{background:rgba(34,214,122,.08);border-color:rgba(34,214,122,.3);color:var(--grn)}
+.ext-m{margin-top:8px;font-family:'IBM Plex Mono';font-size:7px;color:var(--t3);display:flex;gap:10px}
+.ext-m span{display:flex;align-items:center;gap:3px}
+.sdot{width:4px;height:4px;border-radius:50%;display:inline-block}
+.auth-ok{position:fixed;inset:0;background:var(--bg);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center}
+.auth-ok.show{display:flex;animation:af 2.5s ease-out forwards}
+@keyframes af{0%{opacity:1}80%{opacity:1}100%{opacity:0;pointer-events:none}}
+.chk{width:56px;height:56px;border-radius:50%;background:rgba(34,214,122,.1);border:2px solid var(--grn);display:flex;align-items:center;justify-content:center;animation:cp .4s ease-out}
+@keyframes cp{from{transform:scale(0)}to{transform:scale(1)}}
+.chk svg{width:24px;height:24px;stroke:var(--grn);stroke-width:3;fill:none;stroke-linecap:round}
+.chk svg path{stroke-dasharray:30;stroke-dashoffset:30;animation:dc .5s ease-out .2s forwards}
+@keyframes dc{to{stroke-dashoffset:0}}
+.at1{margin-top:14px;font-family:'IBM Plex Mono';font-size:11px;color:var(--grn);letter-spacing:2px;animation:fd .4s ease-out .3s both}
+.at2{margin-top:5px;font-size:9px;color:var(--t3);font-family:'IBM Plex Mono';animation:fd .4s ease-out .5s both}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div><div class="bg-glow"></div><div class="scanline"></div>
+<div class="auth-ok" id="authOk"><div class="chk"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></div><div class="at1">AUTHENTIFICATION RÉUSSIE</div><div class="at2">Chargement du moniteur...</div></div>
+<div class="page" id="loginPage">
+<div class="classbar">CONFIDENTIEL DÉFENSE — ACCÈS RESTREINT — SENTINELLE-RDC</div>
+<div class="logo-block"><div class="logo-icon">S</div><div class="logo-nm">SENTINELLE-RDC</div><div class="logo-sub">Système de Surveillance Frontalière par Satellite</div></div>
+<div class="card">
+  <div class="card-h"><div class="card-t">Authentification requise</div><div class="card-badge">NIVEAU 3+</div></div>
+  <div class="card-b">
+    <div class="levels"><div class="lv act" data-l="analyst"><div class="lv-i">📊</div><div class="lv-n">Analyste</div><div class="lv-d">Lecture seule</div></div><div class="lv" data-l="operator"><div class="lv-i">🛰️</div><div class="lv-n">Opérateur</div><div class="lv-d">Sat + Alertes</div></div><div class="lv" data-l="commander"><div class="lv-i">⚔️</div><div class="lv-n">Commandement</div><div class="lv-d">Accès complet</div></div></div>
+    <div class="fld"><label class="fld-l">Identifiant opérateur</label><input class="fld-i" type="text" id="uid" placeholder="ex: gbk-ops-001" autocomplete="off" spellcheck="false"></div>
+    <div class="fld"><label class="fld-l">Clé d'accès</label><input class="fld-i" type="password" id="pwd" placeholder="••••••••••••"></div>
+    <div class="hint"><b>Accès démo :</b> identifiant <b>deepq</b> — clé <b>sentinelle2026</b><br><b>Commandement :</b> identifiant <b>gedeon</b> — clé <b>deepq-admin</b></div>
+    <button class="btn" id="loginBtn" onclick="doLogin()">ACCÉDER AU MONITEUR</button>
+    <div class="err" id="errMsg"></div>
+  </div>
+  <div class="card-f"><span>DeepQ Intelligence Division</span><a href="https://deepq.io" target="_blank">deepq.io</a></div>
+</div>
+<div class="ext"><div class="ext-c">
+  <div class="ext-t">Lien d'accès externe</div>
+  <div class="ext-row"><div class="ext-lnk" id="extLnk"></div><button class="cp-btn" id="cpBtn" onclick="copyLnk()">COPIER</button></div>
+  <div class="ext-m"><span><div class="sdot" style="background:var(--grn)"></div>Lien actif</span><span>Expire: 24h</span><span>TLS 1.3</span></div>
+</div></div>
+</div>
+<script>
+const CREDS={
+  deepq:{pwd:'sentinelle2026',level:'analyst',name:'DeepQ Analyst',clearance:'NIVEAU 3'},
+  'gbk-ops':{pwd:'kivu-watch',level:'operator',name:'Opérateur Satellite',clearance:'NIVEAU 4'},
+  'fardc-cmd':{pwd:'goma-secure',level:'commander',name:'FARDC Commandement',clearance:'NIVEAU 5'},
+  monusco:{pwd:'un-force-2026',level:'operator',name:'MONUSCO JMAC',clearance:'NIVEAU 4'},
+  anr:{pwd:'securite-nat',level:'commander',name:'ANR Direction',clearance:'NIVEAU 5'},
+  gedeon:{pwd:'deepq-admin',level:'commander',name:'Gedeon Baleke — VP',clearance:'NIVEAU 5'},
+};
+let selLevel='analyst';
+document.querySelectorAll('.lv').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.lv').forEach(x=>x.classList.remove('act'));b.classList.add('act');selLevel=b.dataset.l})});
+document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+function doLogin(){
+  const uid=document.getElementById('uid').value.trim().toLowerCase();
+  const pwd=document.getElementById('pwd').value;
+  const btn=document.getElementById('loginBtn');
+  const err=document.getElementById('errMsg');
+  err.style.display='none';
+  if(!uid||!pwd){err.textContent="Identifiant et clé requis.";err.style.display='block';return}
+  btn.classList.add('load');
+  setTimeout(()=>{
+    btn.classList.remove('load');
+    const u=CREDS[uid];
+    if(!u||u.pwd!==pwd){err.textContent="Identifiant ou clé incorrect.";err.style.display='block';return}
+    const rank={analyst:1,operator:2,commander:3};
+    if(rank[selLevel]>rank[u.level]){err.textContent=`Niveau insuffisant. ${u.name} — ${u.clearance}.`;err.style.display='block';return}
+    const token=crypto.getRandomValues(new Uint8Array(32)).reduce((s,b)=>s+b.toString(16).padStart(2,'0'),'');
+    sessionStorage.setItem('sentinelle_session',JSON.stringify({token,user:u.name,clearance:u.clearance,level:u.level,loginTime:new Date().toISOString()}));
+    document.getElementById('authOk').classList.add('show');
+    setTimeout(()=>{window.location.href='monitor.html'},2400);
+  },1000);
+}
+function copyLnk(){
+  navigator.clipboard.writeText(document.getElementById('extLnk').textContent).then(()=>{
+    const b=document.getElementById('cpBtn');b.textContent='✓ COPIÉ';b.classList.add('ok');
+    setTimeout(()=>{b.textContent='COPIER';b.classList.remove('ok')},2000);
+  });
+}
+// Generate link
+const tk=crypto.getRandomValues(new Uint8Array(8)).reduce((s,b)=>s+b.toString(16).padStart(2,'0'),'');
+document.getElementById('extLnk').textContent=`${location.origin}${location.pathname.replace(/[^/]*$/,'')}?token=${tk}`;
+// Token auto-login
+const p=new URLSearchParams(location.search);
+if(p.get('token')){
+  sessionStorage.setItem('sentinelle_session',JSON.stringify({token:p.get('token'),user:'External Operator',clearance:'NIVEAU 3',level:'analyst'}));
+  setTimeout(()=>{document.getElementById('authOk').classList.add('show');setTimeout(()=>{window.location.href='monitor.html'},2000)},500);
+}
+</script>
+</body>
+</html>
