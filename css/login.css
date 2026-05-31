@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════════
+   SENTINELLE-RDC — Login / Authentication Page
+   ═══════════════════════════════════════════════ */
+
+html,body { min-height:100vh; overflow-x:hidden; }
+
+/* Background decorations */
+.bg-grid  { position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,216,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,216,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none }
+.bg-glow  { position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(26,140,255,.06),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(0,212,216,.04),transparent 50%);pointer-events:none }
+.scanline { position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px);z-index:9998;pointer-events:none }
+
+.page     { position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px }
+.classbar { position:fixed;top:0;left:0;right:0;height:28px;background:rgba(255,64,85,.12);border-bottom:1px solid rgba(255,64,85,.25);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:10px;color:var(--red);letter-spacing:2px;font-weight:600;z-index:100;backdrop-filter:blur(10px) }
+
+/* ── Logo ─────────────────────────────────────── */
+.logo-block { text-align:center;margin-bottom:36px;animation:fd .8s ease-out }
+.logo-icon  { width:60px;height:60px;margin:0 auto 14px;background:linear-gradient(135deg,#1565c0,var(--cyn));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-weight:700;font-size:26px;color:#fff;box-shadow:0 0 36px rgba(0,212,216,.2);position:relative }
+.logo-icon::after { content:'';position:absolute;inset:-3px;border-radius:15px;border:1px solid rgba(0,212,216,.2);animation:lp 3s ease-in-out infinite }
+@keyframes lp { 0%,100%{border-color:rgba(0,212,216,.2)} 50%{border-color:rgba(0,212,216,.4)} }
+.logo-nm  { font-weight:800;font-size:24px;letter-spacing:4px;background:linear-gradient(90deg,var(--cyn),var(--blu));-webkit-background-clip:text;-webkit-text-fill-color:transparent }
+.logo-sub { font-family:'IBM Plex Mono';font-size:10px;color:var(--t3);letter-spacing:2px;margin-top:4px }
+
+/* ── Card ─────────────────────────────────────── */
+.card   { width:100%;max-width:400px;background:var(--b1);border:1px solid var(--bd);border-radius:10px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.5);animation:ci .5s ease-out .2s both }
+.card-h { padding:16px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between }
+.card-t { font-weight:700;font-size:14px }
+.card-badge { font-family:'IBM Plex Mono';font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(0,212,216,.08);border:1px solid rgba(0,212,216,.2);color:var(--cyn);letter-spacing:1px }
+.card-b { padding:20px }
+
+/* ── Level selector ───────────────────────────── */
+.levels { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px }
+.lv     { padding:8px 6px;background:var(--b2);border:1px solid var(--bd);border-radius:5px;text-align:center;cursor:pointer;transition:all .2s;position:relative;user-select:none }
+.lv:hover   { border-color:var(--t3) }
+.lv.act     { border-color:var(--cyn);background:rgba(0,212,216,.03) }
+.lv.act::after { content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--cyn);border-radius:1px }
+.lv-i { font-size:16px;margin-bottom:3px }
+.lv-n { font-size:9px;font-weight:600 }
+.lv-d { font-size:7px;color:var(--t3);font-family:'IBM Plex Mono';margin-top:1px }
+
+/* ── Form fields ──────────────────────────────── */
+.fld   { margin-bottom:14px }
+.fld-l { display:block;font-family:'IBM Plex Mono';font-size:8px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px }
+.fld-i { width:100%;padding:10px 12px;background:var(--b0);border:1px solid var(--bd);border-radius:5px;color:var(--t1);font-size:12px;font-family:'Outfit';outline:none;transition:all .2s }
+.fld-i:focus       { border-color:var(--cyn);box-shadow:0 0 0 2px rgba(0,212,216,.08) }
+.fld-i::placeholder{ color:var(--t3) }
+.fld-i:disabled    { opacity:.5;cursor:not-allowed }
+
+.hint   { background:var(--b0);border:1px solid var(--bd);border-radius:5px;padding:8px 12px;margin-bottom:14px;font-family:'IBM Plex Mono';font-size:8px;color:var(--t2);line-height:1.6 }
+.hint b { color:var(--cyn) }
+
+/* ── Submit button ────────────────────────────── */
+.btn { width:100%;padding:11px;background:linear-gradient(135deg,var(--blu),var(--cyn));border:none;border-radius:5px;color:#fff;font-size:12px;font-weight:700;font-family:'Outfit';letter-spacing:1px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden }
+.btn:hover:not(:disabled) { box-shadow:0 4px 18px rgba(0,212,216,.3);transform:translateY(-1px) }
+.btn:disabled   { opacity:.6;cursor:not-allowed;transform:none }
+.btn.load       { pointer-events:none;color:transparent }
+.btn.load::after{ content:'';position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite }
+
+/* ── Feedback ─────────────────────────────────── */
+.err     { background:rgba(255,64,85,.08);border:1px solid rgba(255,64,85,.2);border-radius:5px;padding:8px 12px;margin-top:10px;font-size:10px;color:var(--red);display:none;animation:sh .4s ease }
+.lockout { background:rgba(255,167,38,.08);border:1px solid rgba(255,167,38,.2);border-radius:5px;padding:8px 12px;margin-top:8px;font-size:9px;color:var(--amb);display:none;font-family:'IBM Plex Mono';letter-spacing:.4px;line-height:1.6 }
+
+/* ── Card footer ──────────────────────────────── */
+.card-f   { padding:12px 20px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono';font-size:7px;color:var(--t3) }
+.card-f a { color:var(--cyn);text-decoration:none }
+
+/* ── External link widget ─────────────────────── */
+.ext     { width:100%;max-width:400px;margin-top:20px;animation:ci .5s ease-out .4s both }
+.ext-c   { background:var(--b1);border:1px solid var(--bd);border-radius:8px;padding:16px 20px }
+.ext-t   { font-family:'IBM Plex Mono';font-size:8px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px }
+.ext-row { display:flex;gap:6px;align-items:center }
+.ext-lnk { flex:1;padding:8px 10px;background:var(--b0);border:1px solid var(--bd);border-radius:4px;font-family:'IBM Plex Mono';font-size:9px;color:var(--cyn);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:all }
+.cp-btn       { padding:8px 14px;background:var(--b3);border:1px solid var(--bd);border-radius:4px;color:var(--t2);font-size:9px;font-family:'IBM Plex Mono';cursor:pointer;transition:all .2s;white-space:nowrap }
+.cp-btn:hover { border-color:var(--cyn);color:var(--cyn) }
+.cp-btn.ok    { background:rgba(34,214,122,.08);border-color:rgba(34,214,122,.3);color:var(--grn) }
+.ext-m        { margin-top:8px;font-family:'IBM Plex Mono';font-size:7px;color:var(--t3);display:flex;gap:10px }
+.ext-m span   { display:flex;align-items:center;gap:3px }
+.sdot         { width:4px;height:4px;border-radius:50%;display:inline-block }
+
+/* ── Auth success overlay ─────────────────────── */
+.auth-ok      { position:fixed;inset:0;background:var(--b0);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center }
+.auth-ok.show { display:flex;animation:af 2.5s ease-out forwards }
+@keyframes af { 0%,80%{opacity:1} 100%{opacity:0;pointer-events:none} }
+.chk { width:56px;height:56px;border-radius:50%;background:rgba(34,214,122,.1);border:2px solid var(--grn);display:flex;align-items:center;justify-content:center;animation:cp .4s ease-out }
+@keyframes cp { from{transform:scale(0)} to{transform:scale(1)} }
+.chk svg { width:24px;height:24px;stroke:var(--grn);stroke-width:3;fill:none;stroke-linecap:round }
+.chk svg path { stroke-dasharray:30;stroke-dashoffset:30;animation:dc .5s ease-out .2s forwards }
+@keyframes dc { to{stroke-dashoffset:0} }
+.at1 { margin-top:14px;font-family:'IBM Plex Mono';font-size:11px;color:var(--grn);letter-spacing:2px;animation:fd .4s ease-out .3s both }
+.at2 { margin-top:5px;font-size:9px;color:var(--t3);font-family:'IBM Plex Mono';animation:fd .4s ease-out .5s both }

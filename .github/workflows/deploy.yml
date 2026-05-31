@@ -1,0 +1,85 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # ── Validate ────────────────────────────────────────────────
+  validate:
+    name: Validate HTML & JS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install validators
+        run: npm install -g htmlhint
+
+      - name: Lint HTML
+        run: |
+          htmlhint index.html monitor.html \
+            --rules='{"tagname-lowercase":true,"attr-lowercase":true,"attr-value-double-quotes":true,"doctype-first":true,"tag-pair":true,"id-unique":true}'
+
+      - name: Check for inline scripts in HTML
+        run: |
+          # Warn if any inline <script> blocks with code remain in HTML files
+          if grep -n '<script>' index.html monitor.html | grep -v 'src='; then
+            echo "⚠ Inline script blocks found — prefer external JS files"
+          fi
+          echo "✓ Script check complete"
+
+      - name: Verify JS files exist
+        run: |
+          for f in js/config.js js/utils.js js/toast.js js/data.js \
+                   js/api.js js/map.js js/feed.js js/monitor.js js/auth.js; do
+            [ -f "$f" ] && echo "✓ $f" || { echo "✗ Missing: $f"; exit 1; }
+          done
+
+      - name: Verify CSS files exist
+        run: |
+          for f in css/base.css css/login.css css/monitor.css; do
+            [ -f "$f" ] && echo "✓ $f" || { echo "✗ Missing: $f"; exit 1; }
+          done
+
+  # ── Deploy (main branch only) ──────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
