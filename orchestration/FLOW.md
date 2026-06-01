@@ -14,53 +14,51 @@
 task
   │
   ▼
-policy-engine ──HANDOFF: builder──► builder ──HANDOFF: reviewer──► reviewer
-                                                                        │
-                                                              ┌─────────┴─────────┐
-                                                         REVIEW: PASS        REVIEW: FAIL
-                                                              │                   │
-                                                            done          ROUTE_TO: policy-engine
-                                                                               or builder
-                                                                               (loop ≤ 3)
+policy-engine ──HANDOFF -> builder──► builder ──HANDOFF -> reviewer──► reviewer
+                                                                            │
+                                                              ┌─────────────┴─────────────┐
+                                                         verdict: PASS        verdict: CHANGES_REQUESTED
+                                                              │                            │
+                                                            done                  routed_to: policy-engine
+                                                                                       or builder
+                                                                                       (loop ≤ 3)
 ```
 
-## Handoff blocks
+## Block format
 
-Each agent ends its turn with a structured block that the orchestrator parses.
+The orchestrator (`orchestrate.mjs`) parses these literal strings from agent output.
 
 ### policy-engine output
 ```
-HANDOFF: builder
-TASK: <what builder must do>
-FILES_CHANGED: src/lib/policy-engine/coefficients.ts, ...
+HANDOFF -> builder
 ```
 
 ### builder output
 ```
-HANDOFF: reviewer
-TASK: <what reviewer should verify>
-FILES_CHANGED: src/components/Simulator.tsx, ...
+HANDOFF -> reviewer
 ```
 
 ### reviewer output (pass)
 ```
-REVIEW: PASS
+verdict: PASS
 ```
 
 ### reviewer output (fail)
 ```
-REVIEW: FAIL
-ISSUES:
-- <blocker 1>
-- <blocker 2>
-ROUTE_TO: builder
+verdict: CHANGES_REQUESTED
+routed_to: builder
+```
+or
+```
+verdict: CHANGES_REQUESTED
+routed_to: policy-engine
 ```
 
 ## Loop budget
 
-- Maximum **3 review loops** before the orchestrator exits with a non-zero code and prints the outstanding issues for human resolution.
-- On ROUTE_TO: policy-engine, re-run policy-engine then builder before going back to reviewer.
-- On ROUTE_TO: builder, re-run builder only.
+- Maximum **3 review cycles** before the orchestrator exits non-zero and prints outstanding issues for human resolution.
+- `routed_to: policy-engine` → re-run policy-engine then builder before returning to reviewer.
+- `routed_to: builder` → re-run builder only.
 
 ## Invariants
 

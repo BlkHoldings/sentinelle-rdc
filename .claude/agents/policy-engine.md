@@ -26,10 +26,8 @@ You own `src/lib/policy-engine/` exclusively. The builder and reviewer consume y
 
 ## Handoff format
 
-End your response with:
+End your response with exactly this block (the orchestrator parses it):
 
 ```
-HANDOFF: builder
-TASK: <what builder needs to implement or update>
-FILES_CHANGED: <comma-separated list>
+HANDOFF -> builder
 ```

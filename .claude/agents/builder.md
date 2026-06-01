@@ -25,10 +25,8 @@ You own `src/app/` and `src/components/`. You consume the policy engine via `@/l
 
 ## Handoff format
 
-End your response with:
+End your response with exactly this block (the orchestrator parses it):
 
 ```
-HANDOFF: reviewer
-TASK: <what reviewer should verify>
-FILES_CHANGED: <comma-separated list>
+HANDOFF -> reviewer
 ```

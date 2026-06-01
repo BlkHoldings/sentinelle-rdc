@@ -19,7 +19,7 @@ Run through every item; fail fast on the first blocker.
 ```bash
 npm run test:determinism
 ```
-All tests must pass. Any failure is a FAIL verdict.
+All tests must pass. Any failure → `CHANGES_REQUESTED`.
 
 ### 3. Type safety
 ```bash
@@ -34,7 +34,7 @@ Zero errors required.
 - [ ] New enum members have entries in every coefficient table
 
 ### 5. Realism spot-check
-Run a few representative inputs mentally or via the API. Verify:
+Verify mentally or via the API:
 - Higher intensity → higher score
 - More regions → higher score
 - Origin sector is hardest-hit
@@ -42,12 +42,22 @@ Run a few representative inputs mentally or via the API. Verify:
 
 ## Verdict format
 
+End your response with exactly one of these blocks (the orchestrator parses it):
+
+Pass:
 ```
-REVIEW: PASS
+verdict: PASS
+```
+
+Fail:
+```
+verdict: CHANGES_REQUESTED
+routed_to: builder
 ```
 or
 ```
-REVIEW: FAIL
-ISSUES: <concise bullet list of blockers>
-ROUTE_TO: policy-engine|builder
+verdict: CHANGES_REQUESTED
+routed_to: policy-engine
 ```
+
+Use `routed_to: policy-engine` only when the engine math itself is wrong. Route to `builder` for all UI, API, or wiring issues.
