@@ -18,8 +18,9 @@ export default function HomePage() {
             <li><a href="#tarifs">Tarifs</a></li>
           </ul>
           <div className={styles.navCta}>
+            <Link href="/store/demo" className={styles.btnDemo}>Boutique démo</Link>
             <Link href="/auth/login" className={styles.btnOutline}>Se connecter</Link>
-            <Link href="/auth/register" className={styles.btnPrimary}>Commencer gratuitement</Link>
+            <Link href="/demo" className={styles.btnPrimary}>Accès démo</Link>
           </div>
         </div>
       </nav>

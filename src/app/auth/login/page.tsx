@@ -86,6 +86,34 @@ export default function LoginPage() {
             </div>
           )}
 
+          <button
+            type="button"
+            onClick={async () => {
+              setLoading(true);
+              await new Promise((r) => setTimeout(r, 600));
+              router.push('/dashboard');
+            }}
+            disabled={loading}
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '0.875rem',
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              border: 'none',
+              borderRadius: 10,
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '1.25rem',
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? 'Chargement…' : '🚀 Accès démo instantané'}
+          </button>
+
+          <div className={styles.divider} style={{ marginBottom: '1.25rem' }}>ou connectez-vous avec votre compte</div>
+
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
             <div className={styles.fieldGroup}>
               <label className={styles.label} htmlFor="email">Adresse email</label>

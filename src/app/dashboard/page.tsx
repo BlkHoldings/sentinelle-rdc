@@ -33,6 +33,20 @@ const topProducts = [
 export default function DashboardPage() {
   return (
     <>
+      <div style={{
+        background: 'linear-gradient(90deg, #3730a3, #4f46e5)',
+        color: 'white',
+        padding: '0.55rem 1.75rem',
+        fontSize: '0.8rem',
+        fontWeight: 600,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+      }}>
+        <span style={{ background: 'rgba(255,255,255,0.2)', padding: '0.1rem 0.45rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.06em' }}>DÉMO</span>
+        Vous explorez un tableau de bord de démonstration — toutes les données sont fictives.
+        <a href="/auth/register" style={{ marginLeft: 'auto', color: '#86efac', fontWeight: 700, textDecoration: 'none' }}>Créer un vrai compte →</a>
+      </div>
       <div className={styles.topbar}>
         <span className={styles.topbarTitle}>Tableau de bord</span>
         <div className={styles.topbarActions}>

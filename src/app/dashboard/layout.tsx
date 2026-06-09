@@ -59,6 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         })}
 
         <div className={styles.sidebarBottom}>
+          <div className={styles.demoBadge}>MODE DÉMO</div>
           <div className={styles.sidebarUser}>
             <div className={styles.sidebarAvatar}>JK</div>
             <div className={styles.sidebarUserInfo}>
@@ -66,6 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className={styles.sidebarUserStore}>Ma Boutique Kinshasa</div>
             </div>
           </div>
+          <Link href="/" className={styles.logoutLink}>← Retour au site</Link>
         </div>
       </aside>
 
