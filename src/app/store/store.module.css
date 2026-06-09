@@ -1,0 +1,529 @@
+/* Public store styles */
+
+.page {
+  min-height: 100vh;
+  background: #f8f7ff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  color: #1a1a2e;
+}
+
+/* STORE HEADER */
+.storeHeader {
+  background: linear-gradient(135deg, #3730a3, #4f46e5);
+  color: white;
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.storeHeaderInner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.storeLogo {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.storeInfo {
+  flex: 1;
+}
+
+.storeName {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.storeDesc {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.storeMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.storeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  padding: 0.2rem 0.625rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.storeActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.whatsappBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  background: #16a34a;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.whatsappBtn:hover {
+  opacity: 0.9;
+}
+
+/* NAV BAR */
+.storeNav {
+  background: white;
+  border-bottom: 1px solid #e8e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 1px 8px rgba(55, 48, 163, 0.06);
+}
+
+.storeNavInner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.storeNavCategories {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.storeNavCategories::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryTab {
+  padding: 0.35rem 0.875rem;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.categoryTab:hover {
+  background: #f3f4f6;
+  color: #1a1a2e;
+}
+
+.categoryTabActive {
+  background: #3730a3;
+  color: white;
+}
+
+.cartBtnWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cartBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.875rem;
+  background: #3730a3;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.cartBtn:hover {
+  opacity: 0.9;
+}
+
+.cartCount {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* PRODUCTS GRID */
+.mainContent {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.searchBar {
+  margin-bottom: 1.25rem;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.625rem 1rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 100px;
+  font-size: 0.875rem;
+  outline: none;
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #3730a3;
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* CHECKOUT PAGE */
+.checkoutPage {
+  min-height: 100vh;
+  background: #f8f7ff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  color: #1a1a2e;
+}
+
+.checkoutHeader {
+  background: white;
+  border-bottom: 1px solid #e8e8f0;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.checkoutBack {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.checkoutBack:hover {
+  color: #3730a3;
+}
+
+.checkoutTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a1a2e;
+}
+
+.checkoutContent {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.checkoutSection {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e8e8f0;
+  padding: 1.25rem;
+}
+
+.checkoutSectionTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.orderSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  font-size: 0.875rem;
+}
+
+.orderSummaryRow:last-child {
+  border-top: 1px solid #e8e8f0;
+  margin-top: 0.5rem;
+  padding-top: 0.875rem;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input {
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1a1a2e;
+  background: #f9fafb;
+  transition: border-color 0.15s;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.input:focus {
+  border-color: #3730a3;
+  background: white;
+}
+
+/* Payment methods */
+.paymentMethods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.paymentOption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.paymentOption:hover {
+  border-color: #c4b5fd;
+}
+
+.paymentOptionActive {
+  border-color: #3730a3;
+  background: #f5f3ff;
+}
+
+.paymentOptionIcon {
+  font-size: 1.25rem;
+  width: 32px;
+  text-align: center;
+}
+
+.paymentOptionInfo {
+  flex: 1;
+}
+
+.paymentOptionName {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.paymentOptionDesc {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.paymentRadio {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.paymentRadioFilled {
+  border-color: #3730a3;
+}
+
+.paymentRadioFilled::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #3730a3;
+  border-radius: 50%;
+}
+
+.phonePrefixGroup {
+  display: flex;
+}
+
+.phonePrefix {
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid #e5e7eb;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background: #f3f4f6;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.phonePrefixGroup .input {
+  border-radius: 0 8px 8px 0;
+}
+
+.placeOrderBtn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3730a3, #4f46e5);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.placeOrderBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.placeOrderBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success state */
+.successCard {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e8e8f0;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 440px;
+  margin: 3rem auto;
+}
+
+.successIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.successDesc {
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.successTxId {
+  background: #f8f7ff;
+  border: 1px solid #ede9fe;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #6d28d9;
+  margin-bottom: 1.5rem;
+}
+
+.pendingNotice {
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.875rem;
+  font-size: 0.8rem;
+  color: #92400e;
+  line-height: 1.5;
+  text-align: left;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .storeHeaderInner {
+    flex-wrap: wrap;
+  }
+
+  .storeActions {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
