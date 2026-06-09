@@ -1,0 +1,170 @@
+.filterTabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filterTab {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.875rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 100px;
+  background: white;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.filterTab:hover {
+  border-color: #3730a3;
+  color: #3730a3;
+}
+
+.filterTabActive {
+  background: #3730a3;
+  border-color: #3730a3;
+  color: white;
+}
+
+.filterCount {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.7rem;
+}
+
+.filterTabActive .filterCount {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Detail Panel */
+.detailPanel {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e8e8f0;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  position: sticky;
+  top: 80px;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e8e8f0;
+}
+
+.detailId {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #3730a3;
+}
+
+.detailClose {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.detailClose:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.detailBody {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.detailSection {}
+
+.detailLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  margin-bottom: 0.3rem;
+}
+
+.detailValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.detailSub {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 0.15rem;
+}
+
+.statusBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.statusBtn {
+  padding: 0.3rem 0.65rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.statusBtn:hover {
+  border-color: #3730a3;
+  color: #3730a3;
+}
+
+.statusBtnActive {
+  background: #3730a3;
+  border-color: #3730a3;
+  color: white;
+}
+
+.whatsappBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem;
+  background: #16a34a;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.whatsappBtn:hover {
+  opacity: 0.9;
+}
