@@ -2,7 +2,6 @@
 
 import { useFeedStore } from '@/store/useFeedStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { todayFR } from '@/lib/utils';
 
 export default function IntelPanel() {
   const session = useAuthStore((s) => s.session);
@@ -18,26 +17,39 @@ export default function IntelPanel() {
   const totalKIA   = events.reduce((a, e) => a + (e.fatalities ?? 0), 0);
 
   return (
-    <div className="absolute top-14 left-4 z-hud w-52 pointer-events-none animate-fade-in">
-      <div className="glass rounded-2xl overflow-hidden shadow-panel">
+    <div className="absolute top-14 left-3 z-hud w-48 pointer-events-none animate-fade-in">
+      <div className="panel shadow-panel">
+
         {/* Header */}
-        <div className="px-4 py-3 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2 mb-0.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-alert animate-pulse-slow" />
-            <span className="text-alert text-xs font-semibold tracking-wide uppercase">
-              Menace Critique
-            </span>
-          </div>
-          <div className="text-t3 text-2xs font-mono">{todayFR()}</div>
+        <div className="panel-header px-2.5 py-1 flex items-center gap-1.5">
+          <div className="w-1 h-1 bg-alert animate-pulse-slow shrink-0" />
+          <span className="mvn-label">SITREP // AOR EST-DRC</span>
         </div>
 
-        {/* Stats */}
-        <div className="px-4 py-3 space-y-2">
-          <StatRow label="Conflits armés" value={acledCount}  color="text-alert" />
-          <StatRow label="Anomalies FIRMS" value={firmsCount} color="text-fire"  />
-          <StatRow label="Frappes drone"   value={strikes}    color="text-mag"   />
-          <div className="border-t border-white/[0.06] pt-2 mt-2">
-            <StatRow label="Total KIA" value={totalKIA} color="text-alert" bold />
+        {/* Stats grid */}
+        <div className="divide-y divide-b3">
+          <StatRow label="CONFLITS ARMES" value={acledCount}  color="text-alert" />
+          <StatRow label="ANOMALIES FIRMS" value={firmsCount} color="text-fire"  />
+          <StatRow label="FRAPPES DRONE"   value={strikes}    color="text-mag"   />
+          <div className="flex items-center justify-between px-2.5 py-1.5 bg-alert/[0.06]">
+            <span className="mvn-label text-alert">TOTAL KIA</span>
+            <span className="font-mono font-bold text-sm text-alert">
+              {totalKIA.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Threat level bar */}
+        <div className="panel-header px-2.5 py-1 flex items-center justify-between">
+          <span className="mvn-label">THREAT LVL</span>
+          <div className="flex items-center gap-0.5">
+            {[1,2,3,4,5].map((i) => (
+              <div
+                key={i}
+                className={`w-3 h-1.5 ${i <= 4 ? 'bg-alert' : 'bg-b3'}`}
+              />
+            ))}
+            <span className="text-alert text-2xs font-mono font-bold ml-1">CRITICAL</span>
           </div>
         </div>
       </div>
@@ -45,13 +57,13 @@ export default function IntelPanel() {
   );
 }
 
-function StatRow({ label, value, color, bold }: {
-  label: string; value: number; color: string; bold?: boolean;
+function StatRow({ label, value, color }: {
+  label: string; value: number; color: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-t2 text-xs">{label}</span>
-      <span className={`font-mono font-semibold ${bold ? 'text-sm' : 'text-xs'} ${color}`}>
+    <div className="flex items-center justify-between px-2.5 py-1.5">
+      <span className="mvn-label">{label}</span>
+      <span className={`font-mono font-bold text-xs ${color}`}>
         {value.toLocaleString()}
       </span>
     </div>

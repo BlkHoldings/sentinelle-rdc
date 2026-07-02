@@ -10,10 +10,8 @@ import { MIL_POSITIONS } from '@/data/military';
 import { DRONE_ISR } from '@/data/drones';
 import type { IntelEvent } from '@/types/intel';
 
-/* CARTO dark matter — free, vector tiles, no API key */
 const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
-/* ── Show all of eastern DRC + Rwanda + Uganda + Burundi + Tanzania ── */
 const INITIAL_VIEW = {
   longitude: 30.2,
   latitude:  -0.8,
@@ -22,26 +20,27 @@ const INITIAL_VIEW = {
   bearing:   0,
 };
 
+/* Maven tactical colors: HOSTILE=red, FRIENDLY=blue, UNKNOWN=amber, ISR=cyan */
 const MIL_DOT_COLOR: Record<string, string> = {
-  hq:   '#ff375f',
-  arty: '#bf5af2',
-  cp:   '#ff9f0a',
-  log:  '#ff9f0a',
-  camp: '#ff9f0a',
-  nav:  '#0a84ff',
-  idp:  '#30d158',
+  hq:   '#c83048',  // hostile / mag
+  arty: '#8060d8',  // pur
+  cp:   '#d09820',  // unknown / amb
+  log:  '#d09820',
+  camp: '#d09820',
+  nav:  '#1e70f0',  // friendly / blu
+  idp:  '#20c880',  // confirmed / grn
 };
 
 const DRONE_DOT_COLOR: Record<string, string> = {
-  strike:      '#ff453a',
-  strike_bda:  '#ff9f0a',
-  installation:'#bf5af2',
-  naval:       '#0a84ff',
-  logistics:   '#ff9f0a',
-  camp:        '#ff9f0a',
-  artillery:   '#bf5af2',
-  humanitarian:'#30d158',
-  movement:    '#40c8e0',
+  strike:       '#e03030',
+  strike_bda:   '#d09820',
+  installation: '#8060d8',
+  naval:        '#1e70f0',
+  logistics:    '#d09820',
+  camp:         '#d09820',
+  artillery:    '#8060d8',
+  humanitarian: '#20c880',
+  movement:     '#18c8e0',
 };
 
 export default function GlobeMapInner() {
@@ -58,10 +57,10 @@ export default function GlobeMapInner() {
       (map as any).setProjection({ name: 'globe' });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (map as any).setFog({
-        range:           [0.5, 10],
-        color:           '#0d1525',
-        'horizon-blend': 0.04,
-        'star-intensity': 0.18,
+        range:            [0.5, 10],
+        color:            '#0a1020',
+        'horizon-blend':  0.03,
+        'star-intensity': 0.15,
       });
     } catch { /* older maplibre versions */ }
     preloadMGRS();
@@ -77,7 +76,6 @@ export default function GlobeMapInner() {
 
   const handleMouseLeave = useCallback(() => setCursor(null), [setCursor]);
 
-  /* ── GeoJSON: ACLED events ── */
   const acledGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
     features: events
@@ -95,7 +93,6 @@ export default function GlobeMapInner() {
       })),
   }), [events]);
 
-  /* ── GeoJSON: FIRMS hotspots ── */
   const firmsGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
     features: events
@@ -107,14 +104,14 @@ export default function GlobeMapInner() {
       })),
   }), [events]);
 
-  /* ── ACLED color expression ── */
+  /* Maven affiliation colors */
   const acledColor = [
     'match', ['get', 'type'],
-    'Battles',                    '#ff453a',
-    'Violence against civilians', '#ff9f0a',
-    'Explosions/Remote violence', '#ff375f',
-    'Strategic developments',     '#30d158',
-    '#0a84ff',
+    'Battles',                    '#e03030',
+    'Violence against civilians', '#d09820',
+    'Explosions/Remote violence', '#c83048',
+    'Strategic developments',     '#20c880',
+    '#1e70f0',
   ] as unknown as string;
 
   const handleMilClick = useCallback((pos: typeof MIL_POSITIONS[0]) => {
@@ -144,7 +141,7 @@ export default function GlobeMapInner() {
       onClick={() => selectFeature(null)}
       attributionControl={false}
     >
-      {/* ── ACLED conflict events ── */}
+      {/* ACLED conflict events */}
       {layers.acled && (
         <Source id="acled-src" type="geojson" data={acledGeoJSON}>
           <Layer
@@ -153,7 +150,7 @@ export default function GlobeMapInner() {
             paint={{
               'circle-radius':  ['interpolate', ['linear'], ['zoom'], 4, 8, 10, 20],
               'circle-color':   acledColor,
-              'circle-opacity': 0.12,
+              'circle-opacity': 0.10,
               'circle-blur':    1,
             }}
           />
@@ -163,15 +160,15 @@ export default function GlobeMapInner() {
             paint={{
               'circle-radius':       ['interpolate', ['linear'], ['zoom'], 4, 3.5, 10, 9],
               'circle-color':        acledColor,
-              'circle-opacity':      0.9,
+              'circle-opacity':      0.95,
               'circle-stroke-width': 0.5,
-              'circle-stroke-color': 'rgba(0,0,0,0.5)',
+              'circle-stroke-color': 'rgba(0,0,0,0.6)',
             }}
           />
         </Source>
       )}
 
-      {/* ── FIRMS thermal anomalies ── */}
+      {/* FIRMS thermal anomalies */}
       {layers.firms && (
         <Source id="firms-src" type="geojson" data={firmsGeoJSON}>
           {layers.heat && (
@@ -183,10 +180,10 @@ export default function GlobeMapInner() {
                 'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 10, 2.5],
                 'heatmap-color': [
                   'interpolate', ['linear'], ['heatmap-density'],
-                  0, 'rgba(255,107,0,0)',
-                  0.3, 'rgba(255,107,0,0.3)',
-                  0.7, 'rgba(255,107,0,0.7)',
-                  1,   '#ff6b00',
+                  0,   'rgba(224,96,32,0)',
+                  0.3, 'rgba(224,96,32,0.3)',
+                  0.7, 'rgba(224,96,32,0.7)',
+                  1,   '#e06020',
                 ],
                 'heatmap-radius':  ['interpolate', ['linear'], ['zoom'], 4, 14, 10, 30],
                 'heatmap-opacity': 0.75,
@@ -199,16 +196,16 @@ export default function GlobeMapInner() {
             minzoom={6}
             paint={{
               'circle-radius':       5,
-              'circle-color':        '#ff6b00',
+              'circle-color':        '#e06020',
               'circle-opacity':      0.95,
               'circle-stroke-width': 1,
-              'circle-stroke-color': '#ff9f0a',
+              'circle-stroke-color': '#d09820',
             }}
           />
         </Source>
       )}
 
-      {/* ── Military positions ── */}
+      {/* Military positions */}
       {layers.mil && MIL_POSITIONS.map((pos) => (
         <Marker
           key={pos.n}
@@ -219,7 +216,7 @@ export default function GlobeMapInner() {
         >
           <button
             className="flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-150 select-none cursor-pointer"
-            style={{ color: MIL_DOT_COLOR[pos.t] ?? '#98989e', fontSize: pos.t === 'hq' ? 17 : 13 }}
+            style={{ color: MIL_DOT_COLOR[pos.t] ?? '#7890a8', fontSize: pos.t === 'hq' ? 17 : 13 }}
             title={pos.n}
           >
             {pos.s}
@@ -227,10 +224,10 @@ export default function GlobeMapInner() {
         </Marker>
       ))}
 
-      {/* ── Drone / UAV records ── */}
+      {/* Drone / UAV records */}
       {layers.drone && DRONE_ISR.map((rec) => {
         const isStrike = rec.classification === 'strike' || rec.classification === 'strike_bda';
-        const color    = DRONE_DOT_COLOR[rec.classification] ?? '#64d2ff';
+        const color    = DRONE_DOT_COLOR[rec.classification] ?? '#18d8f0';
         return (
           <Marker
             key={rec.id}
@@ -241,18 +238,18 @@ export default function GlobeMapInner() {
           >
             <button
               className={`relative flex items-center justify-center cursor-pointer select-none
-                w-4 h-4 rounded-full border-2 transition-transform hover:scale-125 active:scale-95
+                w-4 h-4 border-2 transition-transform hover:scale-125 active:scale-95
                 ${isStrike ? 'blast-ring' : ''}`}
-              style={{ background: color + '1a', borderColor: color }}
+              style={{ background: color + '18', borderColor: color }}
               title={`${rec.id} · ${rec.type}`}
             >
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+              <div className="w-1.5 h-1.5" style={{ background: color }} />
             </button>
           </Marker>
         );
       })}
 
-      {/* ── Feature popup ── */}
+      {/* Feature popup — Maven style */}
       {selectedFeature && popupCoords && ready && (
         <Popup
           longitude={popupCoords[0]}
@@ -262,34 +259,37 @@ export default function GlobeMapInner() {
           anchor="bottom"
           offset={16}
         >
-          <div className="space-y-2 max-w-xs">
+          <div className="space-y-1.5 max-w-xs">
+            {selectedFeature.id && (
+              <div className="text-t3 text-2xs font-mono">TRACK: {selectedFeature.id}</div>
+            )}
             {selectedFeature.platform && (
-              <div className="text-drone text-xs font-mono font-medium">
+              <div className="text-cyn text-xs font-mono font-medium">
                 {selectedFeature.platform} · {selectedFeature.status}
               </div>
             )}
-            <div className="text-white font-semibold leading-tight">
+            <div className="text-t1 font-mono font-semibold text-xs leading-tight border-t border-b3 pt-1.5">
               {selectedFeature.location ?? selectedFeature.type}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               {selectedFeature.time && (
-                <span className="text-t3 text-xs font-mono">{selectedFeature.time}</span>
+                <span className="text-t3 text-2xs font-mono">{selectedFeature.time}</span>
               )}
               {selectedFeature.date && (
-                <span className="text-t3 text-xs font-mono">{selectedFeature.date}</span>
+                <span className="text-t3 text-2xs font-mono">{selectedFeature.date}</span>
               )}
               {selectedFeature.fatalities != null && selectedFeature.fatalities > 0 && (
-                <span className="text-alert font-bold text-xs">
-                  {selectedFeature.fatalities} KIA
+                <span className="text-alert font-bold text-xs font-mono">
+                  ▲{selectedFeature.fatalities} KIA
                 </span>
               )}
             </div>
             {(selectedFeature.desc ?? selectedFeature.notes) && (
-              <p className="text-t2 text-xs leading-relaxed border-t border-white/10 pt-2">
+              <p className="text-t2 text-2xs font-mono leading-relaxed border-t border-b3 pt-1.5">
                 {selectedFeature.desc ?? selectedFeature.notes}
               </p>
             )}
-            <div className="text-t3 text-xs font-mono pt-1">
+            <div className="text-t3 text-2xs font-mono pt-0.5 border-t border-b3">
               {formatLatLon(selectedFeature.lat, selectedFeature.lon)}
             </div>
           </div>

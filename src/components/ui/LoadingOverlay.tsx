@@ -9,10 +9,10 @@ export default function LoadingOverlay() {
   if (!isLoading) return null;
 
   return (
-    <div className="absolute top-14 left-1/2 -translate-x-1/2 z-header mt-2 pointer-events-none animate-slide-up">
-      <div className="glass rounded-full px-4 py-2 flex items-center gap-2.5 shadow-panel">
-        <div className="w-3.5 h-3.5 border border-blu/30 border-t-blu rounded-full animate-spin-slow" />
-        <span className="text-t2 text-xs font-medium tracking-wide">Actualisation…</span>
+    <div className="absolute top-14 left-1/2 -translate-x-1/2 z-header mt-1 pointer-events-none animate-slide-up">
+      <div className="panel px-3 py-1.5 flex items-center gap-2 shadow-panel">
+        <div className="w-2.5 h-2.5 border border-blu/40 border-t-blu animate-spin-slow" />
+        <span className="text-t3 text-2xs font-mono tracking-widest">SYS: UPDATING DATA FEEDS</span>
       </div>
     </div>
   );

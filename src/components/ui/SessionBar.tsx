@@ -36,22 +36,26 @@ export default function SessionBar() {
   return (
     <div className="
       absolute bottom-0 left-0 right-0 h-8 z-session
-      flex items-center justify-between px-4
-      bg-b0/90 backdrop-blur-lg border-t border-white/[0.05]
+      flex items-center justify-between px-3
+      bg-b2 border-t border-b3
     ">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5">
-          <div className="w-1 h-1 rounded-full bg-grn" />
-          <span className="text-t3 text-2xs font-mono uppercase tracking-wider">Session active</span>
+          <div className="w-1 h-1 bg-grn" />
+          <span className="mvn-label text-grn">SESSION ACTIVE</span>
         </div>
-        <span className="text-t3 text-2xs font-mono">·</span>
-        <span className="text-t2 text-2xs font-mono uppercase">{session.clearance}</span>
-        <span className="text-t3 text-2xs font-mono">·</span>
-        <span className="text-t2 text-2xs font-mono">{session.user}</span>
+        <span className="text-b3 text-2xs font-mono">|</span>
+        <span className="mvn-label">{session.clearance}</span>
+        <span className="text-b3 text-2xs font-mono">|</span>
+        <span className="text-t3 text-2xs font-mono uppercase">{session.user}</span>
       </div>
-      <span className={`text-2xs font-mono ${warn ? 'text-alert animate-pulse-slow' : 'text-t3'}`}>
-        Expiration: {remaining}
-      </span>
+      <div className="flex items-center gap-3">
+        <span className="mvn-label">AOR: EST-DRC</span>
+        <span className="text-b3 text-2xs font-mono">|</span>
+        <span className={`text-2xs font-mono ${warn ? 'text-alert animate-pulse-slow' : 'text-t3'}`}>
+          TTL:{remaining}
+        </span>
+      </div>
     </div>
   );
 }

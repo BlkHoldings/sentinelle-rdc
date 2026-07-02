@@ -2,106 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Apple-system CSS custom properties ──────────────────────── */
+/* ── Maven tactical CSS custom properties ─────────────────────── */
 :root {
-  /* Backgrounds */
-  --color-b0: #000000;
-  --color-b1: #1c1c1e;
-  --color-b2: #2c2c2e;
-  --color-b3: #3a3a3c;
-  --color-bd: #38383a;
-  /* Labels */
-  --color-t1: #ffffff;
-  --color-t2: #98989e;
-  --color-t3: #6c6c70;
-  /* System accent colors (Apple dark mode) */
-  --color-alert: #ff453a;
-  --color-amb:   #ff9f0a;
-  --color-grn:   #30d158;
-  --color-blu:   #0a84ff;
-  --color-cyn:   #40c8e0;
-  --color-pur:   #bf5af2;
-  --color-fire:  #ff6b00;
-  --color-mag:   #ff375f;
-  --color-drone: #64d2ff;
-  /* Glass */
-  --glass-bg:     rgba(28,28,30,0.85);
-  --glass-border: rgba(255,255,255,0.08);
-  --glass-blur:   48px;
+  --color-b0: #090d13;
+  --color-b1: #0d1520;
+  --color-b2: #121e2e;
+  --color-b3: #1a2e42;
+  --color-bd: #1f3a52;
+  --color-t1: #c8d8e8;
+  --color-t2: #7890a8;
+  --color-t3: #445870;
+  --color-alert: #e03030;
+  --color-amb:   #d09820;
+  --color-grn:   #20c880;
+  --color-blu:   #1e70f0;
+  --color-cyn:   #18c8e0;
+  --color-pur:   #8060d8;
+  --color-fire:  #e06020;
+  --color-mag:   #c83048;
+  --color-drone: #18d8f0;
+
+  --panel-bg:     #0d1520;
+  --panel-border: #1a2e42;
+  --panel-header: #121e2e;
+
+  /* Classification stripe colors */
+  --classify-bg:  #7a5a10;
+  --classify-fg:  #ffd060;
 }
 
-/* ── Reset ───────────────────────────────────────────────────── */
+/* ── Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   width: 100%; height: 100%;
   overflow: hidden;
-  background: #000;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+  background: var(--color-b0);
+  color: var(--color-t1);
+  font-family: ui-monospace, 'IBM Plex Mono', Consolas, monospace;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────────── */
+/* ── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-thumb { background: var(--color-b3); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-blu); }
 
-/* ── Utility: glass panel ─────────────────────────────────────── */
+/* ── Utility: Maven solid panel ─────────────────────────────── */
 @layer components {
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-  }
+  /* Replace glass with solid tactical panel */
+  .glass,
   .glass-light {
-    background: rgba(44,44,46,0.75);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+  }
+
+  .panel-header {
+    background: var(--panel-header);
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  /* Classification stripe */
+  .classify {
+    background: var(--classify-bg);
+    color: var(--classify-fg);
+    font-family: ui-monospace, monospace;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+    user-select: none;
+  }
+
+  /* Uppercase mono section label */
+  .mvn-label {
+    font-family: ui-monospace, monospace;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-t3);
+  }
+
+  /* Track row */
+  .mvn-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 0.3rem 0.625rem;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .mvn-row:hover {
+    background: rgba(30,112,240,0.06);
   }
 }
 
-/* ── Maplibre GL overrides ─────────────────────────────────────── */
-.maplibregl-map { font-family: inherit !important; }
+/* ── Maplibre GL overrides ──────────────────────────────────── */
+.maplibregl-map { font-family: ui-monospace, monospace !important; }
 .maplibregl-ctrl-attrib { display: none !important; }
 .maplibregl-ctrl-logo   { display: none !important; }
 .maplibregl-canvas-container { cursor: crosshair !important; }
 
-/* ── Popup ─────────────────────────────────────────────────────── */
+/* ── Popup — Maven tactical style ──────────────────────────── */
 .maplibregl-popup {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+  font-family: ui-monospace, monospace !important;
 }
 .maplibregl-popup-content {
-  background: rgba(28,28,30,0.96) !important;
-  backdrop-filter: blur(40px) !important;
-  -webkit-backdrop-filter: blur(40px) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 16px !important;
-  padding: 16px !important;
-  color: #fff !important;
-  font-size: 12px !important;
-  max-width: 300px !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 4px 16px rgba(0,0,0,0.6) !important;
+  background: #0d1520 !important;
+  border: 1px solid #1a2e42 !important;
+  border-radius: 2px !important;
+  padding: 10px 12px !important;
+  color: #c8d8e8 !important;
+  font-size: 11px !important;
+  max-width: 280px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.9) !important;
 }
 .maplibregl-popup-tip { display: none !important; }
 .maplibregl-popup-close-button {
-  color: rgba(255,255,255,0.4) !important;
-  font-size: 18px !important;
-  right: 10px !important;
-  top: 8px !important;
+  color: #445870 !important;
+  font-size: 14px !important;
+  right: 8px !important;
+  top: 6px !important;
   line-height: 1 !important;
   transition: color 0.15s !important;
 }
-.maplibregl-popup-close-button:hover { color: rgba(255,255,255,0.9) !important; }
+.maplibregl-popup-close-button:hover { color: #c8d8e8 !important; background: transparent !important; }
 
-/* ── Strike pulse ring ─────────────────────────────────────────── */
+/* ── Strike pulse ring ──────────────────────────────────────── */
 .blast-ring::before {
   content: '';
   position: absolute;
@@ -117,14 +154,14 @@ html, body {
   100% { transform: scale(2.2); opacity: 0; }
 }
 
-/* ── Input autofill reset ──────────────────────────────────────── */
+/* ── Input autofill reset ───────────────────────────────────── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #ffffff;
-  -webkit-box-shadow: 0 0 0 100px #2c2c2e inset;
+  -webkit-text-fill-color: var(--color-t1);
+  -webkit-box-shadow: 0 0 0 100px #121e2e inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* ── Focus ring ────────────────────────────────────────────────── */
-:focus-visible { outline: 2px solid rgba(10,132,255,0.6); outline-offset: 2px; }
+/* ── Focus ring ─────────────────────────────────────────────── */
+:focus-visible { outline: 1px solid rgba(30,112,240,0.7); outline-offset: 1px; }
