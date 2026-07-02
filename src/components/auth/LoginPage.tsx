@@ -7,19 +7,34 @@ import { useToastStore } from '@/store/useToastStore';
 
 type Level = 'analyst' | 'operator' | 'commander';
 
-const LEVELS: { id: Level; label: string; clearance: string; desc: string; color: string }[] = [
-  { id: 'analyst',   label: 'ANALYST',   clearance: 'CONFIDENTIAL', desc: 'Read-only access. ACLED, FIRMS, drone ISR feeds.', color: 'border-grn/40 hover:border-grn' },
-  { id: 'operator',  label: 'OPERATOR',  clearance: 'SECRET',       desc: 'Full feed access. Layer toggles. Export enabled.', color: 'border-blu/40 hover:border-blu' },
-  { id: 'commander', label: 'COMMANDER', clearance: 'TOP SECRET',   desc: 'All feeds. Tactical overlay. Intel assessment.', color: 'border-alert/40 hover:border-alert' },
+const LEVELS: {
+  id: Level; label: string; clearance: string; desc: string;
+  ring: string; dot: string; bg: string;
+}[] = [
+  {
+    id: 'analyst',   label: 'Analyst',   clearance: 'CONFIDENTIAL',
+    desc: 'Lecture seule. Flux ACLED, FIRMS, ISR drone.',
+    ring: 'ring-grn/40 hover:ring-grn/70',   dot: 'bg-grn',   bg: 'bg-grn/[0.06]',
+  },
+  {
+    id: 'operator',  label: 'Operator',  clearance: 'SECRET',
+    desc: 'Accès complet. Couches, export CSV.',
+    ring: 'ring-blu/40 hover:ring-blu/70',   dot: 'bg-blu',   bg: 'bg-blu/[0.06]',
+  },
+  {
+    id: 'commander', label: 'Commander', clearance: 'TOP SECRET',
+    desc: 'Toutes sources. Évaluation tactique.',
+    ring: 'ring-alert/40 hover:ring-alert/70', dot: 'bg-alert', bg: 'bg-alert/[0.06]',
+  },
 ];
 
 export default function LoginPage() {
-  const router   = useRouter();
-  const login    = useAuthStore((s) => s.login);
-  const session  = useAuthStore((s) => s.session);
-  const attempts = useAuthStore((s) => s.attempts);
+  const router       = useRouter();
+  const login        = useAuthStore((s) => s.login);
+  const session      = useAuthStore((s) => s.session);
+  const attempts     = useAuthStore((s) => s.attempts);
   const lockoutUntil = useAuthStore((s) => s.lockoutUntil);
-  const push     = useToastStore((s) => s.push);
+  const push         = useToastStore((s) => s.push);
 
   const [level,      setLevel]      = useState<Level>('operator');
   const [user,       setUser]       = useState('');
@@ -50,57 +65,70 @@ export default function LoginPage() {
     e.preventDefault();
     if (countdown > 0) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 280));
     const result = login(user, pass, level, firmKey, acledKey, acledEmail);
     setLoading(false);
     if (result === 'ok') {
       push('Authentification réussie', 'success');
       router.replace('/monitor');
     } else if (result === 'locked') {
-      push(`Compte verrouillé. Attendez ${countdown}s.`, 'error');
+      push(`Compte verrouillé — réessayez dans ${countdown}s`, 'error');
     } else {
-      push('Identifiants incorrects.', 'error', 3000);
+      push('Identifiants incorrects', 'error', 3000);
     }
   }, [user, pass, level, firmKey, acledKey, acledEmail, countdown, login, push, router]);
 
   const locked = countdown > 0;
 
   return (
-    <div className="min-h-screen w-full bg-b0 flex flex-col items-center justify-center p-4 font-mono">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="text-2xs tracking-[0.3em] text-t3 uppercase mb-1">SYSTÈME SÉCURISÉ</div>
-        <h1 className="text-t1 text-2xl font-bold tracking-widest uppercase">SENTINELLE-RDC</h1>
-        <div className="text-t3 text-xs tracking-widest mt-1">C2 INTELLIGENCE MONITOR — KIVU EST</div>
-        <div className="w-32 h-px bg-bd mx-auto mt-4" />
-      </div>
+    <div className="min-h-screen w-full bg-b0 flex flex-col items-center justify-center px-5">
 
-      {/* Level selector */}
-      <div className="w-full max-w-lg mb-6">
-        <div className="text-t3 text-2xs tracking-widest uppercase mb-2">Niveau d&apos;accès</div>
-        <div className="grid grid-cols-3 gap-2">
-          {LEVELS.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setLevel(l.id)}
-              className={`
-                border rounded p-3 text-left transition-all duration-150
-                ${l.color}
-                ${level === l.id ? 'bg-b3 border-opacity-100' : 'bg-b1 border-opacity-40'}
-              `}
-            >
-              <div className="text-t1 text-xs font-bold mb-1">{l.label}</div>
-              <div className="text-t3 text-2xs leading-tight">{l.clearance}</div>
-            </button>
-          ))}
+      {/* App icon */}
+      <div className="mb-8 flex flex-col items-center gap-4">
+        <div className="w-20 h-20 rounded-[22px] bg-alert flex items-center justify-center shadow-float">
+          <span className="text-white text-3xl font-bold tracking-tighter">S</span>
+        </div>
+        <div className="text-center">
+          <h1 className="text-white text-2xl font-semibold tracking-tight">Sentinelle-RDC</h1>
+          <p className="text-t2 text-sm mt-1">C2 Intelligence Monitor · Kivu Est</p>
         </div>
       </div>
 
-      {/* Login form */}
-      <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-3">
-        <div className="grid grid-cols-2 gap-3">
+      {/* Card */}
+      <div className="w-full max-w-sm glass rounded-3xl p-6 shadow-float">
+
+        {/* Level selector */}
+        <div className="mb-5">
+          <p className="text-t3 text-xs font-semibold uppercase tracking-widest mb-3">
+            Niveau d&apos;accès
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {LEVELS.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => setLevel(l.id)}
+                className={`
+                  ring-1 rounded-2xl p-3 text-left transition-all duration-150
+                  ${l.ring} ${level === l.id ? `${l.bg} ring-opacity-100` : 'bg-transparent ring-opacity-30'}
+                `}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${l.dot} mb-2`} />
+                <div className="text-white text-xs font-semibold">{l.label}</div>
+                <div className="text-t3 text-2xs leading-tight mt-0.5">{l.clearance}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Separator */}
+        <div className="border-t border-white/[0.06] mb-5" />
+
+        {/* Credentials */}
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-t3 text-2xs tracking-widest uppercase mb-1">Identifiant</label>
+            <label className="text-t3 text-xs font-medium uppercase tracking-wider mb-1.5 block">
+              Identifiant
+            </label>
             <input
               type="text"
               value={user}
@@ -108,11 +136,19 @@ export default function LoginPage() {
               placeholder="analyst"
               required
               autoComplete="username"
-              className="w-full bg-b1 border border-bd rounded px-3 py-2 text-t1 text-xs focus:outline-none focus:border-blu placeholder:text-t3"
+              className="
+                w-full bg-b3/60 border border-white/[0.08] rounded-xl
+                px-4 py-3 text-white text-sm
+                placeholder:text-t3
+                focus:outline-none focus:border-blu/50 focus:bg-b3/80
+                transition-all duration-150
+              "
             />
           </div>
           <div>
-            <label className="block text-t3 text-2xs tracking-widest uppercase mb-1">Mot de passe</label>
+            <label className="text-t3 text-xs font-medium uppercase tracking-wider mb-1.5 block">
+              Mot de passe
+            </label>
             <input
               type="password"
               value={pass}
@@ -120,68 +156,91 @@ export default function LoginPage() {
               placeholder="••••••••"
               required
               autoComplete="current-password"
-              className="w-full bg-b1 border border-bd rounded px-3 py-2 text-t1 text-xs focus:outline-none focus:border-blu placeholder:text-t3"
+              className="
+                w-full bg-b3/60 border border-white/[0.08] rounded-xl
+                px-4 py-3 text-white text-sm
+                placeholder:text-t3
+                focus:outline-none focus:border-blu/50 focus:bg-b3/80
+                transition-all duration-150
+              "
             />
           </div>
-        </div>
 
-        {/* Optional API keys */}
-        <details className="group">
-          <summary className="text-t3 text-2xs tracking-widest uppercase cursor-pointer hover:text-t2 select-none">
-            Clés API (optionnel)
-          </summary>
-          <div className="mt-2 space-y-2 pl-2 border-l border-bd">
-            <input
-              type="text"
-              value={firmKey}
-              onChange={(e) => setFirmKey(e.target.value)}
-              placeholder="NASA FIRMS MAP_KEY"
-              className="w-full bg-b1 border border-bd rounded px-3 py-2 text-t1 text-xs focus:outline-none focus:border-blu placeholder:text-t3"
-            />
-            <div className="grid grid-cols-2 gap-2">
+          {/* API keys (collapsed) */}
+          <details className="group">
+            <summary className="text-t3 text-xs cursor-pointer hover:text-t2 transition-colors select-none py-1">
+              ↳ Clés API (optionnel)
+            </summary>
+            <div className="mt-2.5 space-y-2 pl-2 border-l border-white/[0.06]">
+              <input
+                type="text"
+                value={firmKey}
+                onChange={(e) => setFirmKey(e.target.value)}
+                placeholder="NASA FIRMS MAP_KEY"
+                className="w-full bg-b3/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-white text-xs placeholder:text-t3 focus:outline-none focus:border-blu/50 transition-all"
+              />
               <input
                 type="text"
                 value={acledKey}
                 onChange={(e) => setAcledKey(e.target.value)}
                 placeholder="ACLED API Key"
-                className="w-full bg-b1 border border-bd rounded px-3 py-2 text-t1 text-xs focus:outline-none focus:border-blu placeholder:text-t3"
+                className="w-full bg-b3/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-white text-xs placeholder:text-t3 focus:outline-none focus:border-blu/50 transition-all"
               />
               <input
                 type="email"
                 value={acledEmail}
                 onChange={(e) => setAcledEmail(e.target.value)}
                 placeholder="ACLED Email"
-                className="w-full bg-b1 border border-bd rounded px-3 py-2 text-t1 text-xs focus:outline-none focus:border-blu placeholder:text-t3"
+                className="w-full bg-b3/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-white text-xs placeholder:text-t3 focus:outline-none focus:border-blu/50 transition-all"
               />
             </div>
-          </div>
-        </details>
+          </details>
 
-        {/* Rate limit warning */}
-        {attempts > 0 && !locked && (
-          <div className="text-amb text-2xs font-mono">
-            Tentative {attempts}/5. Encore {5 - attempts} avant verrouillage.
-          </div>
-        )}
-        {locked && (
-          <div className="text-alert text-xs font-mono bg-alert/10 border border-alert/30 rounded px-3 py-2">
-            Compte verrouillé. Réessayez dans {countdown}s.
-          </div>
-        )}
+          {/* Rate limit indicator */}
+          {attempts > 0 && !locked && (
+            <div className="text-amb text-xs font-mono">
+              Tentative {attempts}/5 — {5 - attempts} restante{5 - attempts !== 1 ? 's' : ''}
+            </div>
+          )}
+          {locked && (
+            <div className="flex items-center gap-2 bg-alert/[0.08] border border-alert/20 rounded-xl px-4 py-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-alert animate-pulse-fast shrink-0" />
+              <span className="text-alert text-xs font-medium">
+                Verrouillé — réessayez dans {countdown}s
+              </span>
+            </div>
+          )}
 
-        <button
-          type="submit"
-          disabled={locked || loading}
-          className="w-full bg-blu/90 hover:bg-blu disabled:bg-b3 disabled:text-t3 text-white rounded py-2.5 text-xs font-bold tracking-widest uppercase transition-colors"
-        >
-          {loading ? 'AUTHENTIFICATION…' : locked ? `VERROUILLÉ (${countdown}s)` : 'ACCÈS SYSTÈME'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={locked || loading}
+            className="
+              w-full rounded-2xl py-3.5 mt-1
+              bg-blu hover:bg-[#0071eb] active:bg-[#006de0]
+              disabled:bg-b3 disabled:text-t3
+              text-white font-semibold text-sm
+              transition-all duration-150 shadow-[0_4px_16px_rgba(10,132,255,0.3)]
+              disabled:shadow-none
+            "
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border border-white/30 border-t-white rounded-full animate-spin-slow" />
+                Authentification…
+              </span>
+            ) : locked ? (
+              `Verrouillé (${countdown}s)`
+            ) : (
+              'Accès système'
+            )}
+          </button>
+        </form>
+      </div>
 
       {/* Demo hint */}
-      <div className="mt-6 text-t3 text-2xs text-center leading-relaxed">
-        Démo: analyst/analyst2026 · operator/op3rator! · commander/cmd@rdc2026
-      </div>
+      <p className="mt-6 text-t3 text-xs text-center leading-relaxed">
+        Démo · analyst/analyst2026 · operator/op3rator!
+      </p>
     </div>
   );
 }

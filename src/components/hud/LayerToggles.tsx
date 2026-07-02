@@ -3,42 +3,47 @@
 import { useMapStore } from '@/store/useMapStore';
 import type { LayerKey } from '@/types/intel';
 
-const LAYERS: { key: LayerKey; label: string; color: string }[] = [
-  { key: 'acled',  label: 'ACLED',   color: 'text-alert' },
-  { key: 'firms',  label: 'FIRMS',   color: 'text-fire'  },
-  { key: 'heat',   label: 'CHALEUR', color: 'text-fire'  },
-  { key: 'drone',  label: 'UAV',     color: 'text-drone' },
-  { key: 'mil',    label: 'FORCES',  color: 'text-mag'   },
-  { key: 'zone',   label: 'ZONES',   color: 'text-pur'   },
-  { key: 'ref',    label: 'REF',     color: 'text-t3'    },
-  { key: 'routes', label: 'ROUTES',  color: 'text-amb'   },
+const LAYERS: { key: LayerKey; label: string; dot: string }[] = [
+  { key: 'acled',  label: 'ACLED',    dot: 'bg-alert' },
+  { key: 'firms',  label: 'FIRMS',    dot: 'bg-fire'  },
+  { key: 'heat',   label: 'Chaleur',  dot: 'bg-fire'  },
+  { key: 'drone',  label: 'UAV',      dot: 'bg-drone' },
+  { key: 'mil',    label: 'Forces',   dot: 'bg-mag'   },
+  { key: 'zone',   label: 'Zones',    dot: 'bg-pur'   },
+  { key: 'ref',    label: 'Réf.',     dot: 'bg-t3'    },
+  { key: 'routes', label: 'Routes',   dot: 'bg-amb'   },
 ];
 
 export default function LayerToggles() {
-  const layers     = useMapStore((s) => s.layers);
+  const layers      = useMapStore((s) => s.layers);
   const toggleLayer = useMapStore((s) => s.toggleLayer);
 
   return (
-    <div className="absolute bottom-8 right-3 z-hud">
-      <div className="bg-b1/90 backdrop-blur-sm border border-bd rounded overflow-hidden">
-        <div className="text-t3 text-2xs font-mono tracking-widest px-2.5 py-1.5 border-b border-bd uppercase">
-          Couches
+    <div className="absolute bottom-9 right-4 z-hud">
+      <div className="glass rounded-2xl overflow-hidden shadow-panel">
+        <div className="px-3 py-2 border-b border-white/[0.06]">
+          <span className="text-t3 text-2xs font-mono uppercase tracking-widest">Couches</span>
         </div>
-        <div className="grid grid-cols-2 gap-px p-0.5">
-          {LAYERS.map(({ key, label, color }) => (
-            <button
-              key={key}
-              onClick={() => toggleLayer(key)}
-              className={`
-                px-2 py-1 rounded text-2xs font-mono tracking-widest transition-all
-                ${layers[key]
-                  ? `${color} bg-b3`
-                  : 'text-t3 bg-transparent opacity-40'}
-              `}
-            >
-              {layers[key] ? '● ' : '○ '}{label}
-            </button>
-          ))}
+        <div className="p-1.5 grid grid-cols-2 gap-0.5">
+          {LAYERS.map(({ key, label, dot }) => {
+            const active = layers[key];
+            return (
+              <button
+                key={key}
+                onClick={() => toggleLayer(key)}
+                className={`
+                  flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium
+                  transition-all duration-150
+                  ${active
+                    ? 'bg-white/[0.08] text-white'
+                    : 'text-t3 hover:bg-white/[0.04] hover:text-t2'}
+                `}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full shrink-0 transition-opacity ${dot} ${active ? 'opacity-100' : 'opacity-30'}`} />
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

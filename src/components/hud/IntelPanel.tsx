@@ -5,35 +5,39 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { todayFR } from '@/lib/utils';
 
 export default function IntelPanel() {
-  const session  = useAuthStore((s) => s.session);
-  const events   = useFeedStore((s) => s.events);
-
-  const acledCount  = events.filter((e) => e.src === 'acled').length;
-  const firmsCount  = events.filter((e) => e.src === 'firms').length;
-  const droneCount  = events.filter((e) => e.src === 'drone').length;
-  const totalKIA    = events.reduce((acc, e) => acc + (e.fatalities ?? 0), 0);
-  const strikes     = events.filter((e) =>
-    (e.classification === 'strike' || (e.type ?? '').toLowerCase().includes('drone strike')),
-  ).length;
+  const session = useAuthStore((s) => s.session);
+  const events  = useFeedStore((s) => s.events);
 
   if (session?.level === 'analyst') return null;
 
+  const acledCount = events.filter((e) => e.src === 'acled').length;
+  const firmsCount = events.filter((e) => e.src === 'firms').length;
+  const strikes    = events.filter((e) =>
+    e.classification === 'strike' || (e.type ?? '').toLowerCase().includes('drone strike'),
+  ).length;
+  const totalKIA   = events.reduce((a, e) => a + (e.fatalities ?? 0), 0);
+
   return (
-    <div className="absolute top-14 left-3 z-hud w-48 pointer-events-none animate-fade-in">
-      <div className="bg-b1/90 backdrop-blur-sm border border-bd rounded overflow-hidden">
-        <div className="bg-alert/10 border-b border-alert/30 px-2.5 py-1.5">
-          <div className="text-alert text-2xs font-mono tracking-widest uppercase font-bold">
-            MENACE ÉLEVÉE
+    <div className="absolute top-14 left-4 z-hud w-52 pointer-events-none animate-fade-in">
+      <div className="glass rounded-2xl overflow-hidden shadow-panel">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-alert animate-pulse-slow" />
+            <span className="text-alert text-xs font-semibold tracking-wide uppercase">
+              Menace Critique
+            </span>
           </div>
-          <div className="text-t3 text-2xs font-mono mt-0.5">{todayFR()}</div>
+          <div className="text-t3 text-2xs font-mono">{todayFR()}</div>
         </div>
-        <div className="p-2.5 space-y-1.5 font-mono text-2xs">
-          <Stat label="Événements ACLED" value={acledCount} color="text-alert" />
-          <Stat label="Anomalies thermiques" value={firmsCount} color="text-fire" />
-          <Stat label="Sorties UAV" value={droneCount} color="text-drone" />
-          <Stat label="Frappes drone" value={strikes} color="text-alert" />
-          <div className="border-t border-bd pt-1.5">
-            <Stat label="Total KIA (signalés)" value={totalKIA} color="text-alert" bold />
+
+        {/* Stats */}
+        <div className="px-4 py-3 space-y-2">
+          <StatRow label="Conflits armés" value={acledCount}  color="text-alert" />
+          <StatRow label="Anomalies FIRMS" value={firmsCount} color="text-fire"  />
+          <StatRow label="Frappes drone"   value={strikes}    color="text-mag"   />
+          <div className="border-t border-white/[0.06] pt-2 mt-2">
+            <StatRow label="Total KIA" value={totalKIA} color="text-alert" bold />
           </div>
         </div>
       </div>
@@ -41,11 +45,15 @@ export default function IntelPanel() {
   );
 }
 
-function Stat({ label, value, color, bold }: { label: string; value: number; color: string; bold?: boolean }) {
+function StatRow({ label, value, color, bold }: {
+  label: string; value: number; color: string; bold?: boolean;
+}) {
   return (
-    <div className="flex justify-between items-center gap-2">
-      <span className="text-t3">{label}</span>
-      <span className={`${color} font-bold ${bold ? 'text-xs' : ''}`}>{value}</span>
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-t2 text-xs">{label}</span>
+      <span className={`font-mono font-semibold ${bold ? 'text-sm' : 'text-xs'} ${color}`}>
+        {value.toLocaleString()}
+      </span>
     </div>
   );
 }

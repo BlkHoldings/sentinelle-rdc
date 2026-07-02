@@ -8,7 +8,7 @@ import FeedCard from './FeedCard';
 import type { IntelEvent } from '@/types/intel';
 
 const TABS: { id: FeedTab; label: string }[] = [
-  { id: 'all',   label: 'TOUS' },
+  { id: 'all',   label: 'Tous' },
   { id: 'acled', label: 'ACLED' },
   { id: 'firms', label: 'FIRMS' },
   { id: 'drone', label: 'UAV' },
@@ -35,14 +35,14 @@ const MIL_EVENTS: IntelEvent[] = MIL_POSITIONS.map((p) => ({
 }));
 
 export default function TacticalFeedPanel() {
-  const [open, setOpen]   = useState(true);
-  const events            = useFeedStore((s) => s.events);
-  const activeTab         = useFeedStore((s) => s.activeTab);
-  const activePill        = useFeedStore((s) => s.activePill);
-  const searchQuery       = useFeedStore((s) => s.searchQuery);
-  const setTab            = useFeedStore((s) => s.setTab);
-  const setPill           = useFeedStore((s) => s.setPill);
-  const setSearch         = useFeedStore((s) => s.setSearch);
+  const [open, setOpen]  = useState(true);
+  const events           = useFeedStore((s) => s.events);
+  const activeTab        = useFeedStore((s) => s.activeTab);
+  const activePill       = useFeedStore((s) => s.activePill);
+  const searchQuery      = useFeedStore((s) => s.searchQuery);
+  const setTab           = useFeedStore((s) => s.setTab);
+  const setPill          = useFeedStore((s) => s.setPill);
+  const setSearch        = useFeedStore((s) => s.setSearch);
 
   const allEvents = useMemo(
     () => [...events, ...DRONE_EVENTS, ...MIL_EVENTS],
@@ -54,57 +54,62 @@ export default function TacticalFeedPanel() {
     [allEvents, activeTab, activePill, searchQuery],
   );
 
-  const totalKIA = useMemo(
-    () => events.reduce((a, e) => a + (e.fatalities ?? 0), 0),
-    [events],
-  );
+  const totalKIA  = useMemo(() => events.reduce((a, e) => a + (e.fatalities ?? 0), 0), [events]);
+  const acledN    = events.filter((e) => e.src === 'acled').length;
+  const firmsN    = events.filter((e) => e.src === 'firms').length;
 
   return (
     <>
-      {/* Toggle button */}
+      {/* Toggle pill */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="absolute top-14 right-3 z-panel bg-b1/90 backdrop-blur-sm border border-bd rounded px-2 py-1 text-t2 text-xs font-mono hover:text-t1 transition-colors"
-        title={open ? 'Fermer flux' : 'Ouvrir flux'}
+        className="
+          absolute top-16 right-4 z-panel
+          flex items-center gap-1.5 px-3 py-1.5 rounded-full
+          glass text-t2 text-xs font-medium hover:text-white
+          transition-all shadow-panel
+        "
       >
-        {open ? '▶ FLUX' : '◀ FLUX'}
+        <span className="w-1 h-1 rounded-full bg-blu" />
+        {open ? 'Masquer flux' : 'Flux intel'}
       </button>
 
       {/* Panel */}
       <div
         className={`
-          absolute top-10 right-0 bottom-0 z-panel
+          absolute top-11 right-0 bottom-0 z-panel
           w-80 flex flex-col
-          bg-b1/95 backdrop-blur-sm border-l border-bd
-          transition-transform duration-200
+          bg-b0/92 backdrop-blur-3xl
+          border-l border-white/[0.06]
+          transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
           ${open ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
         {/* Stats row */}
-        <div className="grid grid-cols-4 border-b border-bd divide-x divide-bd shrink-0">
+        <div className="grid grid-cols-4 border-b border-white/[0.06] shrink-0">
           {[
-            { label: 'ACLED',  value: events.filter((e) => e.src === 'acled').length,  color: 'text-alert' },
-            { label: 'FIRMS',  value: events.filter((e) => e.src === 'firms').length,  color: 'text-fire'  },
-            { label: 'UAV',    value: DRONE_ISR.length,                                 color: 'text-drone' },
-            { label: 'KIA',    value: totalKIA,                                          color: 'text-alert' },
+            { label: 'ACLED', value: acledN,         color: 'text-alert' },
+            { label: 'FIRMS', value: firmsN,          color: 'text-fire'  },
+            { label: 'UAV',   value: DRONE_ISR.length, color: 'text-drone' },
+            { label: 'KIA',   value: totalKIA,         color: 'text-alert' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="py-2 px-2 text-center">
-              <div className={`font-mono font-bold text-sm ${color}`}>{value}</div>
-              <div className="text-t3 text-2xs font-mono">{label}</div>
+            <div key={label} className="flex flex-col items-center py-3 gap-0.5">
+              <span className={`font-mono font-bold text-base ${color}`}>{value}</span>
+              <span className="text-t3 text-2xs font-mono uppercase">{label}</span>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-bd shrink-0">
+        <div className="flex border-b border-white/[0.06] shrink-0 bg-b1/40">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`
-                flex-1 py-1.5 text-2xs font-mono tracking-widest transition-colors
+                flex-1 py-2.5 text-xs font-medium transition-all duration-150
                 ${activeTab === t.id
-                  ? 'text-t1 border-b-2 border-blu bg-b2'
+                  ? 'text-white border-b-2 border-blu'
                   : 'text-t3 hover:text-t2'}
               `}
             >
@@ -114,27 +119,36 @@ export default function TacticalFeedPanel() {
         </div>
 
         {/* Search */}
-        <div className="px-2 py-1.5 border-b border-bd shrink-0">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher…"
-            className="w-full bg-b2 border border-bd rounded px-2.5 py-1.5 text-t1 text-xs font-mono focus:outline-none focus:border-blu placeholder:text-t3"
-          />
+        <div className="px-3 py-2.5 border-b border-white/[0.06] shrink-0">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-t3 text-xs pointer-events-none">⌕</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher dans le flux…"
+              className="
+                w-full bg-b3/50 border border-white/[0.08] rounded-xl
+                pl-8 pr-3 py-2 text-white text-xs
+                placeholder:text-t3
+                focus:outline-none focus:border-blu/40 focus:bg-b3/80
+                transition-all
+              "
+            />
+          </div>
         </div>
 
         {/* Filter pills */}
-        <div className="flex gap-1 px-2 py-1.5 border-b border-bd shrink-0 overflow-x-auto">
+        <div className="flex gap-1.5 px-3 py-2 border-b border-white/[0.06] shrink-0 overflow-x-auto">
           {PILLS.map((p) => (
             <button
               key={p.id}
               onClick={() => setPill(p.id)}
               className={`
-                shrink-0 px-2 py-0.5 rounded-full text-2xs font-mono border transition-colors
+                shrink-0 px-2.5 py-1 rounded-full text-2xs font-medium border transition-all duration-150
                 ${activePill === p.id
-                  ? 'bg-blu/20 border-blu/50 text-blu'
-                  : 'bg-b2 border-bd text-t3 hover:text-t2'}
+                  ? 'bg-blu/[0.15] border-blu/40 text-blu'
+                  : 'bg-transparent border-white/10 text-t3 hover:border-white/20 hover:text-t2'}
               `}
             >
               {p.label}
@@ -142,10 +156,10 @@ export default function TacticalFeedPanel() {
           ))}
         </div>
 
-        {/* Feed list */}
-        <div className="flex-1 overflow-y-auto space-y-0.5 p-1">
+        {/* Feed */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {displayed.length === 0 ? (
-            <div className="text-t3 text-xs font-mono text-center py-8">
+            <div className="text-t3 text-xs text-center py-12 font-medium">
               Aucun événement correspondant
             </div>
           ) : (
@@ -155,9 +169,9 @@ export default function TacticalFeedPanel() {
           )}
         </div>
 
-        {/* Count footer */}
-        <div className="px-3 py-1.5 border-t border-bd shrink-0 text-t3 text-2xs font-mono text-right">
-          {displayed.length} événements affichés
+        {/* Footer count */}
+        <div className="px-4 py-2 border-t border-white/[0.06] shrink-0 text-t3 text-2xs font-mono text-right">
+          {displayed.length.toLocaleString()} événements
         </div>
       </div>
     </>
