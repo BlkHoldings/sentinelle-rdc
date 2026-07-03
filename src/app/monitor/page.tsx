@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useApiStore } from '@/store/useApiStore';
@@ -13,7 +13,7 @@ import { DRONE_ISR } from '@/data/drones';
 import GlobeMap from '@/components/globe/GlobeMap';
 import TopBar from '@/components/hud/TopBar';
 import CoordHUD from '@/components/hud/CoordHUD';
-import IntelPanel from '@/components/hud/IntelPanel';
+import IntelAssessmentPanel from '@/components/hud/IntelAssessmentPanel';
 import LayerToggles from '@/components/hud/LayerToggles';
 import TacticalFeedPanel from '@/components/feed/TacticalFeedPanel';
 import ToastContainer from '@/components/ui/Toast';
@@ -22,11 +22,11 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import type { IntelEvent } from '@/types/intel';
 
 export default function MonitorPage() {
-  const router   = useRouter();
-  const session  = useAuthStore((s) => s.session);
-  const isExpired = useAuthStore((s) => s.isExpired);
-  const firmKey  = useAuthStore((s) => s.firmKey);
-  const acledKey = useAuthStore((s) => s.acledKey);
+  const router     = useRouter();
+  const session    = useAuthStore((s) => s.session);
+  const isExpired  = useAuthStore((s) => s.isExpired);
+  const firmKey    = useAuthStore((s) => s.firmKey);
+  const acledKey   = useAuthStore((s) => s.acledKey);
   const acledEmail = useAuthStore((s) => s.acledEmail);
 
   const setStatus = useApiStore((s) => s.setStatus);
@@ -36,12 +36,11 @@ export default function MonitorPage() {
   const { auto, tick, reset } = useRefreshStore();
 
   const fetchedRef = useRef(false);
+  const [showIntsum, setShowIntsum] = useState(false);
 
-  // Auth guard
+  /* Auth guard */
   useEffect(() => {
-    if (!session || isExpired()) {
-      router.replace('/');
-    }
+    if (!session || isExpired()) router.replace('/');
   }, [session, isExpired, router]);
 
   const doRefresh = useCallback(async () => {
@@ -56,11 +55,9 @@ export default function MonitorPage() {
       classification: r.classification, desc: r.desc, id: r.id,
     }));
 
-    // Start with drone + ACLED fallback immediately
     setEvents([...ACLED_FALLBACK, ...droneEvents]);
     setStatus('drone', 'ok');
 
-    // Fetch live ACLED
     setStatus('acled', 'loading');
     const acledData = await fetchACLED(acledKey, acledEmail);
     if (acledData && acledData.length > 0) {
@@ -69,10 +66,9 @@ export default function MonitorPage() {
       push(`${acledData.length} événements ACLED chargés`, 'success');
     } else {
       setStatus('acled', acledKey ? 'error' : 'idle');
-      if (acledKey) push('ACLED API indisponible — données de secours actives', 'warn');
+      if (acledKey) push('ACLED indisponible — données de secours actives', 'warn');
     }
 
-    // Fetch FIRMS
     setStatus('firms', 'loading');
     const firmsData = await fetchFIRMS(firmKey);
     if (firmsData.length > 0) {
@@ -83,7 +79,6 @@ export default function MonitorPage() {
       setStatus('firms', firmKey ? 'error' : 'idle');
     }
 
-    // Fetch Copernicus
     setStatus('copernicus', 'loading');
     const copData = await fetchCopernicus();
     if (copData.length > 0) {
@@ -94,7 +89,6 @@ export default function MonitorPage() {
     }
   }, [session, firmKey, acledKey, acledEmail, setEvents, addEvents, setStatus, reset, push]);
 
-  // Initial fetch
   useEffect(() => {
     if (session && !fetchedRef.current) {
       fetchedRef.current = true;
@@ -102,12 +96,10 @@ export default function MonitorPage() {
     }
   }, [session, doRefresh]);
 
-  // Auto-refresh countdown
   useEffect(() => {
     if (!auto) return;
     const id = setInterval(() => {
-      const fire = tick();
-      if (fire) doRefresh();
+      if (tick()) doRefresh();
     }, 1000);
     return () => clearInterval(id);
   }, [auto, tick, doRefresh]);
@@ -116,29 +108,40 @@ export default function MonitorPage() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-b0">
-      {/* z-0: Full-screen globe viewport */}
+
+      {/* Globe viewport */}
       <div className="absolute inset-0 z-globe">
         <GlobeMap />
       </div>
 
-      {/* z-40: Top header bar */}
-      <TopBar onRefresh={doRefresh} />
+      {/* Header */}
+      <TopBar
+        onRefresh={doRefresh}
+        onToggleIntsum={() => setShowIntsum((v) => !v)}
+        intsumOpen={showIntsum}
+      />
 
-      {/* z-30: HUD overlays */}
-      <CoordHUD />
-      <IntelPanel />
+      {/* Layer chips (horizontal, below header on left) */}
       <LayerToggles />
 
-      {/* z-20: Tactical feed panel (slides in from right) */}
+      {/* Coordinate HUD (bottom-left) */}
+      <CoordHUD />
+
+      {/* Intelligence Assessment panel (toggleable) */}
+      {showIntsum && (
+        <IntelAssessmentPanel onClose={() => setShowIntsum(false)} />
+      )}
+
+      {/* Tactical feed panel (right) */}
       <TacticalFeedPanel />
 
-      {/* z-50: Session expiry bar */}
+      {/* Session bar */}
       <SessionBar />
 
-      {/* z-40: Loading indicator */}
+      {/* Loading overlay */}
       <LoadingOverlay />
 
-      {/* z-60: Toast notifications */}
+      {/* Toasts */}
       <ToastContainer />
     </div>
   );

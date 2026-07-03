@@ -6,6 +6,19 @@ import type { IntelEvent } from '@/types/intel';
  * Sources: ACLED, UN OCHA, Human Rights Watch, MSF, MONUSCO sitreps.
  */
 export const ACLED_FALLBACK: IntelEvent[] = [
+  /* ── 3 JUILLET 2026 ──────────────────────────────── */
+  { src:'acled', type:'Battles', subtype:'Armed clash', date:'2026-07-03',
+    location:'Sake', admin1:'North Kivu', lat:-1.62, lon:28.99, fatalities:5,
+    actor1:'M23/RDF', actor2:'FARDC/Wazalendo',
+    notes:"Combats intensifs a Sake. M23/RDF tente de consolider le couloir Goma-Minova. 5 KIA documentes cote FARDC." },
+  { src:'acled', type:'Explosions/Remote violence', subtype:'Drone strike', date:'2026-07-03',
+    location:'Kibumba', admin1:'North Kivu', lat:-1.52, lon:29.30, fatalities:2,
+    actor1:'M23/RDF', actor2:'FARDC',
+    notes:"Frappe Shaheed-136 sur emplacement FARDC a Kibumba. 2 soldats KIA. Debris recuperes par MONUSCO ISR." },
+  { src:'acled', type:'Violence against civilians', subtype:'Attack', date:'2026-07-03',
+    location:'Djugu', admin1:'Ituri', lat:1.88, lon:30.52, fatalities:3,
+    actor1:'CODECO', actor2:'Civilians',
+    notes:"Attaque CODECO sur site IDP a Djugu (Ituri). 3 civils tues, dont 1 enfant. Attaque 14e en 6 semaines sur ce site." },
   /* ── JUILLET 2026 ────────────────────────────────── */
   { src:'acled', type:'Battles', subtype:'Armed clash', date:'2026-07-01',
     location:'Minova', admin1:'South Kivu', lat:-1.62, lon:28.97, fatalities:8,

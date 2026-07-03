@@ -8,6 +8,7 @@ import { useFeedStore } from '@/store/useFeedStore';
 import { toMGRSSync, preloadMGRS, formatLatLon } from '@/lib/mgrs';
 import { MIL_POSITIONS } from '@/data/military';
 import { DRONE_ISR } from '@/data/drones';
+import { M23_ZONES_GEOJSON } from '@/data/zones';
 import type { IntelEvent } from '@/types/intel';
 
 const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
@@ -20,15 +21,14 @@ const INITIAL_VIEW = {
   bearing:   0,
 };
 
-/* Maven tactical colors: HOSTILE=red, FRIENDLY=blue, UNKNOWN=amber, ISR=cyan */
 const MIL_DOT_COLOR: Record<string, string> = {
-  hq:   '#c83048',  // hostile / mag
-  arty: '#8060d8',  // pur
-  cp:   '#d09820',  // unknown / amb
+  hq:   '#c83048',
+  arty: '#8060d8',
+  cp:   '#d09820',
   log:  '#d09820',
   camp: '#d09820',
-  nav:  '#1e70f0',  // friendly / blu
-  idp:  '#20c880',  // confirmed / grn
+  nav:  '#1e70f0',
+  idp:  '#20c880',
 };
 
 const DRONE_DOT_COLOR: Record<string, string> = {
@@ -41,6 +41,16 @@ const DRONE_DOT_COLOR: Record<string, string> = {
   artillery:    '#8060d8',
   humanitarian: '#20c880',
   movement:     '#18c8e0',
+};
+
+/* Zone fill colors by type */
+const ZONE_FILL: Record<string, string> = {
+  hostile:   '#e03030',
+  contested: '#d09820',
+};
+const ZONE_LINE: Record<string, string> = {
+  hostile:   '#e03030',
+  contested: '#d09820',
 };
 
 export default function GlobeMapInner() {
@@ -62,7 +72,7 @@ export default function GlobeMapInner() {
         'horizon-blend':  0.03,
         'star-intensity': 0.15,
       });
-    } catch { /* older maplibre versions */ }
+    } catch { /* older maplibre */ }
     preloadMGRS();
     setReady(true);
   }, []);
@@ -104,7 +114,6 @@ export default function GlobeMapInner() {
       })),
   }), [events]);
 
-  /* Maven affiliation colors */
   const acledColor = [
     'match', ['get', 'type'],
     'Battles',                    '#e03030',
@@ -141,6 +150,40 @@ export default function GlobeMapInner() {
       onClick={() => selectFeature(null)}
       attributionControl={false}
     >
+      {/* M23 / hostile zone overlays */}
+      {layers.zone && (
+        <Source id="m23-zones" type="geojson" data={M23_ZONES_GEOJSON}>
+          <Layer
+            id="m23-fill"
+            type="fill"
+            paint={{
+              'fill-color': [
+                'match', ['get', 'type'],
+                'hostile',   ZONE_FILL.hostile,
+                'contested', ZONE_FILL.contested,
+                '#888888',
+              ],
+              'fill-opacity': 0.10,
+            }}
+          />
+          <Layer
+            id="m23-line"
+            type="line"
+            paint={{
+              'line-color': [
+                'match', ['get', 'type'],
+                'hostile',   ZONE_LINE.hostile,
+                'contested', ZONE_LINE.contested,
+                '#888888',
+              ],
+              'line-width':   1.5,
+              'line-opacity': 0.45,
+              'line-dasharray': [4, 4],
+            }}
+          />
+        </Source>
+      )}
+
       {/* ACLED conflict events */}
       {layers.acled && (
         <Source id="acled-src" type="geojson" data={acledGeoJSON}>
@@ -249,7 +292,7 @@ export default function GlobeMapInner() {
         );
       })}
 
-      {/* Feature popup — Maven style */}
+      {/* Feature popup */}
       {selectedFeature && popupCoords && ready && (
         <Popup
           longitude={popupCoords[0]}
