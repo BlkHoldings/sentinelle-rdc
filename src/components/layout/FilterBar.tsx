@@ -5,6 +5,7 @@ import { useMapStore } from '@/store/useMapStore';
 import { useFeedStore, type TimeRange } from '@/store/useFeedStore';
 import { flyTo } from '@/lib/mapController';
 import type { LayerKey } from '@/types/intel';
+import type { KeyboardEvent } from 'react';
 
 const TIME_OPTS: { label: string; value: TimeRange }[] = [
   { label: '24H',  value: '24h'  },
@@ -47,9 +48,17 @@ export default function FilterBar() {
   const timeRange   = useFeedStore((s) => s.timeRange);
   const setTimeRange = useFeedStore((s) => s.setTimeRange);
 
-  const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
-  const [aoiIdx,   setAoiIdx]   = useState(0);
-  const [cls,      setCls]      = useState('TOUS');
+  const [openMenu,  setOpenMenu]  = useState<MenuKey | null>(null);
+  const [aoiIdx,    setAoiIdx]    = useState(0);
+  const [cls,       setCls]       = useState('TOUS');
+  const [searchVal, setSearchVal] = useState('');
+  const searchQuery = useFeedStore((s) => s.searchQuery);
+  const setSearch   = useFeedStore((s) => s.setSearch);
+
+  const handleSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') setSearch(searchVal);
+    if (e.key === 'Escape') { setSearchVal(''); setSearch(''); }
+  };
 
   const barRef = useRef<HTMLDivElement>(null);
 
@@ -155,7 +164,33 @@ export default function FilterBar() {
         ))}
       </Dropdown>
 
-      <div className="flex-1" />
+      {/* ── Global search ── */}
+      <div className="flex-1 mx-2 max-w-sm">
+        <div className="relative">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-t3 text-xs pointer-events-none">⌕</span>
+          <input
+            type="text"
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            onKeyDown={handleSearchKey}
+            onBlur={() => setSearch(searchVal)}
+            placeholder="Rechercher événements, entités, lieux…"
+            className={`
+              w-full bg-b0 border pl-8 pr-3 py-1 text-t2 text-2xs font-mono
+              placeholder:text-t3 focus:outline-none transition-colors
+              ${searchQuery ? 'border-blu text-t1' : 'border-b3 focus:border-t3'}
+            `}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => { setSearchVal(''); setSearch(''); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-t3 hover:text-t1 text-xs transition-colors"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* UTC clock */}
       <UtcClock />

@@ -151,6 +151,31 @@ export default function MonitorPage() {
               <GlobeMap />
               <CoordHUD />
               <LoadingOverlay />
+
+              {/* AOR label overlay */}
+              <div className="absolute top-6 right-6 z-hud pointer-events-none text-right">
+                <div className="text-t3 text-2xs font-mono tracking-widest uppercase">ZONE D&apos;OPÉRATIONS</div>
+                <div className="text-t1 text-xs font-mono font-bold tracking-widest uppercase">SENTINELLE-RDC EST</div>
+              </div>
+
+              {/* Map tools panel */}
+              <div className="absolute top-4 left-3 z-hud flex flex-col gap-0.5">
+                {[
+                  { sym: '↖', title: 'Sélectionner' },
+                  { sym: '⬜', title: 'Rectangle'   },
+                  { sym: '○',  title: 'Cercle'      },
+                  { sym: '△',  title: 'Polygone'    },
+                  { sym: '✎',  title: 'Annoter'     },
+                ].map(({ sym, title }) => (
+                  <button
+                    key={title}
+                    title={title}
+                    className="w-7 h-7 bg-b2/90 border border-b3 text-t3 hover:text-t1 hover:border-t3 text-xs flex items-center justify-center transition-colors"
+                  >
+                    {sym}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Right panel */}
