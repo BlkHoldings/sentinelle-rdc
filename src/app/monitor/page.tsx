@@ -7,18 +7,18 @@ import { useApiStore } from '@/store/useApiStore';
 import { useFeedStore } from '@/store/useFeedStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
 import { useToastStore } from '@/store/useToastStore';
+import { useMapStore } from '@/store/useMapStore';
 import { fetchFIRMS, fetchCopernicus, fetchACLED } from '@/lib/api';
 import { ACLED_FALLBACK } from '@/data/acled-fallback';
 import { DRONE_ISR } from '@/data/drones';
 import GlobeMap from '@/components/globe/GlobeMap';
-import TopBar from '@/components/hud/TopBar';
 import CoordHUD from '@/components/hud/CoordHUD';
-import IntelAssessmentPanel from '@/components/hud/IntelAssessmentPanel';
-import LayerToggles from '@/components/hud/LayerToggles';
-import TacticalFeedPanel from '@/components/feed/TacticalFeedPanel';
-import ToastContainer from '@/components/ui/Toast';
-import SessionBar from '@/components/ui/SessionBar';
+import Sidebar, { type ViewKey } from '@/components/layout/Sidebar';
+import FilterBar from '@/components/layout/FilterBar';
+import RightPanel from '@/components/panels/RightPanel';
+import BottomPanels from '@/components/panels/BottomPanels';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import ToastContainer from '@/components/ui/Toast';
 import type { IntelEvent } from '@/types/intel';
 
 export default function MonitorPage() {
@@ -34,9 +34,11 @@ export default function MonitorPage() {
   const addEvents = useFeedStore((s) => s.addEvents);
   const push      = useToastStore((s) => s.push);
   const { auto, tick, reset } = useRefreshStore();
+  const layers     = useMapStore((s) => s.layers);
+  const toggleLayer = useMapStore((s) => s.toggleLayer);
 
-  const fetchedRef = useRef(false);
-  const [showIntsum, setShowIntsum] = useState(false);
+  const fetchedRef  = useRef(false);
+  const [activeView, setActiveView] = useState<ViewKey>('overview');
 
   /* Auth guard */
   useEffect(() => {
@@ -89,6 +91,7 @@ export default function MonitorPage() {
     }
   }, [session, firmKey, acledKey, acledEmail, setEvents, addEvents, setStatus, reset, push]);
 
+  /* Initial fetch */
   useEffect(() => {
     if (session && !fetchedRef.current) {
       fetchedRef.current = true;
@@ -96,52 +99,70 @@ export default function MonitorPage() {
     }
   }, [session, doRefresh]);
 
+  /* Auto-refresh timer */
   useEffect(() => {
     if (!auto) return;
-    const id = setInterval(() => {
-      if (tick()) doRefresh();
-    }, 1000);
+    const id = setInterval(() => { if (tick()) doRefresh(); }, 1000);
     return () => clearInterval(id);
   }, [auto, tick, doRefresh]);
+
+  /* Adjust map layers when nav view changes */
+  const handleViewChange = useCallback((view: ViewKey) => {
+    setActiveView(view);
+    if (view === 'incidents'    && !layers.acled)  toggleLayer('acled');
+    if (view === 'entities'     && !layers.mil)    toggleLayer('mil');
+    if (view === 'entities'     && !layers.drone)  toggleLayer('drone');
+    if (view === 'effects'      && !layers.acled)  toggleLayer('acled');
+    if (view === 'logistics'    && !layers.mil)    toggleLayer('mil');
+    if (view === 'planning'     && !layers.zone)   toggleLayer('zone');
+  }, [layers, toggleLayer]);
 
   if (!session) return null;
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-b0">
+    <div className="flex flex-col w-screen h-screen overflow-hidden bg-b0">
 
-      {/* Globe viewport */}
-      <div className="absolute inset-0 z-globe">
-        <GlobeMap />
+      {/* Classification stripe — full width */}
+      <div className="classify h-5 flex items-center justify-center shrink-0">
+        SECRET // REL TO USA, COD, UNMISS // SENTINELLE-RDC C2 INTEL
       </div>
 
-      {/* Header */}
-      <TopBar
-        onRefresh={doRefresh}
-        onToggleIntsum={() => setShowIntsum((v) => !v)}
-        intsumOpen={showIntsum}
-      />
+      {/* Main area below classify stripe */}
+      <div className="flex flex-1 overflow-hidden min-h-0">
 
-      {/* Layer chips (horizontal, below header on left) */}
-      <LayerToggles />
+        {/* ── Left Sidebar ── */}
+        <Sidebar
+          activeView={activeView}
+          onViewChange={handleViewChange}
+          onRefresh={doRefresh}
+        />
 
-      {/* Coordinate HUD (bottom-left) */}
-      <CoordHUD />
+        {/* ── Center column ── */}
+        <div className="flex flex-col flex-1 overflow-hidden min-w-0">
 
-      {/* Intelligence Assessment panel (toggleable) */}
-      {showIntsum && (
-        <IntelAssessmentPanel onClose={() => setShowIntsum(false)} />
-      )}
+          {/* Filter bar */}
+          <FilterBar />
 
-      {/* Tactical feed panel (right) */}
-      <TacticalFeedPanel />
+          {/* Map + right panel row */}
+          <div className="flex flex-1 overflow-hidden min-h-0">
 
-      {/* Session bar */}
-      <SessionBar />
+            {/* Globe map container */}
+            <div className="flex-1 relative overflow-hidden min-w-0">
+              <GlobeMap />
+              <CoordHUD />
+              <LoadingOverlay />
+            </div>
 
-      {/* Loading overlay */}
-      <LoadingOverlay />
+            {/* Right panel */}
+            <RightPanel activeView={activeView} />
+          </div>
 
-      {/* Toasts */}
+          {/* Bottom panels */}
+          <BottomPanels />
+        </div>
+      </div>
+
+      {/* Toasts — floating */}
       <ToastContainer />
     </div>
   );

@@ -1,11 +1,12 @@
 'use client';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
-import Map, { Marker, Popup, Source, Layer, type MapRef } from 'react-map-gl/maplibre';
+import Map, { Marker, Source, Layer, type MapRef } from 'react-map-gl/maplibre';
 import { useRef, useCallback, useMemo, useState } from 'react';
 import { useMapStore } from '@/store/useMapStore';
-import { useFeedStore } from '@/store/useFeedStore';
-import { toMGRSSync, preloadMGRS, formatLatLon } from '@/lib/mgrs';
+import { useFeedStore, cutoffForRange } from '@/store/useFeedStore';
+import { toMGRSSync, preloadMGRS } from '@/lib/mgrs';
+import { registerFlyTo } from '@/lib/mapController';
 import { MIL_POSITIONS } from '@/data/military';
 import { DRONE_ISR } from '@/data/drones';
 import { M23_ZONES_GEOJSON } from '@/data/zones';
@@ -13,12 +14,13 @@ import type { IntelEvent } from '@/types/intel';
 
 const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
+/* Full DRC viewport */
 const INITIAL_VIEW = {
-  longitude: 30.2,
-  latitude:  -0.8,
-  zoom:      5.2,
-  pitch:     18,
-  bearing:   0,
+  longitude: 24.0,
+  latitude:  -4.0,
+  zoom:       4.7,
+  pitch:      0,
+  bearing:    0,
 };
 
 const MIL_DOT_COLOR: Record<string, string> = {
@@ -43,21 +45,14 @@ const DRONE_DOT_COLOR: Record<string, string> = {
   movement:     '#18c8e0',
 };
 
-/* Zone fill colors by type */
-const ZONE_FILL: Record<string, string> = {
-  hostile:   '#e03030',
-  contested: '#d09820',
-};
-const ZONE_LINE: Record<string, string> = {
-  hostile:   '#e03030',
-  contested: '#d09820',
-};
+const ZONE_FILL: Record<string, string> = { hostile: '#e03030', contested: '#d09820' };
+const ZONE_LINE: Record<string, string> = { hostile: '#e03030', contested: '#d09820' };
 
 export default function GlobeMapInner() {
   const mapRef = useRef<MapRef>(null);
-  const { layers, setCursor, selectFeature, selectedFeature, popupCoords } = useMapStore();
-  const { events } = useFeedStore();
-  const [ready, setReady] = useState(false);
+  const { layers, setCursor, selectFeature } = useMapStore();
+  const { events, timeRange } = useFeedStore();
+  const [, setReady] = useState(false);
 
   const handleLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -73,6 +68,19 @@ export default function GlobeMapInner() {
         'star-intensity': 0.15,
       });
     } catch { /* older maplibre */ }
+
+    /* Register flyTo for FilterBar AOI control */
+    registerFlyTo((opts) => {
+      map.flyTo({
+        center:    [opts.longitude, opts.latitude],
+        zoom:      opts.zoom,
+        pitch:     opts.pitch ?? 0,
+        bearing:   opts.bearing ?? 0,
+        duration:  1400,
+        essential: true,
+      });
+    });
+
     preloadMGRS();
     setReady(true);
   }, []);
@@ -86,10 +94,13 @@ export default function GlobeMapInner() {
 
   const handleMouseLeave = useCallback(() => setCursor(null), [setCursor]);
 
+  /* Date cutoff for time-range filter */
+  const cutoff = useMemo(() => cutoffForRange(timeRange), [timeRange]);
+
   const acledGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
     features: events
-      .filter((e) => e.src === 'acled' && e.lat !== 0)
+      .filter((e) => e.src === 'acled' && e.lat !== 0 && (!cutoff || e.date >= cutoff))
       .map((e) => ({
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [e.lon, e.lat] },
@@ -101,18 +112,18 @@ export default function GlobeMapInner() {
           notes:      e.notes ?? '',
         },
       })),
-  }), [events]);
+  }), [events, cutoff]);
 
   const firmsGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
     features: events
-      .filter((e) => e.src === 'firms' && e.lat !== 0)
+      .filter((e) => e.src === 'firms' && e.lat !== 0 && (!cutoff || e.date >= cutoff))
       .map((e) => ({
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [e.lon, e.lat] },
         properties: { brightness: e.brightness ?? 300, frp: e.frp ?? 0 },
       })),
-  }), [events]);
+  }), [events, cutoff]);
 
   const acledColor = [
     'match', ['get', 'type'],
@@ -133,7 +144,8 @@ export default function GlobeMapInner() {
   const handleDroneClick = useCallback((rec: typeof DRONE_ISR[0]) => {
     selectFeature(
       { src: 'drone', type: rec.type, lat: rec.lat, lon: rec.lon, desc: rec.desc,
-        platform: rec.platform, status: rec.status, id: rec.id, time: rec.time } as IntelEvent,
+        platform: rec.platform, status: rec.status, id: rec.id, time: rec.time,
+        date: '', classification: rec.classification } as IntelEvent,
       [rec.lon, rec.lat],
     );
   }, [selectFeature]);
@@ -153,61 +165,35 @@ export default function GlobeMapInner() {
       {/* M23 / hostile zone overlays */}
       {layers.zone && (
         <Source id="m23-zones" type="geojson" data={M23_ZONES_GEOJSON}>
-          <Layer
-            id="m23-fill"
-            type="fill"
-            paint={{
-              'fill-color': [
-                'match', ['get', 'type'],
-                'hostile',   ZONE_FILL.hostile,
-                'contested', ZONE_FILL.contested,
-                '#888888',
-              ],
-              'fill-opacity': 0.10,
-            }}
-          />
-          <Layer
-            id="m23-line"
-            type="line"
-            paint={{
-              'line-color': [
-                'match', ['get', 'type'],
-                'hostile',   ZONE_LINE.hostile,
-                'contested', ZONE_LINE.contested,
-                '#888888',
-              ],
-              'line-width':   1.5,
-              'line-opacity': 0.45,
-              'line-dasharray': [4, 4],
-            }}
-          />
+          <Layer id="m23-fill" type="fill" paint={{
+            'fill-color': ['match', ['get', 'type'],
+              'hostile', ZONE_FILL.hostile, 'contested', ZONE_FILL.contested, '#888888'],
+            'fill-opacity': 0.10,
+          }} />
+          <Layer id="m23-line" type="line" paint={{
+            'line-color': ['match', ['get', 'type'],
+              'hostile', ZONE_LINE.hostile, 'contested', ZONE_LINE.contested, '#888888'],
+            'line-width': 1.5, 'line-opacity': 0.45, 'line-dasharray': [4, 4],
+          }} />
         </Source>
       )}
 
       {/* ACLED conflict events */}
       {layers.acled && (
         <Source id="acled-src" type="geojson" data={acledGeoJSON}>
-          <Layer
-            id="acled-glow"
-            type="circle"
-            paint={{
-              'circle-radius':  ['interpolate', ['linear'], ['zoom'], 4, 8, 10, 20],
-              'circle-color':   acledColor,
-              'circle-opacity': 0.10,
-              'circle-blur':    1,
-            }}
-          />
-          <Layer
-            id="acled-circles"
-            type="circle"
-            paint={{
-              'circle-radius':       ['interpolate', ['linear'], ['zoom'], 4, 3.5, 10, 9],
-              'circle-color':        acledColor,
-              'circle-opacity':      0.95,
-              'circle-stroke-width': 0.5,
-              'circle-stroke-color': 'rgba(0,0,0,0.6)',
-            }}
-          />
+          <Layer id="acled-glow" type="circle" paint={{
+            'circle-radius':  ['interpolate', ['linear'], ['zoom'], 4, 8, 10, 20],
+            'circle-color':   acledColor,
+            'circle-opacity': 0.10,
+            'circle-blur':    1,
+          }} />
+          <Layer id="acled-circles" type="circle" paint={{
+            'circle-radius':       ['interpolate', ['linear'], ['zoom'], 4, 3.5, 10, 9],
+            'circle-color':        acledColor,
+            'circle-opacity':      0.95,
+            'circle-stroke-width': 0.5,
+            'circle-stroke-color': 'rgba(0,0,0,0.6)',
+          }} />
         </Source>
       )}
 
@@ -215,46 +201,28 @@ export default function GlobeMapInner() {
       {layers.firms && (
         <Source id="firms-src" type="geojson" data={firmsGeoJSON}>
           {layers.heat && (
-            <Layer
-              id="firms-heat"
-              type="heatmap"
-              paint={{
-                'heatmap-weight':    ['interpolate', ['linear'], ['get', 'frp'], 0, 0, 50, 1],
-                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 10, 2.5],
-                'heatmap-color': [
-                  'interpolate', ['linear'], ['heatmap-density'],
-                  0,   'rgba(224,96,32,0)',
-                  0.3, 'rgba(224,96,32,0.3)',
-                  0.7, 'rgba(224,96,32,0.7)',
-                  1,   '#e06020',
-                ],
-                'heatmap-radius':  ['interpolate', ['linear'], ['zoom'], 4, 14, 10, 30],
-                'heatmap-opacity': 0.75,
-              }}
-            />
+            <Layer id="firms-heat" type="heatmap" paint={{
+              'heatmap-weight':    ['interpolate', ['linear'], ['get', 'frp'], 0, 0, 50, 1],
+              'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 10, 2.5],
+              'heatmap-color': [
+                'interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(224,96,32,0)', 0.3, 'rgba(224,96,32,0.3)',
+                0.7, 'rgba(224,96,32,0.7)', 1, '#e06020',
+              ],
+              'heatmap-radius':  ['interpolate', ['linear'], ['zoom'], 4, 14, 10, 30],
+              'heatmap-opacity': 0.75,
+            }} />
           )}
-          <Layer
-            id="firms-pts"
-            type="circle"
-            minzoom={6}
-            paint={{
-              'circle-radius':       5,
-              'circle-color':        '#e06020',
-              'circle-opacity':      0.95,
-              'circle-stroke-width': 1,
-              'circle-stroke-color': '#d09820',
-            }}
-          />
+          <Layer id="firms-pts" type="circle" minzoom={6} paint={{
+            'circle-radius': 5, 'circle-color': '#e06020', 'circle-opacity': 0.95,
+            'circle-stroke-width': 1, 'circle-stroke-color': '#d09820',
+          }} />
         </Source>
       )}
 
       {/* Military positions */}
       {layers.mil && MIL_POSITIONS.map((pos) => (
-        <Marker
-          key={pos.n}
-          longitude={pos.ln}
-          latitude={pos.lt}
-          anchor="center"
+        <Marker key={pos.n} longitude={pos.ln} latitude={pos.lt} anchor="center"
           onClick={(e) => { e.originalEvent.stopPropagation(); handleMilClick(pos); }}
         >
           <button
@@ -272,11 +240,7 @@ export default function GlobeMapInner() {
         const isStrike = rec.classification === 'strike' || rec.classification === 'strike_bda';
         const color    = DRONE_DOT_COLOR[rec.classification] ?? '#18d8f0';
         return (
-          <Marker
-            key={rec.id}
-            longitude={rec.lon}
-            latitude={rec.lat}
-            anchor="center"
+          <Marker key={rec.id} longitude={rec.lon} latitude={rec.lat} anchor="center"
             onClick={(e) => { e.originalEvent.stopPropagation(); handleDroneClick(rec); }}
           >
             <button
@@ -291,53 +255,6 @@ export default function GlobeMapInner() {
           </Marker>
         );
       })}
-
-      {/* Feature popup */}
-      {selectedFeature && popupCoords && ready && (
-        <Popup
-          longitude={popupCoords[0]}
-          latitude={popupCoords[1]}
-          onClose={() => selectFeature(null)}
-          closeOnClick={false}
-          anchor="bottom"
-          offset={16}
-        >
-          <div className="space-y-1.5 max-w-xs">
-            {selectedFeature.id && (
-              <div className="text-t3 text-2xs font-mono">TRACK: {selectedFeature.id}</div>
-            )}
-            {selectedFeature.platform && (
-              <div className="text-cyn text-xs font-mono font-medium">
-                {selectedFeature.platform} · {selectedFeature.status}
-              </div>
-            )}
-            <div className="text-t1 font-mono font-semibold text-xs leading-tight border-t border-b3 pt-1.5">
-              {selectedFeature.location ?? selectedFeature.type}
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {selectedFeature.time && (
-                <span className="text-t3 text-2xs font-mono">{selectedFeature.time}</span>
-              )}
-              {selectedFeature.date && (
-                <span className="text-t3 text-2xs font-mono">{selectedFeature.date}</span>
-              )}
-              {selectedFeature.fatalities != null && selectedFeature.fatalities > 0 && (
-                <span className="text-alert font-bold text-xs font-mono">
-                  ▲{selectedFeature.fatalities} KIA
-                </span>
-              )}
-            </div>
-            {(selectedFeature.desc ?? selectedFeature.notes) && (
-              <p className="text-t2 text-2xs font-mono leading-relaxed border-t border-b3 pt-1.5">
-                {selectedFeature.desc ?? selectedFeature.notes}
-              </p>
-            )}
-            <div className="text-t3 text-2xs font-mono pt-0.5 border-t border-b3">
-              {formatLatLon(selectedFeature.lat, selectedFeature.lon)}
-            </div>
-          </div>
-        </Popup>
-      )}
     </Map>
   );
 }

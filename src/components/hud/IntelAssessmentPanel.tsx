@@ -5,7 +5,7 @@ import { DRONE_ISR } from '@/data/drones';
 
 interface Props { onClose: () => void; }
 
-const SECTIONS = [
+export const SECTIONS = [
   {
     key: 'critique',
     label: 'CRITIQUE — OCCUPATION M23/RDF',
