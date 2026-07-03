@@ -1,15 +1,29 @@
 import type { Metadata } from 'next';
+import { IBM_Plex_Mono, Outfit } from 'next/font/google';
 import './globals.css';
 
+const ibmPlexMono = IBM_Plex_Mono({
+  weight:   ['400', '500', '600'],
+  subsets:  ['latin'],
+  variable: '--font-mono',
+  display:  'swap',
+});
+
+const outfit = Outfit({
+  subsets:  ['latin'],
+  variable: '--font-sans',
+  display:  'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Commerce Opus DRC — Créez votre boutique, vendez sur WhatsApp & Instagram',
-  description:
-    'Plateforme e-commerce pour les commerçants congolais. Créez votre boutique en 3 clics et acceptez M-Pesa, Orange Money, Airtel Money.',
+  title:       'SENTINELLE-RDC | C2 Intelligence Monitor',
+  description: 'Command & Control intelligence dashboard — Eastern DRC conflict monitoring',
+  robots:      { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${ibmPlexMono.variable} ${outfit.variable}`}>
       <body>{children}</body>
     </html>
   );
