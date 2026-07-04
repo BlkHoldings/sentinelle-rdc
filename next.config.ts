@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
 
+  // Project site is served at https://blkholdings.github.io/sentinelle-rdc/
+  basePath: process.env.NODE_ENV === 'production' ? '/sentinelle-rdc' : '',
+
   // Maplibre GL ships as an ES module; Next.js must transpile it
   transpilePackages: ['maplibre-gl', 'react-map-gl'],
 
