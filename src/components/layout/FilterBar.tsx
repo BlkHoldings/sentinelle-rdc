@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useMapStore } from '@/store/useMapStore';
 import { useFeedStore, applyFilters, type TimeRange, type ClassFilter } from '@/store/useFeedStore';
+import { useRefreshStore } from '@/store/useRefreshStore';
 import { flyTo } from '@/lib/mapController';
 import type { LayerKey } from '@/types/intel';
 import type { KeyboardEvent } from 'react';
@@ -271,6 +272,11 @@ export default function FilterBar() {
         </div>
       </div>
 
+      {/* Live refresh status */}
+      <RefreshStatus />
+
+      <Sep />
+
       {/* UTC clock */}
       <UtcClock />
 
@@ -360,6 +366,36 @@ function DropItem({ active, onClick, children }: DropItemProps) {
     >
       {children}
     </button>
+  );
+}
+
+function RefreshStatus() {
+  const auto      = useRefreshStore((s) => s.auto);
+  const countdown = useRefreshStore((s) => s.countdown);
+  const setAuto   = useRefreshStore((s) => s.setAuto);
+  const refreshFn = useRefreshStore((s) => s.refreshFn);
+
+  return (
+    <div className="hidden lg:flex items-center gap-1.5 shrink-0">
+      <button
+        onClick={() => refreshFn?.()}
+        title="Rafraîchir maintenant (R)"
+        className="flex items-center gap-1.5 px-2 py-1 border border-b3 hover:border-grn/60 transition-colors group"
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-grn animate-pulse-slow" />
+        <span className="text-grn text-2xs font-mono font-bold tracking-wider">LIVE</span>
+        <span className="text-t3 text-2xs font-mono group-hover:text-t2">↻</span>
+      </button>
+      <button
+        onClick={() => setAuto(!auto)}
+        title={auto ? 'Désactiver le rafraîchissement auto' : 'Activer le rafraîchissement auto'}
+        className={`px-1.5 py-1 border text-2xs font-mono tracking-wider transition-colors ${
+          auto ? 'border-blu/50 text-blu' : 'border-b3 text-t3 hover:text-t2'
+        }`}
+      >
+        {auto ? `AUTO ${countdown}s` : 'AUTO ○'}
+      </button>
+    </div>
   );
 }
 
