@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useMapStore } from '@/store/useMapStore';
-import { useFeedStore, type TimeRange } from '@/store/useFeedStore';
+import { useFeedStore, applyFilters, type TimeRange, type ClassFilter } from '@/store/useFeedStore';
 import { flyTo } from '@/lib/mapController';
 import type { LayerKey } from '@/types/intel';
 import type { KeyboardEvent } from 'react';
@@ -27,7 +27,17 @@ const AOI_OPTS = [
   { label: 'KASAI',       lon: 23.0, lat: -5.5, zoom: 7.0 },
 ];
 
-const CLASS_OPTS = ['TOUS', 'SECRET', 'CLASSIFIÉ', 'NON-CLASSIFIÉ'];
+const CLASS_OPTS: ClassFilter[] = ['TOUS', 'SECRET', 'CLASSIFIÉ', 'NON-CLASSIFIÉ'];
+
+/** Trigger a client-side file download. */
+function download(name: string, mime: string, content: string) {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const LAYER_META: { key: LayerKey; label: string; dot: string }[] = [
   { key: 'acled',  label: 'ACLED EVENTS', dot: 'bg-alert' },
@@ -40,20 +50,74 @@ const LAYER_META: { key: LayerKey; label: string; dot: string }[] = [
   { key: 'routes', label: 'AXES ROUTES',  dot: 'bg-amb'   },
 ];
 
-type MenuKey = 'time' | 'aoi' | 'layers' | 'class';
+type MenuKey = 'time' | 'aoi' | 'layers' | 'class' | 'more';
 
 export default function FilterBar() {
   const layers      = useMapStore((s) => s.layers);
   const toggleLayer = useMapStore((s) => s.toggleLayer);
   const timeRange   = useFeedStore((s) => s.timeRange);
   const setTimeRange = useFeedStore((s) => s.setTimeRange);
+  const events         = useFeedStore((s) => s.events);
+  const classFilter    = useFeedStore((s) => s.classFilter);
+  const setClassFilter = useFeedStore((s) => s.setClassFilter);
 
   const [openMenu,  setOpenMenu]  = useState<MenuKey | null>(null);
   const [aoiIdx,    setAoiIdx]    = useState(0);
-  const [cls,       setCls]       = useState('TOUS');
   const [searchVal, setSearchVal] = useState('');
   const searchQuery = useFeedStore((s) => s.searchQuery);
   const setSearch   = useFeedStore((s) => s.setSearch);
+
+  /* ── Export / view actions (••• menu) ── */
+  const currentFiltered = () =>
+    applyFilters(events, { query: searchQuery, timeRange, classFilter });
+
+  const exportGeoJSON = () => {
+    const fc = {
+      type: 'FeatureCollection',
+      features: currentFiltered()
+        .filter((e) => e.lat !== 0 || e.lon !== 0)
+        .map((e) => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [e.lon, e.lat] },
+          properties: {
+            src: e.src, type: e.type, date: e.date, location: e.location ?? '',
+            fatalities: e.fatalities ?? 0, actor1: e.actor1 ?? '', notes: e.notes ?? e.desc ?? '',
+          },
+        })),
+    };
+    download('sentinelle-rdc-events.geojson', 'application/geo+json', JSON.stringify(fc, null, 2));
+    setOpenMenu(null);
+  };
+
+  const exportCSV = () => {
+    const esc = (v: unknown) => `"${String(v ?? '').replaceAll('"', '""')}"`;
+    const rows = currentFiltered().map((e) =>
+      [e.src, e.type, e.date, e.location ?? '', e.lat, e.lon, e.fatalities ?? 0,
+       e.actor1 ?? '', e.actor2 ?? '', (e.notes ?? e.desc ?? '').slice(0, 300)].map(esc).join(','),
+    );
+    download(
+      'sentinelle-rdc-events.csv',
+      'text/csv',
+      ['src,type,date,location,lat,lon,fatalities,actor1,actor2,notes', ...rows].join('\n'),
+    );
+    setOpenMenu(null);
+  };
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+    setOpenMenu(null);
+  };
+
+  const resetView = () => {
+    setTimeRange('7d');
+    setSearch('');
+    setSearchVal('');
+    setClassFilter('TOUS');
+    setAoiIdx(0);
+    flyTo({ longitude: 24.0, latitude: -4.0, zoom: 4.7, pitch: 0, bearing: 0 });
+    setOpenMenu(null);
+  };
 
   const handleSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') setSearch(searchVal);
@@ -158,10 +222,14 @@ export default function FilterBar() {
         open={openMenu === 'class'}
         onToggle={() => toggle('class')}
         tag="CLASS"
-        value={cls}
+        value={classFilter}
       >
         {CLASS_OPTS.map((o) => (
-          <DropItem key={o} active={cls === o} onClick={() => { setCls(o); setOpenMenu(null); }}>
+          <DropItem
+            key={o}
+            active={classFilter === o}
+            onClick={() => { setClassFilter(o); setOpenMenu(null); }}
+          >
             {o}
           </DropItem>
         ))}
@@ -200,13 +268,27 @@ export default function FilterBar() {
 
       <Sep />
 
-      {/* More */}
-      <button
-        className="flex items-center gap-1 px-2 py-1 border border-b3 text-t3 hover:border-t3 hover:text-t2 text-2xs font-mono transition-colors"
-        onClick={() => setOpenMenu(null)}
-      >
-        •••
-      </button>
+      {/* More actions */}
+      <div className="relative shrink-0">
+        <button
+          className={`flex items-center gap-1 px-2 py-1 border text-2xs font-mono transition-colors ${
+            openMenu === 'more'
+              ? 'border-blu text-t1 bg-blu/10'
+              : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
+          }`}
+          onClick={() => toggle('more')}
+        >
+          •••
+        </button>
+        {openMenu === 'more' && (
+          <div className="absolute top-full right-0 mt-0.5 z-[100] bg-b1 border border-b3 shadow-float min-w-[190px]">
+            <DropItem active={false} onClick={exportGeoJSON}>⬇ EXPORT GEOJSON</DropItem>
+            <DropItem active={false} onClick={exportCSV}>⬇ EXPORT CSV</DropItem>
+            <DropItem active={false} onClick={toggleFullscreen}>⛶ PLEIN ÉCRAN</DropItem>
+            <DropItem active={false} onClick={resetView}>↺ RÉINITIALISER VUE</DropItem>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

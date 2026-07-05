@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useFeedStore } from '@/store/useFeedStore';
+import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { useMapStore } from '@/store/useMapStore';
-import { DRONE_ISR } from '@/data/drones';
+import CommsIntercept from '@/components/panels/CommsIntercept';
 import type { IntelEvent } from '@/types/intel';
 
 type ActivityTab = 'ALL' | 'ALERTS' | 'REPORTS' | 'MOVEMENTS' | 'FIRES';
@@ -53,53 +53,34 @@ function EventIcon({ e }: { e: IntelEvent }) {
   );
 }
 
-/* Audio waveform visualization */
-function Waveform() {
-  const bars = 54;
-  return (
-    <svg width="100%" height="40" viewBox={`0 0 ${bars * 4} 40`} preserveAspectRatio="none">
-      {Array.from({ length: bars }, (_, i) => {
-        const t = i / bars;
-        const h = (Math.abs(Math.sin(t * 18.4) * Math.cos(t * 7.3) * 0.75 +
-                            Math.sin(t * 31.1) * 0.25) * 32 + 4);
-        const y = (40 - h) / 2;
-        return (
-          <rect
-            key={i}
-            x={i * 4 + 0.5}
-            y={y}
-            width={3}
-            height={h}
-            fill="#18c8e0"
-            fillOpacity={0.65 + Math.sin(i * 0.8) * 0.2}
-          />
-        );
-      })}
-    </svg>
-  );
-}
-
 interface Props {
   /** On phones, show only this section full-height; null hides the strip */
   mobileSection?: 'activity' | 'comms' | null;
 }
 
 export default function BottomPanels({ mobileSection = null }: Props) {
-  const [actTab, setActTab] = useState<ActivityTab>('ALL');
+  const [actTab, setActTab]   = useState<ActivityTab>('ALL');
+  const [actAll, setActAll]   = useState(false);
+  const [tlFull, setTlFull]   = useState(false);
   const events        = useFeedStore((s) => s.events);
+  const searchQuery   = useFeedStore((s) => s.searchQuery);
+  const timeRange     = useFeedStore((s) => s.timeRange);
+  const classFilter   = useFeedStore((s) => s.classFilter);
   const selectFeature = useMapStore((s) => s.selectFeature);
 
-  const acledEvents = useMemo(() => events.filter((e) => e.src === 'acled'), [events]);
-  const sorted      = useMemo(() =>
-    [...events].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')), [events]);
-  const displayed   = useMemo(() => filterActivity(sorted, actTab).slice(0, 40), [sorted, actTab]);
+  const filtered = useMemo(
+    () => applyFilters(events, { query: searchQuery, timeRange, classFilter }),
+    [events, searchQuery, timeRange, classFilter],
+  );
+  const sorted    = useMemo(() =>
+    [...filtered].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')), [filtered]);
+  const displayed = useMemo(
+    () => filterActivity(sorted, actTab).slice(0, actAll ? 500 : 40),
+    [sorted, actTab, actAll],
+  );
 
   /* Timeline events */
   const timelineEvts = useMemo(() => sorted.filter((e) => e.date).slice(0, 20), [sorted]);
-
-  /* Latest ISR for COMMS panel */
-  const latestISR = DRONE_ISR.filter((r) => r.status === 'ACTIVE' || r.status === 'LIVE').slice(0, 2);
-  const commsRec  = latestISR[0] ?? DRONE_ISR[0];
 
   return (
     <div
@@ -145,7 +126,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
 
         {/* Event list */}
         <div className="flex-1 overflow-y-auto divide-y divide-b3/40">
-          {timelineEvts.slice(0, 4).map((e, i) => (
+          {timelineEvts.slice(0, tlFull ? timelineEvts.length : 4).map((e, i) => (
             <button
               key={i}
               onClick={() => selectFeature(e, [e.lon, e.lat])}
@@ -167,7 +148,12 @@ export default function BottomPanels({ mobileSection = null }: Props) {
         </div>
 
         <div className="panel-header px-3 py-1 shrink-0">
-          <button className="text-t3 text-2xs font-mono hover:text-blu transition-colors">VIEW FULL TIMELINE</button>
+          <button
+            onClick={() => setTlFull((v) => !v)}
+            className={`text-2xs font-mono transition-colors ${tlFull ? 'text-blu' : 'text-t3 hover:text-blu'}`}
+          >
+            {tlFull ? '▲ COLLAPSE TIMELINE' : 'VIEW FULL TIMELINE'}
+          </button>
         </div>
       </div>
 
@@ -223,62 +209,17 @@ export default function BottomPanels({ mobileSection = null }: Props) {
         </div>
 
         <div className="panel-header px-3 py-1 shrink-0">
-          <button className="text-t3 text-2xs font-mono hover:text-blu transition-colors">VIEW ALL ACTIVITY</button>
+          <button
+            onClick={() => setActAll((v) => !v)}
+            className={`text-2xs font-mono transition-colors ${actAll ? 'text-blu' : 'text-t3 hover:text-blu'}`}
+          >
+            {actAll ? '▲ SHOW RECENT ONLY' : 'VIEW ALL ACTIVITY'}
+          </button>
         </div>
       </div>
 
       {/* ── COMMUNICATIONS INTERCEPT ─────────── */}
-      <div className={`${mobileSection === 'comms' ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-[240px] shrink-0`}>
-        <div className="panel-header px-3 py-1.5 flex items-center justify-between shrink-0">
-          <span className="mvn-label">COMMUNICATIONS INTERCEPT</span>
-        </div>
-        <div className="panel-header px-3 py-1 shrink-0">
-          <span className="text-t3 text-2xs font-mono">LATEST INTERCEPT</span>
-        </div>
-
-        {/* Waveform */}
-        <div className="px-3 py-1 shrink-0">
-          <div className="flex items-center gap-2 mb-1">
-            <button className="w-5 h-5 border border-t3/50 flex items-center justify-center text-t2 hover:border-t2 hover:text-t1 transition-colors">
-              <span className="text-xs">▶</span>
-            </button>
-            <Waveform />
-          </div>
-          <div className="flex justify-between text-t3 text-2xs font-mono">
-            <span>00:00</span>
-            <span>02:16</span>
-          </div>
-        </div>
-
-        {/* Metadata */}
-        <div className="grid grid-cols-2 gap-x-2 gap-y-1 px-3 py-1.5 border-t border-b3 shrink-0">
-          {[
-            { label: 'SOURCE',     val: 'SIGINT-7'  },
-            { label: 'TYPE',       val: 'Radio Freq' },
-            { label: 'FRÉQ',       val: '153.4 MHz'  },
-            { label: 'CONFIANCE',  val: '78%'        },
-          ].map(({ label, val }) => (
-            <div key={label}>
-              <div className="mvn-label">{label}</div>
-              <div className="text-t2 text-2xs font-mono">{val}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Transcription */}
-        <div className="flex-1 px-3 py-1.5 border-t border-b3 overflow-hidden">
-          <div className="mvn-label mb-1">TRANSCRIPTION (TRADUIT)</div>
-          <p className="text-t2 text-2xs font-mono leading-relaxed">
-            {commsRec
-              ? `"...${commsRec.desc?.slice(0, 80)}..."`
-              : '"...axe sud... renforcement position... convoi en approche depuis Gisenyi..."'}
-          </p>
-        </div>
-
-        <div className="panel-header px-3 py-1 shrink-0">
-          <button className="text-t3 text-2xs font-mono hover:text-blu transition-colors">VIEW FULL INTERCEPT</button>
-        </div>
-      </div>
+      <CommsIntercept mobileActive={mobileSection === 'comms'} />
 
     </div>
   );

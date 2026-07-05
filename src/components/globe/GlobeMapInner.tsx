@@ -2,9 +2,10 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import Map, { Marker, Source, Layer, type MapRef } from 'react-map-gl/maplibre';
-import { useRef, useCallback, useMemo, useState } from 'react';
+import { useRef, useCallback, useMemo, useState, useEffect } from 'react';
 import { useMapStore } from '@/store/useMapStore';
-import { useFeedStore, cutoffForRange } from '@/store/useFeedStore';
+import { useFeedStore, applyFilters } from '@/store/useFeedStore';
+import { useDrawStore, rectRing, circleRing } from '@/store/useDrawStore';
 import { toMGRSSync, preloadMGRS } from '@/lib/mgrs';
 import { registerFlyTo } from '@/lib/mapController';
 import { MIL_POSITIONS } from '@/data/military';
@@ -51,8 +52,19 @@ const ZONE_LINE: Record<string, string> = { hostile: '#e03030', contested: '#d09
 export default function GlobeMapInner() {
   const mapRef = useRef<MapRef>(null);
   const { layers, setCursor, selectFeature } = useMapStore();
-  const { events, timeRange } = useFeedStore();
+  const { events, timeRange, searchQuery, classFilter } = useFeedStore();
+  const { tool, shapes, notes, pending, addPending, cancelPending, commitShape, addNote } = useDrawStore();
   const [, setReady] = useState(false);
+
+  /* SECRET-source overlays (drone / mil) hidden under lower class filters */
+  const secretVisible = classFilter === 'TOUS' || classFilter === 'SECRET';
+
+  /* ESC cancels an in-progress drawing */
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') cancelPending(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [cancelPending]);
 
   const handleLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -94,13 +106,16 @@ export default function GlobeMapInner() {
 
   const handleMouseLeave = useCallback(() => setCursor(null), [setCursor]);
 
-  /* Date cutoff for time-range filter */
-  const cutoff = useMemo(() => cutoffForRange(timeRange), [timeRange]);
+  /* Search + time-range + classification filters, shared with the panels */
+  const visible = useMemo(
+    () => applyFilters(events, { query: searchQuery, timeRange, classFilter }),
+    [events, searchQuery, timeRange, classFilter],
+  );
 
   const acledGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
-    features: events
-      .filter((e) => e.src === 'acled' && e.lat !== 0 && (!cutoff || e.date >= cutoff))
+    features: visible
+      .filter((e) => e.src === 'acled' && e.lat !== 0)
       .map((e) => ({
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [e.lon, e.lat] },
@@ -112,18 +127,39 @@ export default function GlobeMapInner() {
           notes:      e.notes ?? '',
         },
       })),
-  }), [events, cutoff]);
+  }), [visible]);
 
   const firmsGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
-    features: events
-      .filter((e) => e.src === 'firms' && e.lat !== 0 && (!cutoff || e.date >= cutoff))
+    features: visible
+      .filter((e) => e.src === 'firms' && e.lat !== 0)
       .map((e) => ({
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [e.lon, e.lat] },
         properties: { brightness: e.brightness ?? 300, frp: e.frp ?? 0 },
       })),
-  }), [events, cutoff]);
+  }), [visible]);
+
+  /* Drawn shapes + in-progress preview as GeoJSON */
+  const drawGeoJSON = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: shapes.map((s) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Polygon' as const, coordinates: [s.coords] },
+      properties: { kind: s.kind },
+    })),
+  }), [shapes]);
+
+  const pendingGeoJSON = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: pending.length >= 2
+      ? [{
+          type: 'Feature' as const,
+          geometry: { type: 'LineString' as const, coordinates: pending },
+          properties: {},
+        }]
+      : [],
+  }), [pending]);
 
   const acledColor = [
     'match', ['get', 'type'],
@@ -150,6 +186,43 @@ export default function GlobeMapInner() {
     );
   }, [selectFeature]);
 
+  /* Map clicks: drawing tools capture vertices, select clears the feature */
+  const handleClick = useCallback((e: { lngLat: { lat: number; lng: number } }) => {
+    const pt: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+
+    if (tool === 'select') { selectFeature(null); return; }
+
+    if (tool === 'note') {
+      const text = window.prompt('Annotation:');
+      if (text?.trim()) {
+        addNote({ id: `note-${Date.now() % 1e9}`, lon: pt[0], lat: pt[1], text: text.trim() });
+      }
+      return;
+    }
+
+    if (tool === 'rect') {
+      if (pending.length === 0) addPending(pt);
+      else commitShape('rect', rectRing(pending[0], pt));
+      return;
+    }
+
+    if (tool === 'circle') {
+      if (pending.length === 0) addPending(pt);
+      else commitShape('circle', circleRing(pending[0], pt));
+      return;
+    }
+
+    if (tool === 'poly') addPending(pt);
+  }, [tool, pending, selectFeature, addPending, commitShape, addNote]);
+
+  /* Double-click closes an in-progress polygon */
+  const handleDblClick = useCallback((e: { preventDefault?: () => void }) => {
+    if (tool !== 'poly') return;
+    e.preventDefault?.();
+    if (pending.length >= 3) commitShape('poly', [...pending, pending[0]]);
+    else cancelPending();
+  }, [tool, pending, commitShape, cancelPending]);
+
   return (
     <Map
       ref={mapRef}
@@ -159,7 +232,10 @@ export default function GlobeMapInner() {
       onLoad={handleLoad}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onClick={() => selectFeature(null)}
+      onClick={handleClick}
+      onDblClick={handleDblClick}
+      doubleClickZoom={tool !== 'poly'}
+      cursor={tool === 'select' ? undefined : 'crosshair'}
       attributionControl={false}
     >
       {/* M23 / hostile zone overlays */}
@@ -220,8 +296,44 @@ export default function GlobeMapInner() {
         </Source>
       )}
 
+      {/* Operator-drawn shapes */}
+      {shapes.length > 0 && (
+        <Source id="draw-shapes" type="geojson" data={drawGeoJSON}>
+          <Layer id="draw-fill" type="fill" paint={{ 'fill-color': '#18c8e0', 'fill-opacity': 0.08 }} />
+          <Layer id="draw-line" type="line" paint={{
+            'line-color': '#18c8e0', 'line-width': 1.5, 'line-opacity': 0.8, 'line-dasharray': [3, 2],
+          }} />
+        </Source>
+      )}
+
+      {/* In-progress drawing preview */}
+      {pending.length >= 2 && (
+        <Source id="draw-pending" type="geojson" data={pendingGeoJSON}>
+          <Layer id="draw-pending-line" type="line" paint={{
+            'line-color': '#c8d8e8', 'line-width': 1, 'line-dasharray': [2, 2],
+          }} />
+        </Source>
+      )}
+      {pending.map((pt, i) => (
+        <Marker key={`pend-${i}`} longitude={pt[0]} latitude={pt[1]} anchor="center">
+          <div className="w-2 h-2 border border-cyn bg-cyn/40 pointer-events-none" />
+        </Marker>
+      ))}
+
+      {/* Operator annotations */}
+      {notes.map((n) => (
+        <Marker key={n.id} longitude={n.lon} latitude={n.lat} anchor="bottom">
+          <div className="flex flex-col items-center pointer-events-none select-none">
+            <div className="bg-b1/95 border border-cyn/60 px-1.5 py-0.5 text-cyn text-2xs font-mono whitespace-nowrap max-w-[180px] truncate">
+              {n.text}
+            </div>
+            <div className="w-px h-2 bg-cyn/60" />
+          </div>
+        </Marker>
+      ))}
+
       {/* Military positions */}
-      {layers.mil && MIL_POSITIONS.map((pos) => (
+      {secretVisible && layers.mil && MIL_POSITIONS.map((pos) => (
         <Marker key={pos.n} longitude={pos.ln} latitude={pos.lt} anchor="center"
           onClick={(e) => { e.originalEvent.stopPropagation(); handleMilClick(pos); }}
         >
@@ -236,7 +348,7 @@ export default function GlobeMapInner() {
       ))}
 
       {/* Drone / UAV records */}
-      {layers.drone && DRONE_ISR.map((rec) => {
+      {secretVisible && layers.drone && DRONE_ISR.map((rec) => {
         const isStrike = rec.classification === 'strike' || rec.classification === 'strike_bda';
         const color    = DRONE_DOT_COLOR[rec.classification] ?? '#18d8f0';
         return (

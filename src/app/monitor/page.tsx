@@ -8,6 +8,7 @@ import { useFeedStore } from '@/store/useFeedStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
 import { useToastStore } from '@/store/useToastStore';
 import { useMapStore } from '@/store/useMapStore';
+import { useDrawStore, type DrawTool } from '@/store/useDrawStore';
 import { fetchFIRMS, fetchCopernicus, fetchACLED } from '@/lib/api';
 import { ACLED_FALLBACK } from '@/data/acled-fallback';
 import { DRONE_ISR } from '@/data/drones';
@@ -29,6 +30,46 @@ const MOBILE_TABS: { key: MobileTab; label: string; sym: string }[] = [
   { key: 'intel',    label: 'INTEL',    sym: '◈' },
   { key: 'comms',    label: 'COMMS',    sym: '◉' },
 ];
+
+const DRAW_TOOLS: { key: DrawTool; sym: string; title: string }[] = [
+  { key: 'select', sym: '↖', title: 'Sélectionner' },
+  { key: 'rect',   sym: '⬜', title: 'Rectangle — 2 clics' },
+  { key: 'circle', sym: '○', title: 'Cercle — centre puis rayon' },
+  { key: 'poly',   sym: '△', title: 'Polygone — clics, double-clic pour fermer' },
+  { key: 'note',   sym: '✎', title: 'Annoter — clic sur la carte' },
+];
+
+function MapTools() {
+  const { tool, setTool, shapes, notes, clearAll } = useDrawStore();
+  const hasDrawings = shapes.length > 0 || notes.length > 0;
+  return (
+    <div className="absolute top-4 left-3 z-hud hidden md:flex flex-col gap-0.5">
+      {DRAW_TOOLS.map(({ key, sym, title }) => (
+        <button
+          key={key}
+          title={title}
+          onClick={() => setTool(key)}
+          className={`w-7 h-7 border text-xs flex items-center justify-center transition-colors ${
+            tool === key
+              ? 'bg-blu/20 border-blu text-t1'
+              : 'bg-b2/90 border-b3 text-t3 hover:text-t1 hover:border-t3'
+          }`}
+        >
+          {sym}
+        </button>
+      ))}
+      {hasDrawings && (
+        <button
+          title="Effacer les dessins"
+          onClick={clearAll}
+          className="w-7 h-7 bg-b2/90 border border-alert/40 text-alert/70 hover:text-alert hover:border-alert text-xs flex items-center justify-center transition-colors"
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function MonitorPage() {
   const router     = useRouter();
@@ -215,23 +256,7 @@ export default function MonitorPage() {
               </div>
 
               {/* Map tools panel — desktop only */}
-              <div className="absolute top-4 left-3 z-hud hidden md:flex flex-col gap-0.5">
-                {[
-                  { sym: '↖', title: 'Sélectionner' },
-                  { sym: '⬜', title: 'Rectangle'   },
-                  { sym: '○',  title: 'Cercle'      },
-                  { sym: '△',  title: 'Polygone'    },
-                  { sym: '✎',  title: 'Annoter'     },
-                ].map(({ sym, title }) => (
-                  <button
-                    key={title}
-                    title={title}
-                    className="w-7 h-7 bg-b2/90 border border-b3 text-t3 hover:text-t1 hover:border-t3 text-xs flex items-center justify-center transition-colors"
-                  >
-                    {sym}
-                  </button>
-                ))}
-              </div>
+              <MapTools />
             </div>
 
             {/* Right panel */}

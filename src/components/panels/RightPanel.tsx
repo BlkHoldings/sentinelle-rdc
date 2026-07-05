@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useMapStore } from '@/store/useMapStore';
-import { useFeedStore } from '@/store/useFeedStore';
+import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { DRONE_ISR } from '@/data/drones';
 import { toMGRSSync } from '@/lib/mgrs';
 import { SECTIONS } from '@/components/hud/IntelAssessmentPanel';
@@ -185,9 +185,15 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
   const feat          = useMapStore((s) => s.selectedFeature);
   const selectFeature = useMapStore((s) => s.selectFeature);
   const events        = useFeedStore((s) => s.events);
+  const searchQuery   = useFeedStore((s) => s.searchQuery);
+  const classFilter   = useFeedStore((s) => s.classFilter);
 
-  const acledEvents = useMemo(() => events.filter((e) => e.src === 'acled'), [events]);
-  const totalKIA    = useMemo(() => events.reduce((a, e) => a + (e.fatalities ?? 0), 0), [events]);
+  const filtered = useMemo(
+    () => applyFilters(events, { query: searchQuery, classFilter }),
+    [events, searchQuery, classFilter],
+  );
+  const acledEvents = useMemo(() => filtered.filter((e) => e.src === 'acled'), [filtered]);
+  const totalKIA    = useMemo(() => filtered.reduce((a, e) => a + (e.fatalities ?? 0), 0), [filtered]);
   const strikes     = DRONE_ISR.filter((r) => r.classification === 'strike').length;
 
   /* Donut breakdown */
