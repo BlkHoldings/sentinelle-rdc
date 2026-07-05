@@ -14,7 +14,7 @@ export default function CoordHUD() {
   }, [cursor]);
 
   return (
-    <div className="absolute bottom-3 left-3 z-hud pointer-events-none">
+    <div className="absolute bottom-3 left-3 z-hud pointer-events-none hidden md:block">
       <div className="panel animate-slide-up shadow-panel w-52">
         <div className="panel-header px-2.5 py-1 flex items-center gap-1.5">
           <div className="w-1 h-1 bg-cyn shrink-0" />

@@ -79,7 +79,12 @@ function Waveform() {
   );
 }
 
-export default function BottomPanels() {
+interface Props {
+  /** On phones, show only this section full-height; null hides the strip */
+  mobileSection?: 'activity' | 'comms' | null;
+}
+
+export default function BottomPanels({ mobileSection = null }: Props) {
   const [actTab, setActTab] = useState<ActivityTab>('ALL');
   const events        = useFeedStore((s) => s.events);
   const selectFeature = useMapStore((s) => s.selectFeature);
@@ -97,10 +102,12 @@ export default function BottomPanels() {
   const commsRec  = latestISR[0] ?? DRONE_ISR[0];
 
   return (
-    <div className="flex h-[185px] shrink-0 border-t border-b3 bg-b1 overflow-hidden">
+    <div
+      className={`${mobileSection ? 'flex flex-1 min-h-0' : 'hidden'} md:flex md:flex-none md:h-[185px] shrink-0 border-t border-b3 bg-b1 overflow-hidden`}
+    >
 
-      {/* ── TIMELINE ─────────────────────────── */}
-      <div className="flex flex-col w-[230px] shrink-0 border-r border-b3">
+      {/* ── TIMELINE — desktop only ──────────── */}
+      <div className="hidden md:flex flex-col w-[230px] shrink-0 border-r border-b3">
         <div className="panel-header px-3 py-1.5 flex items-center justify-between shrink-0">
           <span className="mvn-label">TIMELINE</span>
           <span className="text-t3 text-2xs font-mono">PAST 24H</span>
@@ -165,7 +172,7 @@ export default function BottomPanels() {
       </div>
 
       {/* ── RECENT ACTIVITY ──────────────────── */}
-      <div className="flex flex-col flex-1 min-w-0 border-r border-b3">
+      <div className={`${mobileSection === 'activity' ? 'flex' : 'hidden'} md:flex flex-col flex-1 min-w-0 md:border-r border-b3`}>
         <div className="panel-header px-3 py-1.5 shrink-0 flex items-center justify-between">
           <span className="mvn-label">RECENT ACTIVITY</span>
           <span className="text-t3 text-2xs font-mono">{displayed.length} ITEMS</span>
@@ -221,7 +228,7 @@ export default function BottomPanels() {
       </div>
 
       {/* ── COMMUNICATIONS INTERCEPT ─────────── */}
-      <div className="flex flex-col w-[240px] shrink-0">
+      <div className={`${mobileSection === 'comms' ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-[240px] shrink-0`}>
         <div className="panel-header px-3 py-1.5 flex items-center justify-between shrink-0">
           <span className="mvn-label">COMMUNICATIONS INTERCEPT</span>
         </div>
