@@ -85,7 +85,10 @@ export default function FilterBar() {
   const timeLabel = TIME_OPTS.find((o) => o.value === timeRange)?.label ?? '7J';
 
   return (
-    <div ref={barRef} className="relative flex items-center gap-1.5 px-3 h-11 bg-b2 border-b border-b3 shrink-0 z-header">
+    <div
+      ref={barRef}
+      className="relative flex flex-wrap md:flex-nowrap items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-0 h-auto md:h-11 bg-b2 border-b border-b3 shrink-0 z-header"
+    >
 
       {/* TIME RANGE */}
       <Dropdown
@@ -164,8 +167,8 @@ export default function FilterBar() {
         ))}
       </Dropdown>
 
-      {/* ── Global search ── */}
-      <div className="flex-1 mx-2 max-w-sm">
+      {/* ── Global search — full row on phones ── */}
+      <div className="order-last md:order-none basis-full md:basis-auto md:flex-1 md:mx-2 md:max-w-sm">
         <div className="relative">
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-t3 text-xs pointer-events-none">⌕</span>
           <input

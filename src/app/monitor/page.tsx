@@ -21,6 +21,15 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import ToastContainer from '@/components/ui/Toast';
 import type { IntelEvent } from '@/types/intel';
 
+type MobileTab = 'map' | 'activity' | 'intel' | 'comms';
+
+const MOBILE_TABS: { key: MobileTab; label: string; sym: string }[] = [
+  { key: 'map',      label: 'CARTE',    sym: '⊕' },
+  { key: 'activity', label: 'ACTIVITÉ', sym: '≡' },
+  { key: 'intel',    label: 'INTEL',    sym: '◈' },
+  { key: 'comms',    label: 'COMMS',    sym: '◉' },
+];
+
 export default function MonitorPage() {
   const router     = useRouter();
   const session    = useAuthStore((s) => s.session);
@@ -39,6 +48,14 @@ export default function MonitorPage() {
 
   const fetchedRef  = useRef(false);
   const [activeView, setActiveView] = useState<ViewKey>('overview');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mobileTab,  setMobileTab]  = useState<MobileTab>('map');
+  const selectedFeature = useMapStore((s) => s.selectedFeature);
+
+  /* On phones, surface the intel panel when a map feature is tapped */
+  useEffect(() => {
+    if (selectedFeature && window.innerWidth < 768) setMobileTab('intel');
+  }, [selectedFeature]);
 
   /* Auth guard */
   useEffect(() => {
@@ -120,34 +137,73 @@ export default function MonitorPage() {
   if (!session) return null;
 
   return (
-    <div className="flex flex-col w-screen h-screen overflow-hidden bg-b0">
+    <div className="flex flex-col w-screen h-screen h-dvh overflow-hidden bg-b0">
 
       {/* Classification stripe — full width */}
-      <div className="classify h-5 flex items-center justify-center shrink-0">
+      <div className="classify h-5 flex items-center justify-center shrink-0 truncate px-2">
         SECRET // REL TO USA, COD, UNMISS // SENTINELLE-RDC C2 INTEL
+      </div>
+
+      {/* ── Mobile top bar ── */}
+      <div className="flex md:hidden items-center gap-2 px-2 h-10 bg-b1 border-b border-b3 shrink-0">
+        <button
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Menu"
+          className="w-8 h-8 flex items-center justify-center border border-b3 text-t2 text-base"
+        >
+          ☰
+        </button>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-4 h-4 border border-alert flex items-center justify-center shrink-0">
+            <div className="w-2 h-2 bg-alert" />
+          </div>
+          <span className="text-t1 font-mono font-bold text-xs tracking-widest truncate">SENTINELLE-RDC</span>
+        </div>
+        <div className="ml-auto flex items-center gap-1">
+          <div className="w-1.5 h-1.5 bg-grn animate-pulse-slow" />
+          <span className="text-grn text-2xs font-mono font-bold">LIVE</span>
+        </div>
       </div>
 
       {/* Main area below classify stripe */}
       <div className="flex flex-1 overflow-hidden min-h-0">
 
-        {/* ── Left Sidebar ── */}
-        <Sidebar
-          activeView={activeView}
-          onViewChange={handleViewChange}
-          onRefresh={doRefresh}
-        />
+        {/* ── Left Sidebar — desktop ── */}
+        <div className="hidden md:flex shrink-0">
+          <Sidebar
+            activeView={activeView}
+            onViewChange={handleViewChange}
+            onRefresh={doRefresh}
+          />
+        </div>
+
+        {/* ── Sidebar drawer — mobile ── */}
+        {drawerOpen && (
+          <div className="fixed inset-0 z-[200] md:hidden">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setDrawerOpen(false)} />
+            <div className="absolute inset-y-0 left-0 flex animate-slide-up">
+              <Sidebar
+                activeView={activeView}
+                onViewChange={(v) => { handleViewChange(v); setDrawerOpen(false); setMobileTab('map'); }}
+                onRefresh={() => { doRefresh(); setDrawerOpen(false); }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* ── Center column ── */}
         <div className="flex flex-col flex-1 overflow-hidden min-w-0">
 
-          {/* Filter bar */}
-          <FilterBar />
+          {/* Filter bar — on mobile only with the map tab */}
+          <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} md:block shrink-0`}>
+            <FilterBar />
+          </div>
 
           {/* Map + right panel row */}
           <div className="flex flex-1 overflow-hidden min-h-0">
 
             {/* Globe map container */}
-            <div className="flex-1 relative overflow-hidden min-w-0">
+            <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} md:block flex-1 relative overflow-hidden min-w-0`}>
               <GlobeMap />
               <CoordHUD />
               <LoadingOverlay />
@@ -158,8 +214,8 @@ export default function MonitorPage() {
                 <div className="text-t1 text-xs font-mono font-bold tracking-widest uppercase">SENTINELLE-RDC EST</div>
               </div>
 
-              {/* Map tools panel */}
-              <div className="absolute top-4 left-3 z-hud flex flex-col gap-0.5">
+              {/* Map tools panel — desktop only */}
+              <div className="absolute top-4 left-3 z-hud hidden md:flex flex-col gap-0.5">
                 {[
                   { sym: '↖', title: 'Sélectionner' },
                   { sym: '⬜', title: 'Rectangle'   },
@@ -179,12 +235,35 @@ export default function MonitorPage() {
             </div>
 
             {/* Right panel */}
-            <RightPanel activeView={activeView} />
+            <RightPanel activeView={activeView} mobileVisible={mobileTab === 'intel'} />
           </div>
 
           {/* Bottom panels */}
-          <BottomPanels />
+          <BottomPanels
+            mobileSection={
+              mobileTab === 'activity' ? 'activity' :
+              mobileTab === 'comms'    ? 'comms'    : null
+            }
+          />
         </div>
+      </div>
+
+      {/* ── Mobile bottom tab bar ── */}
+      <div className="flex md:hidden bg-b1 border-t border-b3 shrink-0 pb-[env(safe-area-inset-bottom)]">
+        {MOBILE_TABS.map(({ key, label, sym }) => (
+          <button
+            key={key}
+            onClick={() => setMobileTab(key)}
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
+              mobileTab === key
+                ? 'text-t1 border-t-2 border-blu bg-blu/[0.07]'
+                : 'text-t3 border-t-2 border-transparent'
+            }`}
+          >
+            <span className="text-sm leading-none">{sym}</span>
+            <span className="text-2xs font-mono tracking-wider">{label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Toasts — floating */}

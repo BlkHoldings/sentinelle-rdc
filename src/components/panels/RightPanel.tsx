@@ -9,7 +9,11 @@ import { SECTIONS } from '@/components/hud/IntelAssessmentPanel';
 import type { ViewKey } from '@/components/layout/Sidebar';
 import type { IntelEvent } from '@/types/intel';
 
-interface Props { activeView: ViewKey; }
+interface Props {
+  activeView:     ViewKey;
+  /** On phones the panel fills the content area when its tab is active */
+  mobileVisible?: boolean;
+}
 
 const TYPE_COLOR: Record<string, string> = {
   'Battles':                    'text-alert',
@@ -177,7 +181,7 @@ function EntityNetwork() {
 }
 
 /* ── Main component ── */
-export default function RightPanel({ activeView }: Props) {
+export default function RightPanel({ activeView, mobileVisible = false }: Props) {
   const feat          = useMapStore((s) => s.selectedFeature);
   const selectFeature = useMapStore((s) => s.selectFeature);
   const events        = useFeedStore((s) => s.events);
@@ -228,7 +232,9 @@ export default function RightPanel({ activeView }: Props) {
   const ps   = PRIO_STYLE[prio];
 
   return (
-    <div className="flex flex-col w-[300px] shrink-0 bg-b1 border-l border-b3 overflow-y-auto">
+    <div
+      className={`${mobileVisible ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-[300px] shrink-0 bg-b1 md:border-l border-b3 overflow-y-auto`}
+    >
 
       {/* ── INCIDENT / OVERVIEW ── */}
       {feat ? (
