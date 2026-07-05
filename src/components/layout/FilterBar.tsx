@@ -16,15 +16,23 @@ const TIME_OPTS: { label: string; value: TimeRange }[] = [
 ];
 
 const AOI_OPTS = [
-  { label: 'TOUS — RDC',  lon: 24.0, lat: -4.0, zoom: 4.7 },
-  { label: 'EST-RDC',     lon: 29.2, lat: -0.8, zoom: 6.8 },
-  { label: 'NORD-KIVU',   lon: 29.3, lat: -0.5, zoom: 7.5 },
-  { label: 'SUD-KIVU',    lon: 28.6, lat: -2.5, zoom: 7.5 },
-  { label: 'ITURI',       lon: 29.7, lat:  1.5, zoom: 7.5 },
-  { label: 'MANIEMA',     lon: 27.5, lat: -3.0, zoom: 7.0 },
-  { label: 'KATANGA/HAK', lon: 27.5, lat: -7.5, zoom: 6.5 },
-  { label: 'KINSHASA',    lon: 15.3, lat: -4.3, zoom: 8.5 },
-  { label: 'KASAI',       lon: 23.0, lat: -5.5, zoom: 7.0 },
+  { label: 'TOUS — RDC',       lon: 24.0, lat: -4.0, zoom: 4.7 },
+  { label: 'EST-RDC',          lon: 29.2, lat: -0.8, zoom: 6.8 },
+  { label: 'NORD-KIVU',        lon: 29.3, lat: -0.5, zoom: 7.5 },
+  { label: 'SUD-KIVU',         lon: 28.6, lat: -2.5, zoom: 7.5 },
+  { label: 'FIZI',             lon: 28.94, lat: -4.30, zoom: 8.5 },
+  { label: 'MINEMBWE / H-PLAT',lon: 28.66, lat: -3.63, zoom: 8.8 },
+  { label: 'WALIKALE',         lon: 28.06, lat: -1.42, zoom: 8.3 },
+  { label: 'UVIRA',            lon: 29.14, lat: -3.38, zoom: 8.8 },
+  { label: 'BENI',             lon: 29.47, lat:  0.49, zoom: 8.3 },
+  { label: 'ITURI / BUNIA',    lon: 30.25, lat:  1.56, zoom: 7.8 },
+  { label: 'GOMA',             lon: 29.22, lat: -1.68, zoom: 9.0 },
+  { label: 'BUKAVU',           lon: 28.84, lat: -2.51, zoom: 8.8 },
+  { label: 'RWANDA — FRONTIÈRE',lon: 29.30, lat: -1.75, zoom: 8.4 },
+  { label: 'MANIEMA',          lon: 27.5, lat: -3.0, zoom: 7.0 },
+  { label: 'KATANGA/HAK',      lon: 27.5, lat: -7.5, zoom: 6.5 },
+  { label: 'KINSHASA',         lon: 15.3, lat: -4.3, zoom: 8.5 },
+  { label: 'KASAI',            lon: 23.0, lat: -5.5, zoom: 7.0 },
 ];
 
 const CLASS_OPTS: ClassFilter[] = ['TOUS', 'SECRET', 'CLASSIFIÉ', 'NON-CLASSIFIÉ'];
@@ -325,8 +333,8 @@ function Dropdown({ open, onToggle, tag, value, wide, children }: DropdownProps)
       </button>
       {open && (
         <div
-          className={`absolute top-full left-0 mt-0.5 z-[100] bg-b1 border border-b3 shadow-float ${
-            wide ? 'min-w-[180px]' : 'min-w-[100px]'
+          className={`absolute top-full left-0 mt-0.5 z-[100] bg-b1 border border-b3 shadow-float max-h-[60vh] overflow-y-auto ${
+            wide ? 'min-w-[180px]' : 'min-w-[140px]'
           }`}
         >
           {children}

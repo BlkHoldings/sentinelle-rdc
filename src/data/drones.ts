@@ -155,4 +155,50 @@ export const DRONE_ISR: DroneRecord[] = [
     desc: "BDA post-frappe site STRIKE-001 (Kibumba). Cratere ~3m diametre, bunker detruit, 2 vehicules endommages. Elements de preuve pour briefing CSNU.",
     status: 'IN PROGRESS', classification: 'strike_bda',
   },
+
+  /* ── Fronts sud : Fizi / Minembwe / Uvira ────────── */
+  {
+    id: 'UAV-012', time: '08:40 UTC', type: 'ISR Patrol',
+    platform: 'ScanEagle', base: 'Uvira', alt: '3 200m',
+    lat: -4.30, lon: 28.94,
+    desc: "Sortie ISR territoire de Fizi. Concentrations Mai-Mai Yakutumba au sud de Fizi-centre, ~40 combattants, 4 pick-up. Trafic fluvial suspect sur le littoral Tanganyika vers Baraka.",
+    status: 'COMPLETED', classification: 'movement',
+  },
+  {
+    id: 'UAV-013', time: '11:20 UTC', type: 'Reconnaissance',
+    platform: 'Falco EVO', base: 'Uvira', alt: '4 800m',
+    lat: -3.63, lon: 28.66,
+    desc: "Reconnaissance Hauts-Plateaux de Minembwe. Positions Twirwaneho/Gumino sur les cretes, tranchees visibles. Coalition Mai-Mai au nord. Aeroport de Minembwe sous garde FARDC.",
+    status: 'IN PROGRESS', classification: 'installation',
+  },
+  {
+    id: 'UAV-014', time: '05:50 UTC', type: 'Night ISR',
+    platform: 'Falco EVO (IR)', base: 'Uvira', alt: '4 200m',
+    lat: -4.10, lon: 29.10,
+    desc: "Surveillance nocturne port de Baraka (capteur IR). Debarquements nocturnes, ~15 signatures thermiques, caisses transferees vers vehicules. Profil trafic d'armes/or presume.",
+    status: 'COMPLETED', classification: 'logistics',
+  },
+  /* ── Front ouest : Walikale / axe RN3 ────────────── */
+  {
+    id: 'UAV-015', time: '09:30 UTC', type: 'ISR Patrol',
+    platform: 'ScanEagle', base: 'Goma', alt: '3 400m',
+    lat: -1.42, lon: 28.06,
+    desc: "Patrouille ISR axe Masisi-Walikale (RN3). Colonne M23/RDF en progression ouest, ~8 vehicules. Site minier de Bisie (cassiterite) sous surveillance. Wazalendo en repli vers Walikale-centre.",
+    status: 'IN PROGRESS', classification: 'movement',
+  },
+  /* ── Surveillance transfrontalière : Rwanda ──────── */
+  {
+    id: 'RECON-016', time: '02:15 UTC', type: 'Border Surveillance',
+    platform: 'Falco EVO (IR)', base: 'Goma (MONUSCO)', alt: '5 000m',
+    lat: -1.72, lon: 29.28,
+    desc: "SURVEILLANCE TRANSFRONTALIERE (limite territoriale RDC). Mouvements logistiques nocturnes cote rwandais pres de Rubavu/Gisenyi. ~6 camions vers postes-frontieres Goma. Observation depuis espace aerien RDC, conforme mandat MONUSCO. Transmis GoE ONU.",
+    status: 'COMPLETED', classification: 'logistics',
+  },
+  {
+    id: 'RECON-017', time: '03:40 UTC', type: 'Border Surveillance',
+    platform: 'ScanEagle', base: 'Bukavu', alt: '3 600m',
+    lat: -2.52, lon: 28.88,
+    desc: "Surveillance secteur frontalier Rusizi/Cyangugu (face Bukavu). Activite aux points de passage, trafic vehicules accru avant l'aube. Observation depuis limite territoriale RDC. Correlé avec signalements OSINT.",
+    status: 'COMPLETED', classification: 'movement',
+  },
 ];
