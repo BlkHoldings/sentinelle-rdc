@@ -46,8 +46,8 @@ const DRONE_DOT_COLOR: Record<string, string> = {
   movement:     '#18c8e0',
 };
 
-const ZONE_FILL: Record<string, string> = { hostile: '#e03030', contested: '#d09820' };
-const ZONE_LINE: Record<string, string> = { hostile: '#e03030', contested: '#d09820' };
+const ZONE_FILL: Record<string, string> = { hostile: '#e03030', contested: '#d09820', watch: '#18c8e0' };
+const ZONE_LINE: Record<string, string> = { hostile: '#e03030', contested: '#d09820', watch: '#18c8e0' };
 
 export default function GlobeMapInner() {
   const mapRef = useRef<MapRef>(null);
@@ -243,12 +243,14 @@ export default function GlobeMapInner() {
         <Source id="m23-zones" type="geojson" data={M23_ZONES_GEOJSON}>
           <Layer id="m23-fill" type="fill" paint={{
             'fill-color': ['match', ['get', 'type'],
-              'hostile', ZONE_FILL.hostile, 'contested', ZONE_FILL.contested, '#888888'],
+              'hostile', ZONE_FILL.hostile, 'contested', ZONE_FILL.contested,
+              'watch', ZONE_FILL.watch, '#888888'],
             'fill-opacity': 0.10,
           }} />
           <Layer id="m23-line" type="line" paint={{
             'line-color': ['match', ['get', 'type'],
-              'hostile', ZONE_LINE.hostile, 'contested', ZONE_LINE.contested, '#888888'],
+              'hostile', ZONE_LINE.hostile, 'contested', ZONE_LINE.contested,
+              'watch', ZONE_LINE.watch, '#888888'],
             'line-width': 1.5, 'line-opacity': 0.45, 'line-dasharray': [4, 4],
           }} />
         </Source>
