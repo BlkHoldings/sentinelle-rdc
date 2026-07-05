@@ -20,6 +20,8 @@ import RightPanel from '@/components/panels/RightPanel';
 import BottomPanels from '@/components/panels/BottomPanels';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import ToastContainer from '@/components/ui/Toast';
+import MapLegend from '@/components/hud/MapLegend';
+import HelpOverlay from '@/components/hud/HelpOverlay';
 import type { IntelEvent } from '@/types/intel';
 
 type MobileTab = 'map' | 'activity' | 'intel' | 'comms';
@@ -83,15 +85,18 @@ export default function MonitorPage() {
   const setEvents = useFeedStore((s) => s.setEvents);
   const addEvents = useFeedStore((s) => s.addEvents);
   const push      = useToastStore((s) => s.push);
-  const { auto, tick, reset } = useRefreshStore();
+  const { auto, tick, reset, register } = useRefreshStore();
   const layers     = useMapStore((s) => s.layers);
   const toggleLayer = useMapStore((s) => s.toggleLayer);
+  const setSearch  = useFeedStore((s) => s.setSearch);
 
   const fetchedRef  = useRef(false);
   const [activeView, setActiveView] = useState<ViewKey>('overview');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileTab,  setMobileTab]  = useState<MobileTab>('map');
+  const [helpOpen,   setHelpOpen]   = useState(false);
   const selectedFeature = useMapStore((s) => s.selectedFeature);
+  const selectFeature   = useMapStore((s) => s.selectFeature);
 
   /* On phones, surface the intel panel when a map feature is tapped */
   useEffect(() => {
@@ -164,6 +169,9 @@ export default function MonitorPage() {
     return () => clearInterval(id);
   }, [auto, tick, doRefresh]);
 
+  /* Register manual refresh so any panel can trigger it */
+  useEffect(() => { register(doRefresh); }, [register, doRefresh]);
+
   /* Adjust map layers when nav view changes */
   const handleViewChange = useCallback((view: ViewKey) => {
     setActiveView(view);
@@ -174,6 +182,30 @@ export default function MonitorPage() {
     if (view === 'logistics'    && !layers.mil)    toggleLayer('mil');
     if (view === 'planning'     && !layers.zone)   toggleLayer('zone');
   }, [layers, toggleLayer]);
+
+  /* ── Keyboard shortcuts ── */
+  useEffect(() => {
+    const VIEW_KEYS: ViewKey[] = ['overview','incidents','intelligence','entities','effects','logistics','planning','reports'];
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement as HTMLElement | null;
+      const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+
+      if (e.key === 'Escape') {
+        setHelpOpen(false); selectFeature(null); setDrawerOpen(false);
+        return;
+      }
+      if (typing) return;
+
+      if (e.key === '/') { e.preventDefault();
+        (document.querySelector('input[placeholder*="Rechercher"]') as HTMLInputElement | null)?.focus();
+      } else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); doRefresh();
+      } else if (e.key === '?') { setHelpOpen((v) => !v);
+      } else if (e.key >= '1' && e.key <= '8') { handleViewChange(VIEW_KEYS[Number(e.key) - 1]);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [doRefresh, handleViewChange, selectFeature]);
 
   if (!session) return null;
 
@@ -246,6 +278,7 @@ export default function MonitorPage() {
             {/* Globe map container */}
             <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} md:block flex-1 relative overflow-hidden min-w-0`}>
               <GlobeMap />
+              <div className="map-vignette" />
               <CoordHUD />
               <LoadingOverlay />
 
@@ -257,6 +290,18 @@ export default function MonitorPage() {
 
               {/* Map tools panel — desktop only */}
               <MapTools />
+
+              {/* Colour legend */}
+              <MapLegend />
+
+              {/* Help button */}
+              <button
+                onClick={() => setHelpOpen(true)}
+                title="Raccourcis clavier (?)"
+                className="absolute bottom-3 left-[13.5rem] z-hud hidden md:flex w-7 h-7 items-center justify-center bg-b2/90 border border-b3 text-t3 hover:text-t1 hover:border-t3 text-xs font-mono transition-colors"
+              >
+                ?
+              </button>
             </div>
 
             {/* Right panel */}
@@ -290,6 +335,9 @@ export default function MonitorPage() {
           </button>
         ))}
       </div>
+
+      {/* Keyboard shortcut help */}
+      {helpOpen && <HelpOverlay onClose={() => setHelpOpen(false)} />}
 
       {/* Toasts — floating */}
       <ToastContainer />

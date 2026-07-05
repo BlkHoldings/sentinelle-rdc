@@ -165,3 +165,39 @@ input:-webkit-autofill:focus {
 
 /* ── Focus ring ─────────────────────────────────────────────── */
 :focus-visible { outline: 1px solid rgba(30,112,240,0.7); outline-offset: 1px; }
+/* Don't paint a focus ring for pointer users clicking buttons */
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) { outline: none; }
+
+/* ── Map tactical overlay: vignette + scanlines ─────────────── */
+.map-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    radial-gradient(ellipse at center, transparent 58%, rgba(4,8,14,0.42) 100%),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(10,20,32,0.14) 3px
+    );
+  mix-blend-mode: multiply;
+}
+
+/* Marker interaction easing */
+.maplibregl-marker button { transition: transform 0.12s ease-out, filter 0.12s ease-out; }
+.maplibregl-marker button:hover { filter: drop-shadow(0 0 4px currentColor); }
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .blast-ring::before { animation: none; opacity: 0.25; }
+  .map-vignette { background: radial-gradient(ellipse at center, transparent 58%, rgba(4,8,14,0.42) 100%); }
+}
