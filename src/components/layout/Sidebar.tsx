@@ -4,6 +4,8 @@ import { useFeedStore } from '@/store/useFeedStore';
 import { useApiStore } from '@/store/useApiStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
+import { useMapStore } from '@/store/useMapStore';
+import { flyTo } from '@/lib/mapController';
 import { DRONE_ISR } from '@/data/drones';
 import { MIL_POSITIONS } from '@/data/military';
 import { useRouter } from 'next/navigation';
@@ -57,6 +59,13 @@ export default function Sidebar({ activeView, onViewChange, onRefresh }: Props) 
   const lastRefresh = useRefreshStore((s) => s.lastRefresh);
   const events      = useFeedStore((s) => s.events);
   const status      = useApiStore((s) => s.status);
+  const selectFeature = useMapStore((s) => s.selectFeature);
+
+  const handleAlertClick = (e: IntelEvent) => {
+    selectFeature(e, [e.lon, e.lat]);
+    flyTo({ longitude: e.lon, latitude: e.lat, zoom: 9 });
+    onViewChange('incidents');
+  };
 
   const acledN = events.filter((e) => e.src === 'acled').length;
   const firmsN = events.filter((e) => e.src === 'firms').length;
@@ -138,19 +147,28 @@ export default function Sidebar({ activeView, onViewChange, onRefresh }: Props) 
       <div className="border-b border-b3 shrink-0">
         <div className="px-3 py-1 flex items-center justify-between">
           <span className="mvn-label">ALERTS ({alerts.length})</span>
-          <span className="text-blu text-2xs font-mono">VIEW ALL</span>
+          <button
+            onClick={() => onViewChange('incidents')}
+            className="text-blu text-2xs font-mono hover:text-t1 transition-colors"
+          >
+            VIEW ALL
+          </button>
         </div>
         {alerts.map((e, i) => {
           const sev = sevOf(e);
           const { border, text } = SEV[sev];
           return (
-            <div key={i} className={`border-l-2 ${border} pl-2 pr-2 py-1 border-b border-b3/40 last:border-b-0`}>
+            <button
+              key={i}
+              onClick={() => handleAlertClick(e)}
+              className={`w-full text-left border-l-2 ${border} pl-2 pr-2 py-1 border-b border-b3/40 last:border-b-0 hover:bg-b2/60 transition-colors`}
+            >
               <div className="flex items-center justify-between gap-1 mb-0.5">
                 <span className={`text-2xs font-mono font-bold ${text}`}>{sev}</span>
                 <span className="text-t3 text-2xs font-mono shrink-0">{timeAgo(e.date)}</span>
               </div>
               <div className="text-t2 text-2xs font-mono leading-tight truncate">{e.location ?? e.type}</div>
-            </div>
+            </button>
           );
         })}
       </div>

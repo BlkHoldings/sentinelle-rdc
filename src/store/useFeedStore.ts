@@ -3,22 +3,25 @@
 import { create } from 'zustand';
 import type { IntelEvent } from '@/types/intel';
 
-export type FeedTab   = 'all' | 'acled' | 'firms' | 'drone' | 'mil';
-export type FeedPill  = 'all' | 'battle' | 'strike' | 'civilian' | 'humanitarian';
-export type TimeRange = '24h' | '72h' | '7d' | '30d' | 'all';
+export type FeedTab     = 'all' | 'acled' | 'firms' | 'drone' | 'mil';
+export type FeedPill    = 'all' | 'battle' | 'strike' | 'civilian' | 'humanitarian';
+export type TimeRange   = '24h' | '72h' | '7d' | '30d' | 'all';
+export type ClassFilter = 'TOUS' | 'SECRET' | 'CLASSIFIÉ' | 'NON-CLASSIFIÉ';
 
 interface FeedState {
-  events:       IntelEvent[];
-  activeTab:    FeedTab;
-  activePill:   FeedPill;
-  searchQuery:  string;
-  timeRange:    TimeRange;
-  setEvents:    (events: IntelEvent[]) => void;
-  addEvents:    (events: IntelEvent[]) => void;
-  setTab:       (tab: FeedTab) => void;
-  setPill:      (pill: FeedPill) => void;
-  setSearch:    (q: string) => void;
-  setTimeRange: (r: TimeRange) => void;
+  events:         IntelEvent[];
+  activeTab:      FeedTab;
+  activePill:     FeedPill;
+  searchQuery:    string;
+  timeRange:      TimeRange;
+  classFilter:    ClassFilter;
+  setEvents:      (events: IntelEvent[]) => void;
+  addEvents:      (events: IntelEvent[]) => void;
+  setTab:         (tab: FeedTab) => void;
+  setPill:        (pill: FeedPill) => void;
+  setSearch:      (q: string) => void;
+  setTimeRange:   (r: TimeRange) => void;
+  setClassFilter: (c: ClassFilter) => void;
 }
 
 export const useFeedStore = create<FeedState>((set) => ({
@@ -27,6 +30,7 @@ export const useFeedStore = create<FeedState>((set) => ({
   activePill:  'all',
   searchQuery: '',
   timeRange:   '7d',
+  classFilter: 'TOUS',
 
   setEvents(events) { set({ events }); },
 
@@ -42,7 +46,40 @@ export const useFeedStore = create<FeedState>((set) => ({
   setPill(pill)        { set({ activePill: pill }); },
   setSearch(q)         { set({ searchQuery: q }); },
   setTimeRange(r)      { set({ timeRange: r }); },
+  setClassFilter(c)    { set({ classFilter: c }); },
 }));
+
+/** Security classification derived from the collection source. */
+export function classificationOf(e: IntelEvent): ClassFilter {
+  if (e.src === 'drone') return 'SECRET';         // MONUSCO UAS / mil sources
+  if (e.src === 'cop')   return 'CLASSIFIÉ';      // satellite tasking catalog
+  return 'NON-CLASSIFIÉ';                         // ACLED / FIRMS (public data)
+}
+
+/** Canonical filter pipeline shared by map, panels and exports. */
+export function applyFilters(
+  events: IntelEvent[],
+  opts: { query?: string; timeRange?: TimeRange; classFilter?: ClassFilter },
+): IntelEvent[] {
+  const { query = '', timeRange = 'all', classFilter = 'TOUS' } = opts;
+  let out = events;
+
+  const cutoff = cutoffForRange(timeRange);
+  if (cutoff) out = out.filter((e) => !e.date || e.date >= cutoff);
+
+  if (classFilter !== 'TOUS') {
+    out = out.filter((e) => classificationOf(e) === classFilter);
+  }
+
+  if (query.trim()) {
+    const q = query.toLowerCase();
+    out = out.filter((e) =>
+      [e.type, e.subtype, e.location, e.admin1, e.actor1, e.actor2, e.notes, e.desc, e.platform]
+        .some((f) => f?.toLowerCase().includes(q)),
+    );
+  }
+  return out;
+}
 
 export function cutoffForRange(range: TimeRange): string | null {
   if (range === 'all') return null;
