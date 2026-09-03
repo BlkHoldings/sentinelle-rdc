@@ -22,16 +22,26 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import ToastContainer from '@/components/ui/Toast';
 import MapLegend from '@/components/hud/MapLegend';
 import HelpOverlay from '@/components/hud/HelpOverlay';
+import TriageQueue, { needsTriage } from '@/components/fusion/TriageQueue';
+import FusionConsole from '@/components/fusion/FusionConsole';
+import AnomalyPanel from '@/components/fusion/AnomalyPanel';
+import SitrepPanel from '@/components/fusion/SitrepPanel';
+import { useFusionStore } from '@/store/useFusionStore';
 import type { IntelEvent } from '@/types/intel';
 
-type MobileTab = 'map' | 'activity' | 'intel' | 'comms';
+type MobileTab = 'map' | 'activity' | 'intel' | 'triage' | 'comms';
 
 const MOBILE_TABS: { key: MobileTab; label: string; sym: string }[] = [
   { key: 'map',      label: 'CARTE',    sym: '⊕' },
   { key: 'activity', label: 'ACTIVITÉ', sym: '≡' },
   { key: 'intel',    label: 'INTEL',    sym: '◈' },
+  { key: 'triage',   label: 'TRIAGE',   sym: '⚖' },
   { key: 'comms',    label: 'COMMS',    sym: '◉' },
 ];
+
+/** Views that take over the whole working area instead of sitting beside
+ *  the map. Each is a full analyst surface, not a side panel. */
+const WORKSPACE_VIEWS: ViewKey[] = ['triage', 'fusion', 'anomalies', 'reports'];
 
 const DRAW_TOOLS: { key: DrawTool; sym: string; title: string }[] = [
   { key: 'select', sym: '↖', title: 'Sélectionner' },
@@ -90,7 +100,15 @@ export default function MonitorPage() {
   const toggleLayer = useMapStore((s) => s.toggleLayer);
   const setSearch  = useFeedStore((s) => s.setSearch);
 
+  const feedCount    = useFeedStore((s) => s.events.length);
+  const seedFusion   = useFusionStore((s) => s.seed);
+  const fusionSeeded = useFusionStore((s) => s.seeded);
+  const stopFusion   = useFusionStore((s) => s.stop);
+  const fusionEvents = useFusionStore((s) => s.events);
+  const fusionClusters = useFusionStore((s) => s.clusters);
+
   const fetchedRef  = useRef(false);
+  const seededRef   = useRef(false);
   const [activeView, setActiveView] = useState<ViewKey>('overview');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileTab,  setMobileTab]  = useState<MobileTab>('map');
@@ -162,6 +180,20 @@ export default function MonitorPage() {
     }
   }, [session, doRefresh]);
 
+  /* ── Seed the fusion pipeline ──────────────────────────────────
+     Runs once, after the first collection pass, so the synthetic history
+     and the live ACLED/FIRMS/UAS records enter the same fusion layer
+     together. Guarded by a ref as well as the store flag because the
+     effect can fire twice under React strict mode. */
+  useEffect(() => {
+    if (!session || fusionSeeded || seededRef.current || !feedCount) return;
+    seededRef.current = true;
+    seedFusion(useFeedStore.getState().events, session.user.toUpperCase());
+  }, [session, fusionSeeded, seedFusion, feedCount]);
+
+  /* Stop the stream timers when the operator leaves the console. */
+  useEffect(() => () => { stopFusion(); }, [stopFusion]);
+
   /* Auto-refresh timer */
   useEffect(() => {
     if (!auto) return;
@@ -185,7 +217,7 @@ export default function MonitorPage() {
 
   /* ── Keyboard shortcuts ── */
   useEffect(() => {
-    const VIEW_KEYS: ViewKey[] = ['overview','incidents','intelligence','entities','effects','logistics','planning','reports'];
+    const VIEW_KEYS: ViewKey[] = ['overview','incidents','intelligence','entities','effects','logistics','planning','triage','fusion','anomalies'];
     const onKey = (e: KeyboardEvent) => {
       const el = document.activeElement as HTMLElement | null;
       const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
@@ -200,12 +232,19 @@ export default function MonitorPage() {
         (document.querySelector('input[placeholder*="Rechercher"]') as HTMLInputElement | null)?.focus();
       } else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); doRefresh();
       } else if (e.key === '?') { setHelpOpen((v) => !v);
-      } else if (e.key >= '1' && e.key <= '8') { handleViewChange(VIEW_KEYS[Number(e.key) - 1]);
+      } else if (e.key >= '1' && e.key <= '9') { handleViewChange(VIEW_KEYS[Number(e.key) - 1]);
+      } else if (e.key === '0') { handleViewChange('anomalies');
+      } else if (e.key === 's' || e.key === 'S') { handleViewChange('reports');
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [doRefresh, handleViewChange, selectFeature]);
+
+  const isWorkspace = WORKSPACE_VIEWS.includes(activeView);
+
+  const triageCount = fusionEvents.filter(needsTriage).length;
+  const significantClusters = fusionClusters.filter((c) => c.significant).length;
 
   if (!session) return null;
 
@@ -247,6 +286,8 @@ export default function MonitorPage() {
             activeView={activeView}
             onViewChange={handleViewChange}
             onRefresh={doRefresh}
+            triageCount={triageCount}
+            alertCount={significantClusters}
           />
         </div>
 
@@ -259,6 +300,8 @@ export default function MonitorPage() {
                 activeView={activeView}
                 onViewChange={(v) => { handleViewChange(v); setDrawerOpen(false); setMobileTab('map'); }}
                 onRefresh={() => { doRefresh(); setDrawerOpen(false); }}
+                triageCount={triageCount}
+                alertCount={significantClusters}
               />
             </div>
           </div>
@@ -267,13 +310,25 @@ export default function MonitorPage() {
         {/* ── Center column ── */}
         <div className="flex flex-col flex-1 overflow-hidden min-w-0">
 
+          {/* Fusion workspaces take the whole working area */}
+          {isWorkspace && (
+            <div className="flex-1 min-h-0 overflow-hidden">
+              {activeView === 'triage'    && <TriageQueue />}
+              {activeView === 'fusion'    && <FusionConsole />}
+              {activeView === 'anomalies' && <AnomalyPanel />}
+              {activeView === 'reports'   && <SitrepPanel />}
+            </div>
+          )}
+
           {/* Filter bar — on mobile only with the map tab */}
-          <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} md:block shrink-0`}>
-            <FilterBar />
-          </div>
+          {!isWorkspace && (
+            <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} md:block shrink-0`}>
+              <FilterBar />
+            </div>
+          )}
 
           {/* Map + right panel row */}
-          <div className="flex flex-1 overflow-hidden min-h-0">
+          <div className={`${isWorkspace ? 'hidden' : 'flex'} flex-1 overflow-hidden min-h-0`}>
 
             {/* Globe map container */}
             <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} md:block flex-1 relative overflow-hidden min-w-0`}>
@@ -309,12 +364,14 @@ export default function MonitorPage() {
           </div>
 
           {/* Bottom panels */}
-          <BottomPanels
-            mobileSection={
-              mobileTab === 'activity' ? 'activity' :
-              mobileTab === 'comms'    ? 'comms'    : null
-            }
-          />
+          {!isWorkspace && (
+            <BottomPanels
+              mobileSection={
+                mobileTab === 'activity' ? 'activity' :
+                mobileTab === 'comms'    ? 'comms'    : null
+              }
+            />
+          )}
         </div>
       </div>
 
@@ -323,14 +380,27 @@ export default function MonitorPage() {
         {MOBILE_TABS.map(({ key, label, sym }) => (
           <button
             key={key}
-            onClick={() => setMobileTab(key)}
+            onClick={() => {
+              setMobileTab(key);
+              // TRIAGE is a workspace view, not a panel — switching to it
+              // has to move the view, and leaving it has to move back.
+              if (key === 'triage') setActiveView('triage');
+              else if (isWorkspace) setActiveView('overview');
+            }}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               mobileTab === key
                 ? 'text-t1 border-t-2 border-blu bg-blu/[0.07]'
                 : 'text-t3 border-t-2 border-transparent'
             }`}
           >
-            <span className="text-sm leading-none">{sym}</span>
+            <span className="text-sm leading-none relative">
+              {sym}
+              {key === 'triage' && triageCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-amb text-b0 text-3xs font-bold px-0.5 leading-tight">
+                  {triageCount > 99 ? '99' : triageCount}
+                </span>
+              )}
+            </span>
             <span className="text-2xs font-mono tracking-wider">{label}</span>
           </button>
         ))}

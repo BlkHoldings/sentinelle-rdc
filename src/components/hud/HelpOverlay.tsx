@@ -3,9 +3,21 @@
 const SHORTCUTS: { keys: string; label: string }[] = [
   { keys: '/',     label: 'Rechercher' },
   { keys: 'R',     label: 'Rafraîchir les données' },
-  { keys: '1–8',   label: 'Changer de vue (Overview → Reports)' },
+  { keys: '1–9',   label: 'Changer de vue (Overview → Pipeline)' },
+  { keys: '0',     label: 'Anomalies' },
+  { keys: 'S',     label: 'Rapport de situation (SITREP)' },
   { keys: 'ESC',   label: 'Fermer / désélectionner' },
   { keys: '?',     label: 'Afficher / masquer cette aide' },
+];
+
+/* Triage is a repetitive, high-volume task; it is driven entirely from
+   the keyboard so an analyst never has to leave the home row. */
+const TRIAGE_HELP: { keys: string; label: string }[] = [
+  { keys: 'J / K', label: 'Événement suivant / précédent' },
+  { keys: 'C',     label: 'Confirmer — relève la fiabilité des sources contributrices' },
+  { keys: 'X',     label: 'Rejeter — abaisse la fiabilité des sources contributrices' },
+  { keys: 'E',     label: 'Escalader vers le commandement' },
+  { keys: 'D',     label: 'Différer — laisser en file' },
 ];
 
 const MAP_HELP: { keys: string; label: string }[] = [
@@ -32,6 +44,16 @@ export default function HelpOverlay({ onClose }: { onClose: () => void }) {
             {SHORTCUTS.map(({ keys, label }) => (
               <div key={keys} className="flex items-center gap-3">
                 <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-cyn text-2xs font-mono">{keys}</kbd>
+                <span className="text-t2 text-2xs font-mono">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mvn-label mt-3 mb-1.5 text-cyn">FILE DE TRIAGE</div>
+          <div className="space-y-1">
+            {TRIAGE_HELP.map(({ keys, label }) => (
+              <div key={keys} className="flex items-center gap-3">
+                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-amb text-2xs font-mono">{keys}</kbd>
                 <span className="text-t2 text-2xs font-mono">{label}</span>
               </div>
             ))}
