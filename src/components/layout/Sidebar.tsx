@@ -13,15 +13,22 @@ import type { IntelEvent } from '@/types/intel';
 
 export type ViewKey =
   | 'overview' | 'incidents' | 'intelligence' | 'entities'
-  | 'effects'  | 'logistics' | 'planning'     | 'reports';
+  | 'effects'  | 'logistics' | 'planning'     | 'reports'
+  /* Fusion-layer workspaces — these replace the map area rather than
+     re-skinning the right panel, because each is a full working surface. */
+  | 'triage'   | 'fusion'    | 'anomalies';
 
 interface Props {
   activeView:   ViewKey;
   onViewChange: (v: ViewKey) => void;
   onRefresh?:   () => void;
+  /** Count of events awaiting analyst adjudication, shown as a badge. */
+  triageCount?: number;
+  /** Significant spatio-temporal clusters currently detected. */
+  alertCount?: number;
 }
 
-const NAV: { key: ViewKey; label: string; sym: string }[] = [
+const NAV: { key: ViewKey; label: string; sym: string; group?: string }[] = [
   { key: 'overview',     label: 'OVERVIEW',     sym: '⊞' },
   { key: 'incidents',    label: 'INCIDENTS',    sym: '⚠' },
   { key: 'intelligence', label: 'INTELLIGENCE', sym: '◈' },
@@ -29,7 +36,10 @@ const NAV: { key: ViewKey; label: string; sym: string }[] = [
   { key: 'effects',      label: 'EFFECTS',      sym: '✦' },
   { key: 'logistics',    label: 'LOGISTICS',    sym: '⊟' },
   { key: 'planning',     label: 'PLANNING',     sym: '⊕' },
-  { key: 'reports',      label: 'REPORTS',      sym: '≡' },
+  { key: 'triage',       label: 'TRIAGE',       sym: '⚖', group: 'FUSION' },
+  { key: 'fusion',       label: 'PIPELINE',     sym: '⇶' },
+  { key: 'anomalies',    label: 'ANOMALIES',    sym: '◬' },
+  { key: 'reports',      label: 'SITREP',       sym: '≡' },
 ];
 
 function sevOf(e: IntelEvent): 'HIGH' | 'MED' | 'LOW' {
@@ -52,7 +62,9 @@ function timeAgo(dateStr: string): string {
   return `${days}D AGO`;
 }
 
-export default function Sidebar({ activeView, onViewChange, onRefresh }: Props) {
+export default function Sidebar({
+  activeView, onViewChange, onRefresh, triageCount, alertCount,
+}: Props) {
   const router      = useRouter();
   const session     = useAuthStore((s) => s.session);
   const logout      = useAuthStore((s) => s.logout);
@@ -125,22 +137,44 @@ export default function Sidebar({ activeView, onViewChange, onRefresh }: Props) 
 
       {/* Navigation */}
       <nav className="shrink-0 border-b border-b3">
-        {NAV.map(({ key, label, sym }) => (
-          <button
-            key={key}
-            onClick={() => onViewChange(key)}
-            className={`
-              w-full flex items-center gap-2.5 px-3 py-1.5 text-left
-              text-2xs font-mono font-medium border-l-2 transition-colors
-              ${activeView === key
-                ? 'border-l-blu bg-blu/10 text-t1'
-                : 'border-l-transparent text-t3 hover:text-t2 hover:bg-b2/60'}
-            `}
-          >
-            <span className="shrink-0 w-3.5 text-center text-xs">{sym}</span>
-            <span>{label}</span>
-          </button>
-        ))}
+        {NAV.map(({ key, label, sym, group }) => {
+          const badge =
+            key === 'triage'    ? triageCount :
+            key === 'anomalies' ? alertCount  : undefined;
+          return (
+            <div key={key}>
+              {group && (
+                <div className="px-3 pt-1.5 pb-0.5 border-t border-b3/60">
+                  <span className="mvn-label text-cyn">{group}</span>
+                </div>
+              )}
+              <button
+                onClick={() => onViewChange(key)}
+                className={`
+                  w-full flex items-center gap-2.5 px-3 py-1.5 text-left
+                  text-2xs font-mono font-medium border-l-2 transition-colors
+                  ${activeView === key
+                    ? 'border-l-blu bg-blu/10 text-t1'
+                    : 'border-l-transparent text-t3 hover:text-t2 hover:bg-b2/60'}
+                `}
+              >
+                <span className="shrink-0 w-3.5 text-center text-xs">{sym}</span>
+                <span>{label}</span>
+                {badge != null && badge > 0 && (
+                  <span
+                    className={`ml-auto shrink-0 px-1 text-3xs font-bold border ${
+                      key === 'anomalies'
+                        ? 'text-alert border-alert/50 bg-alert/10'
+                        : 'text-amb border-amb/50 bg-amb/10'
+                    }`}
+                  >
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
+              </button>
+            </div>
+          );
+        })}
       </nav>
 
       {/* Latest Alerts */}
