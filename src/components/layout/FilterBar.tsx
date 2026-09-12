@@ -57,6 +57,12 @@ const LAYER_META: { key: LayerKey; label: string; dot: string }[] = [
   { key: 'zone',   label: 'ZONES M23',    dot: 'bg-alert' },
   { key: 'ref',    label: 'VILLES REF',   dot: 'bg-t3'    },
   { key: 'routes', label: 'AXES ROUTES',  dot: 'bg-amb'   },
+  /* Live keyless feeds. Off by default: they only populate once the
+     upstreams answer, and a toggle that lights up an empty layer teaches
+     the operator to distrust the toggles. */
+  { key: 'seismic', label: 'SÉISMES USGS', dot: 'bg-cyn'  },
+  { key: 'weather', label: 'MÉTÉO / ISR',  dot: 'bg-blu'  },
+  { key: 'osm',     label: 'INFRA OSM',    dot: 'bg-grn'  },
 ];
 
 type MenuKey = 'time' | 'aoi' | 'layers' | 'class' | 'more';

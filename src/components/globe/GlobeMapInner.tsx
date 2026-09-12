@@ -1,19 +1,24 @@
 'use client';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
-import Map, { Marker, Source, Layer, type MapRef } from 'react-map-gl/maplibre';
+import Map, {
+  Marker, Source, Layer, ScaleControl, NavigationControl, type MapRef,
+} from 'react-map-gl/maplibre';
 import { useRef, useCallback, useMemo, useState, useEffect } from 'react';
 import { useMapStore } from '@/store/useMapStore';
 import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { useDrawStore, rectRing, circleRing } from '@/store/useDrawStore';
+import { useFusionStore } from '@/store/useFusionStore';
+import { useLiveStore } from '@/store/useLiveStore';
+import { OSM_CATEGORY_COLOR } from '@/lib/live/osm';
+import type { IsrAssessment } from '@/lib/live/weather';
 import { toMGRSSync, preloadMGRS } from '@/lib/mgrs';
-import { registerFlyTo } from '@/lib/mapController';
+import { registerFlyTo, registerGetBounds } from '@/lib/mapController';
+import { basemapById, probeBasemap, DEM_SOURCE, TERRAIN_EXAGGERATION } from '@/lib/basemaps';
 import { MIL_POSITIONS } from '@/data/military';
 import { DRONE_ISR } from '@/data/drones';
 import { M23_ZONES_GEOJSON } from '@/data/zones';
 import type { IntelEvent } from '@/types/intel';
-
-const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 /* Full DRC viewport */
 const INITIAL_VIEW = {
@@ -46,15 +51,40 @@ const DRONE_DOT_COLOR: Record<string, string> = {
   movement:     '#18c8e0',
 };
 
+/* Map-marker colours for the ISR verdict — separate from the panel's
+   Tailwind classes because these render inside the map overlay. */
+const ISR_MAP_COLOR: Record<IsrAssessment, string> = {
+  FAVORABLE:     'text-grn',
+  'DÉGRADÉ':     'text-amb',
+  'DÉFAVORABLE': 'text-alert',
+  INCONNU:       'text-t3',
+};
+
 const ZONE_FILL: Record<string, string> = { hostile: '#e03030', contested: '#d09820', watch: '#18c8e0' };
 const ZONE_LINE: Record<string, string> = { hostile: '#e03030', contested: '#d09820', watch: '#18c8e0' };
 
 export default function GlobeMapInner() {
   const mapRef = useRef<MapRef>(null);
   const { layers, setCursor, selectFeature } = useMapStore();
+  const basemapId       = useMapStore((s) => s.basemap);
+  const terrainMode     = useMapStore((s) => s.terrain);
+  const hillshade       = useMapStore((s) => s.hillshade);
+  const precision       = useMapStore((s) => s.precision);
+  const showUncertainty = useMapStore((s) => s.showUncertainty);
   const { events, timeRange, searchQuery, classFilter } = useFeedStore();
   const { tool, shapes, notes, pending, addPending, cancelPending, commitShape, addNote } = useDrawStore();
-  const [, setReady] = useState(false);
+  const fusionEvents = useFusionStore((s) => s.events);
+  const seismic = useLiveStore((s) => s.seismic);
+  const osm     = useLiveStore((s) => s.osm);
+  const weather = useLiveStore((s) => s.weather);
+  /* `ready` is not cosmetic: effects below reach for the MapLibre instance,
+     which does not exist until onLoad fires. Without it they run once
+     against a null ref, attach nothing, and never re-run — which is
+     exactly how the tile-failure detector silently did nothing. */
+  const [ready, setReady] = useState(false);
+  const [tileError, setTileError] = useState(false);
+
+  const basemap = basemapById(basemapId);
 
   /* SECRET-source overlays (drone / mil) hidden under lower class filters */
   const secretVisible = classFilter === 'TOUS' || classFilter === 'SECRET';
@@ -66,18 +96,60 @@ export default function GlobeMapInner() {
     return () => window.removeEventListener('keydown', h);
   }, [cancelPending]);
 
+  /* ── Terrain wiring ────────────────────────────────────────────
+     Applied imperatively rather than declaratively because a basemap
+     switch replaces the whole style, which drops every source with it.
+     This runs on load *and* on every style change, so terrain survives
+     switching from imagery to vector and back. */
+  const applyTerrain = useCallback(() => {
+    const map = mapRef.current?.getMap();
+    if (!map || !map.isStyleLoaded()) return;
+    try {
+      if (!map.getSource('dem')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.addSource('dem', DEM_SOURCE as any);
+      }
+      const exaggeration = TERRAIN_EXAGGERATION[terrainMode];
+      map.setTerrain(exaggeration > 0 ? { source: 'dem', exaggeration } : null);
+
+      const hasHillshade = !!map.getLayer('dem-hillshade');
+      if (hillshade && !hasHillshade) {
+        // Insert beneath the first symbol layer so place labels stay on
+        // top; on a pure raster style there is none, so it goes last.
+        const firstSymbol = map.getStyle().layers?.find((l) => l.type === 'symbol')?.id;
+        map.addLayer({
+          id: 'dem-hillshade',
+          type: 'hillshade',
+          source: 'dem',
+          paint: {
+            'hillshade-exaggeration': 0.55,
+            'hillshade-shadow-color': '#000814',
+            'hillshade-highlight-color': '#6a8aaa',
+            'hillshade-accent-color': '#12202e',
+          },
+        }, firstSymbol);
+      } else if (!hillshade && hasHillshade) {
+        map.removeLayer('dem-hillshade');
+      }
+    } catch { /* style mid-swap — the next styledata event retries */ }
+  }, [terrainMode, hillshade]);
+
   const handleLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
     if (!map) return;
+
+    /* Globe projection is only coherent at theatre zoom. It is left off
+       here: with terrain enabled MapLibre renders globe + terrain
+       inconsistently across versions, and the operational value of this
+       map is at 10 km, not at planetary scale. */
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (map as any).setProjection({ name: 'globe' });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (map as any).setFog({
-        range:            [0.5, 10],
-        color:            '#0a1020',
-        'horizon-blend':  0.03,
-        'star-intensity': 0.15,
+      (map as any).setSky?.({
+        'sky-color': '#0a1830',
+        'horizon-color': '#16273d',
+        'fog-color': '#090d13',
+        'fog-ground-blend': 0.6,
+        'horizon-fog-blend': 0.4,
       });
     } catch { /* older maplibre */ }
 
@@ -86,22 +158,71 @@ export default function GlobeMapInner() {
       map.flyTo({
         center:    [opts.longitude, opts.latitude],
         zoom:      opts.zoom,
-        pitch:     opts.pitch ?? 0,
-        bearing:   opts.bearing ?? 0,
+        pitch:     opts.pitch ?? map.getPitch(),
+        bearing:   opts.bearing ?? map.getBearing(),
         duration:  1400,
         essential: true,
       });
     });
 
+    registerGetBounds(() => {
+      const b = map.getBounds();
+      return [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
+    });
+
+    applyTerrain();
     preloadMGRS();
     setReady(true);
-  }, []);
+  }, [applyTerrain]);
+
+  /* Re-apply terrain whenever the style is replaced or the settings move. */
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+    applyTerrain();
+    map.on('styledata', applyTerrain);
+    return () => { map.off('styledata', applyTerrain); };
+  }, [applyTerrain, ready]);
+
+  /* ── Basemap reachability ─────────────────────────────────────
+     If the tile host is unreachable — a corporate proxy, a national
+     filter, an outage — the operator is left looking at a black
+     rectangle with every overlay still drawn on top of it. That is
+     indistinguishable from a map centred on empty terrain, which is
+     precisely the wrong thing to be ambiguous about.
+
+     This probes the host directly instead of inferring from MapLibre's
+     error events, which did not reliably surface tile transport failures
+     through the React wrapper. One request, one unambiguous verdict. */
+  useEffect(() => {
+    let cancelled = false;
+    setTileError(false);
+    probeBasemap(basemap).then((ok) => {
+      if (!cancelled) setTileError(!ok);
+    });
+    return () => { cancelled = true; };
+  }, [basemap]);
 
   const handleMouseMove = useCallback(
     (e: { lngLat: { lat: number; lng: number } }) => {
-      setCursor({ lat: e.lngLat.lat, lon: e.lngLat.lng, mgrs: toMGRSSync(e.lngLat.lat, e.lngLat.lng) });
+      const map = mapRef.current?.getMap();
+      /* Sample the DEM under the cursor. Returns null until the tile is
+         resident, which is honest — 0 would read as sea level in a
+         theatre whose floor is 700 m and whose peaks pass 3 000 m. */
+      let elevation: number | null = null;
+      try {
+        const v = map?.queryTerrainElevation?.([e.lngLat.lng, e.lngLat.lat]);
+        if (typeof v === 'number' && Number.isFinite(v)) elevation = v;
+      } catch { /* no terrain source yet */ }
+
+      setCursor({
+        lat: e.lngLat.lat,
+        lon: e.lngLat.lng,
+        mgrs: toMGRSSync(e.lngLat.lat, e.lngLat.lng, precision),
+        elevation,
+      });
     },
-    [setCursor],
+    [setCursor, precision],
   );
 
   const handleMouseLeave = useCallback(() => setCursor(null), [setCursor]);
@@ -139,6 +260,68 @@ export default function GlobeMapInner() {
         properties: { brightness: e.brightness ?? 300, frp: e.frp ?? 0 },
       })),
   }), [visible]);
+
+  /* ── Positional uncertainty ────────────────────────────────────
+     The fusion layer has always computed a per-event uncertainty radius
+     — a UAS fix is ±0.5 km, "quelque part dans le Masisi" is ±25 km —
+     and the map has always drawn both as an identical dot. That is the
+     single most misleading thing a map like this can do: it renders a
+     rumour and a grid reference as the same claim.
+
+     Circles are emitted as real polygons in geographic coordinates so
+     the halo is a true ground distance that scales correctly with zoom.
+     A pixel radius would be a constant-size decoration that means
+     nothing on the ground. */
+  const uncertaintyGeoJSON = useMemo(() => {
+    if (!showUncertainty) return { type: 'FeatureCollection' as const, features: [] };
+    const SEGMENTS = 36;
+    return {
+      type: 'FeatureCollection' as const,
+      features: fusionEvents
+        .filter((e) => e.location && e.status !== 'rejected' && e.status !== 'merged')
+        .slice(0, 400)
+        .map((e) => {
+          const { lat, lon, radius_km } = e.location!;
+          const dLat = radius_km / 110.574;
+          const dLon = radius_km / (111.320 * Math.cos((lat * Math.PI) / 180) || 1);
+          const ring: [number, number][] = [];
+          for (let i = 0; i <= SEGMENTS; i++) {
+            const th = (i / SEGMENTS) * 2 * Math.PI;
+            ring.push([lon + dLon * Math.cos(th), lat + dLat * Math.sin(th)]);
+          }
+          return {
+            type: 'Feature' as const,
+            geometry: { type: 'Polygon' as const, coordinates: [ring] },
+            properties: {
+              confidence: e.confidence,
+              radius_km,
+              method: e.location!.method,
+            },
+          };
+        }),
+    };
+  }, [fusionEvents, showUncertainty]);
+
+  /* ── Live feed geometry ─────────────────────────────────────── */
+  const seismicGeoJSON = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: (seismic.data ?? []).map((e) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [e.lon, e.lat] },
+      properties: { magnitude: e.magnitude, depth: e.depth_km, place: e.place },
+    })),
+  }), [seismic.data]);
+
+  const osmGeoJSON = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: (osm.data ?? []).map((f) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [f.lon, f.lat] },
+      properties: { name: f.name, color: OSM_CATEGORY_COLOR[f.category] },
+    })),
+  }), [osm.data]);
+
+  const weatherPoints = weather.data ?? [];
 
   /* Drawn shapes + in-progress preview as GeoJSON */
   const drawGeoJSON = useMemo(() => ({
@@ -226,8 +409,10 @@ export default function GlobeMapInner() {
   return (
     <Map
       ref={mapRef}
-      mapStyle={STYLE_URL}
+      mapStyle={basemap.style}
       initialViewState={INITIAL_VIEW}
+      maxZoom={basemap.maxZoom}
+      maxPitch={85}
       style={{ position: 'absolute', inset: 0 }}
       onLoad={handleLoad}
       onMouseMove={handleMouseMove}
@@ -238,6 +423,70 @@ export default function GlobeMapInner() {
       cursor={tool === 'select' ? undefined : 'crosshair'}
       attributionControl={false}
     >
+      <ScaleControl position="bottom-right" unit="metric" maxWidth={140} />
+      <NavigationControl position="bottom-right" showCompass visualizePitch />
+
+      {/* Tile host unreachable — say so rather than showing a black map
+          with live overlays floating on it. */}
+      {tileError && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-hud
+                        border border-amb/50 bg-b1/95 px-3 py-2 max-w-sm text-center shadow-float">
+          <div className="text-amb text-2xs font-mono font-bold tracking-wider">
+            FOND DE CARTE INACCESSIBLE
+          </div>
+          <div className="text-t2 text-3xs font-mono leading-snug mt-1">
+            Les tuiles de « {basemap.label} » ne se chargent pas — réseau, proxy ou
+            filtrage. Les calques tactiques restent valides ; seul le fond manque.
+            Essayez un autre fond de carte.
+          </div>
+        </div>
+      )}
+
+      {/* Positional uncertainty — drawn first so it sits under every
+          symbol rather than obscuring the point it qualifies. */}
+      {showUncertainty && (
+        <Source id="uncertainty-src" type="geojson" data={uncertaintyGeoJSON}>
+          <Layer id="uncertainty-fill" type="fill" paint={{
+            // Tight, believable fixes read as a faint wash; vague ones are
+            // visibly large and visibly uncertain.
+            'fill-color': [
+              'interpolate', ['linear'], ['get', 'confidence'],
+              0.2, '#e03030', 0.5, '#d09820', 0.8, '#20c880',
+            ],
+            'fill-opacity': [
+              'interpolate', ['linear'], ['get', 'radius_km'],
+              1, 0.16, 10, 0.07, 40, 0.03,
+            ],
+          }} />
+          {/* Solid ring = measured fix, dashed = inferred. Two layers
+              rather than one: `line-dasharray` is a paint property that
+              MapLibre evaluates per layer, not per feature, so a data
+              expression on it is rejected outright. Filtering achieves
+              the same result and is the supported route. */}
+          <Layer id="uncertainty-line-exact" type="line"
+            filter={['==', ['get', 'method'], 'exact']}
+            paint={{
+              'line-color': [
+                'interpolate', ['linear'], ['get', 'confidence'],
+                0.2, '#e03030', 0.5, '#d09820', 0.8, '#20c880',
+              ],
+              'line-width': 0.9,
+              'line-opacity': 0.6,
+            }} />
+          <Layer id="uncertainty-line-inferred" type="line"
+            filter={['!=', ['get', 'method'], 'exact']}
+            paint={{
+              'line-color': [
+                'interpolate', ['linear'], ['get', 'confidence'],
+                0.2, '#e03030', 0.5, '#d09820', 0.8, '#20c880',
+              ],
+              'line-width': 0.8,
+              'line-opacity': 0.45,
+              'line-dasharray': [3, 3],
+            }} />
+        </Source>
+      )}
+
       {/* M23 / hostile zone overlays */}
       {layers.zone && (
         <Source id="m23-zones" type="geojson" data={M23_ZONES_GEOJSON}>
@@ -297,6 +546,57 @@ export default function GlobeMapInner() {
           }} />
         </Source>
       )}
+
+      {/* ── Live: seismicity ──
+          Sized by magnitude on an energy-proportional scale, not a linear
+          one: an M5 releases ~1 000× the energy of an M3, and a linear
+          radius makes them look comparable. */}
+      {layers.seismic && (
+        <Source id="seismic-src" type="geojson" data={seismicGeoJSON}>
+          <Layer id="seismic-circles" type="circle" paint={{
+            'circle-radius': [
+              'interpolate', ['exponential', 2], ['get', 'magnitude'],
+              2, 3, 4, 8, 6, 20,
+            ],
+            'circle-color': [
+              'interpolate', ['linear'], ['get', 'magnitude'],
+              2, '#18c8e0', 3.5, '#d09820', 5, '#e03030',
+            ],
+            'circle-opacity': 0.55,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#c8d8e8',
+            'circle-stroke-opacity': 0.5,
+          }} />
+        </Source>
+      )}
+
+      {/* ── Live: OSM infrastructure from the on-demand query ── */}
+      {layers.osm && (
+        <Source id="osm-src" type="geojson" data={osmGeoJSON}>
+          <Layer id="osm-pts" type="circle" paint={{
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 2.5, 16, 6],
+            'circle-color': ['get', 'color'],
+            'circle-opacity': 0.9,
+            'circle-stroke-width': 0.5,
+            'circle-stroke-color': 'rgba(0,0,0,0.7)',
+          }} />
+        </Source>
+      )}
+
+      {/* ── Live: weather at collection/decision sites ── */}
+      {layers.weather && weatherPoints.map((w) => (
+        <Marker key={`wx-${w.name}`} longitude={w.lon} latitude={w.lat} anchor="bottom">
+          <div className="pointer-events-none select-none flex flex-col items-center">
+            <div className="bg-b1/95 border border-b3 px-1 py-0.5 text-3xs font-mono whitespace-nowrap">
+              <span className={ISR_MAP_COLOR[w.isr]}>◈{w.isr.slice(0, 4)}</span>
+              {w.rain_24h_mm != null && w.rain_24h_mm > 0 && (
+                <span className="text-blu ml-1">{w.rain_24h_mm}mm</span>
+              )}
+            </div>
+            <div className="w-px h-1.5 bg-b3" />
+          </div>
+        </Marker>
+      ))}
 
       {/* Operator-drawn shapes */}
       {shapes.length > 0 && (
