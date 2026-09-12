@@ -68,7 +68,10 @@ export interface DroneRecord {
   classification: string;
 }
 
-export type LayerKey = 'acled' | 'firms' | 'heat' | 'drone' | 'mil' | 'zone' | 'ref' | 'routes';
+export type LayerKey =
+  | 'acled' | 'firms' | 'heat' | 'drone' | 'mil' | 'zone' | 'ref' | 'routes'
+  /* Live keyless feeds, rendered as map overlays. */
+  | 'seismic' | 'weather' | 'osm';
 
 export interface LayerVisibility extends Record<LayerKey, boolean> {}
 
@@ -85,4 +88,9 @@ export interface MapCoords {
   lat: number;
   lon: number;
   mgrs: string;
+  /** Terrain elevation in metres, sampled from the DEM under the cursor.
+   *  null when the DEM tile for this position has not loaded yet — which
+   *  is a different statement from "sea level", so it must not default
+   *  to 0. */
+  elevation?: number | null;
 }

@@ -16,7 +16,7 @@ export type ViewKey =
   | 'effects'  | 'logistics' | 'planning'     | 'reports'
   /* Fusion-layer workspaces — these replace the map area rather than
      re-skinning the right panel, because each is a full working surface. */
-  | 'triage'   | 'fusion'    | 'anomalies';
+  | 'triage'   | 'fusion'    | 'anomalies'  | 'data';
 
 interface Props {
   activeView:   ViewKey;
@@ -39,6 +39,7 @@ const NAV: { key: ViewKey; label: string; sym: string; group?: string }[] = [
   { key: 'triage',       label: 'TRIAGE',       sym: '⚖', group: 'FUSION' },
   { key: 'fusion',       label: 'PIPELINE',     sym: '⇶' },
   { key: 'anomalies',    label: 'ANOMALIES',    sym: '◬' },
+  { key: 'data',         label: 'DONNÉES',      sym: '⛁' },
   { key: 'reports',      label: 'SITREP',       sym: '≡' },
 ];
 

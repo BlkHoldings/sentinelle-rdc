@@ -21,12 +21,15 @@ import BottomPanels from '@/components/panels/BottomPanels';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import ToastContainer from '@/components/ui/Toast';
 import MapLegend from '@/components/hud/MapLegend';
+import BasemapControl from '@/components/hud/BasemapControl';
 import HelpOverlay from '@/components/hud/HelpOverlay';
 import TriageQueue, { needsTriage } from '@/components/fusion/TriageQueue';
 import FusionConsole from '@/components/fusion/FusionConsole';
 import AnomalyPanel from '@/components/fusion/AnomalyPanel';
 import SitrepPanel from '@/components/fusion/SitrepPanel';
+import DataPanel from '@/components/fusion/DataPanel';
 import { useFusionStore } from '@/store/useFusionStore';
+import { useLiveStore } from '@/store/useLiveStore';
 import type { IntelEvent } from '@/types/intel';
 
 type MobileTab = 'map' | 'activity' | 'intel' | 'triage' | 'comms';
@@ -41,7 +44,7 @@ const MOBILE_TABS: { key: MobileTab; label: string; sym: string }[] = [
 
 /** Views that take over the whole working area instead of sitting beside
  *  the map. Each is a full analyst surface, not a side panel. */
-const WORKSPACE_VIEWS: ViewKey[] = ['triage', 'fusion', 'anomalies', 'reports'];
+const WORKSPACE_VIEWS: ViewKey[] = ['triage', 'fusion', 'anomalies', 'reports', 'data'];
 
 const DRAW_TOOLS: { key: DrawTool; sym: string; title: string }[] = [
   { key: 'select', sym: '↖', title: 'Sélectionner' },
@@ -189,10 +192,17 @@ export default function MonitorPage() {
     if (!session || fusionSeeded || seededRef.current || !feedCount) return;
     seededRef.current = true;
     seedFusion(useFeedStore.getState().events, session.user.toUpperCase());
+    /* Live upstreams start with the console. They fail independently and
+       report their own health, so a dead feed costs nothing here. */
+    void useLiveStore.getState().refreshAll();
+    useLiveStore.getState().startAuto();
   }, [session, fusionSeeded, seedFusion, feedCount]);
 
   /* Stop the stream timers when the operator leaves the console. */
-  useEffect(() => () => { stopFusion(); }, [stopFusion]);
+  useEffect(() => () => {
+    stopFusion();
+    useLiveStore.getState().stopAuto();
+  }, [stopFusion]);
 
   /* Auto-refresh timer */
   useEffect(() => {
@@ -218,6 +228,9 @@ export default function MonitorPage() {
   /* ── Keyboard shortcuts ── */
   useEffect(() => {
     const VIEW_KEYS: ViewKey[] = ['overview','incidents','intelligence','entities','effects','logistics','planning','triage','fusion','anomalies'];
+    /* DONNÉES has no number-row shortcut on purpose: the letters that
+       would fit (D) are already bound inside the triage queue, and a key
+       that navigates away mid-adjudication is worse than no key. */
     const onKey = (e: KeyboardEvent) => {
       const el = document.activeElement as HTMLElement | null;
       const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
@@ -317,6 +330,7 @@ export default function MonitorPage() {
               {activeView === 'fusion'    && <FusionConsole />}
               {activeView === 'anomalies' && <AnomalyPanel />}
               {activeView === 'reports'   && <SitrepPanel />}
+              {activeView === 'data'      && <DataPanel />}
             </div>
           )}
 
@@ -337,8 +351,11 @@ export default function MonitorPage() {
               <CoordHUD />
               <LoadingOverlay />
 
-              {/* AOR label overlay */}
-              <div className="absolute top-6 right-6 z-hud pointer-events-none text-right">
+              {/* Basemap / terrain / precision control */}
+              <BasemapControl />
+
+              {/* AOR label overlay — sits below the basemap control */}
+              <div className="absolute top-16 right-4 z-hud pointer-events-none text-right">
                 <div className="text-t3 text-2xs font-mono tracking-widest uppercase">ZONE D&apos;OPÉRATIONS</div>
                 <div className="text-t1 text-xs font-mono font-bold tracking-widest uppercase">SENTINELLE-RDC EST</div>
               </div>

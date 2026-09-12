@@ -51,9 +51,17 @@ export async function preloadMGRS(): Promise<void> {
   await getForward();
 }
 
-/** Formats a decimal coordinate pair as a display string. */
-export function formatLatLon(lat: number, lon: number): string {
+/**
+ * Formats a decimal coordinate pair as a display string.
+ *
+ * `decimals` is meaningful, not cosmetic: at these latitudes 4 decimals
+ * is ~11 m, 5 is ~1.1 m and 6 is ~0.11 m. Printing more digits than the
+ * position is actually known to is a quiet lie, so the caller passes a
+ * figure matched to the selected grid resolution.
+ */
+export function formatLatLon(lat: number, lon: number, decimals = 4): string {
+  const d = Math.max(0, Math.min(8, decimals));
   const latDir = lat >= 0 ? 'N' : 'S';
   const lonDir = lon >= 0 ? 'E' : 'W';
-  return `${Math.abs(lat).toFixed(4)}°${latDir}  ${Math.abs(lon).toFixed(4)}°${lonDir}`;
+  return `${Math.abs(lat).toFixed(d)}°${latDir}  ${Math.abs(lon).toFixed(d)}°${lonDir}`;
 }
