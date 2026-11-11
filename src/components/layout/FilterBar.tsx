@@ -5,7 +5,8 @@ import { useMapStore } from '@/store/useMapStore';
 import { useFeedStore, applyFilters, type TimeRange, type ClassFilter } from '@/store/useFeedStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
 import { flyTo } from '@/lib/mapController';
-import type { LayerKey } from '@/types/intel';
+import LayerPanel from '@/components/hud/LayerPanel';
+import { LAYERS } from '@/lib/layers';
 import type { KeyboardEvent } from 'react';
 
 const TIME_OPTS: { label: string; value: TimeRange }[] = [
@@ -48,28 +49,11 @@ function download(name: string, mime: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-const LAYER_META: { key: LayerKey; label: string; dot: string }[] = [
-  { key: 'acled',  label: 'ACLED EVENTS', dot: 'bg-alert' },
-  { key: 'firms',  label: 'FIRMS THERMAL',dot: 'bg-fire'  },
-  { key: 'heat',   label: 'HEAT MAP',     dot: 'bg-fire'  },
-  { key: 'drone',  label: 'UAV / DRONE',  dot: 'bg-drone' },
-  { key: 'mil',    label: 'MIL POSITIONS',dot: 'bg-mag'   },
-  { key: 'zone',   label: 'ZONES M23',    dot: 'bg-alert' },
-  { key: 'ref',    label: 'VILLES REF',   dot: 'bg-t3'    },
-  { key: 'routes', label: 'AXES ROUTES',  dot: 'bg-amb'   },
-  /* Live keyless feeds. Off by default: they only populate once the
-     upstreams answer, and a toggle that lights up an empty layer teaches
-     the operator to distrust the toggles. */
-  { key: 'seismic', label: 'SÉISMES USGS', dot: 'bg-cyn'  },
-  { key: 'weather', label: 'MÉTÉO / ISR',  dot: 'bg-blu'  },
-  { key: 'osm',     label: 'INFRA OSM',    dot: 'bg-grn'  },
-];
-
 type MenuKey = 'time' | 'aoi' | 'layers' | 'class' | 'more';
 
 export default function FilterBar() {
   const layers      = useMapStore((s) => s.layers);
-  const toggleLayer = useMapStore((s) => s.toggleLayer);
+  const solo        = useMapStore((s) => s.solo);
   const timeRange   = useFeedStore((s) => s.timeRange);
   const setTimeRange = useFeedStore((s) => s.setTimeRange);
   const events         = useFeedStore((s) => s.events);
@@ -160,7 +144,7 @@ export default function FilterBar() {
     flyTo({ longitude: o.lon, latitude: o.lat, zoom: o.zoom, pitch: 0, bearing: 0 });
   };
 
-  const activeLayerCount = (Object.keys(layers) as LayerKey[]).filter((k) => layers[k]).length;
+  const activeLayerCount = solo ? 1 : LAYERS.filter((l) => layers[l.key]).length;
   const timeLabel = TIME_OPTS.find((o) => o.value === timeRange)?.label ?? '7J';
 
   return (
@@ -205,30 +189,23 @@ export default function FilterBar() {
 
       <Sep />
 
-      {/* LAYERS */}
-      <Dropdown
-        open={openMenu === 'layers'}
-        onToggle={() => toggle('layers')}
-        tag="LAYERS"
-        value={`${activeLayerCount}`}
-        wide
-      >
-        {LAYER_META.map(({ key, label, dot }) => (
-          <button
-            key={key}
-            onClick={() => toggleLayer(key)}
-            className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-b2 transition-colors"
-          >
-            <div className={`w-1.5 h-1.5 shrink-0 ${dot} ${layers[key] ? '' : 'opacity-25'}`} />
-            <span className={`text-2xs font-mono flex-1 text-left ${layers[key] ? 'text-t2' : 'text-t3'}`}>
-              {label}
-            </span>
-            <span className={`text-2xs font-mono ${layers[key] ? 'text-grn' : 'text-t3'}`}>
-              {layers[key] ? '● ON' : '○ OFF'}
-            </span>
-          </button>
-        ))}
-      </Dropdown>
+      {/* LAYERS — a full manager, not a list of switches */}
+      <div className="relative shrink-0">
+        <button
+          onClick={() => toggle('layers')}
+          data-testid="layers-button"
+          className={`flex items-center gap-1.5 px-2 py-1 border text-2xs font-mono transition-colors ${
+            openMenu === 'layers'
+              ? 'border-blu text-t1 bg-blu/10'
+              : solo ? 'border-amb text-amb' : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
+          }`}
+        >
+          <span className="mvn-label text-t3">CALQUES</span>
+          <span className="text-t1 font-bold">{solo ? 'SOLO' : `${activeLayerCount}/${LAYERS.length}`}</span>
+          <span className="text-t3 text-xs">▾</span>
+        </button>
+        {openMenu === 'layers' && <LayerPanel onClose={() => setOpenMenu(null)} />}
+      </div>
 
       <Sep />
 
