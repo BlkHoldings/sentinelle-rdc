@@ -71,7 +71,14 @@ export interface DroneRecord {
 export type LayerKey =
   | 'acled' | 'firms' | 'heat' | 'drone' | 'mil' | 'zone' | 'ref' | 'routes'
   /* Live keyless feeds, rendered as map overlays. */
-  | 'seismic' | 'weather' | 'osm';
+  | 'seismic' | 'weather' | 'osm'
+  /* Fusion output. `fusion` is the engine's actual product — corroborated,
+     scored event clusters — which until now existed only in tables. `halo`
+     is its positional uncertainty, and `scan` the significant
+     spatio-temporal clusters from the Kulldorff pass. */
+  | 'fusion' | 'halo' | 'scan'
+  /* Reference geography drawn from datasets already in the build. */
+  | 'air' | 'border';
 
 export interface LayerVisibility extends Record<LayerKey, boolean> {}
 

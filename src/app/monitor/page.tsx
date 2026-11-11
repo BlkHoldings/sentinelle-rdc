@@ -21,6 +21,7 @@ import BottomPanels from '@/components/panels/BottomPanels';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import ToastContainer from '@/components/ui/Toast';
 import MapLegend from '@/components/hud/MapLegend';
+import { VIEW_EVENT } from '@/components/hud/MapFeaturePopup';
 import BasemapControl from '@/components/hud/BasemapControl';
 import HelpOverlay from '@/components/hud/HelpOverlay';
 import TriageQueue, { needsTriage } from '@/components/fusion/TriageQueue';
@@ -222,6 +223,8 @@ export default function MonitorPage() {
     if (view === 'entities'     && !layers.drone)  toggleLayer('drone');
     if (view === 'effects'      && !layers.acled)  toggleLayer('acled');
     if (view === 'logistics'    && !layers.mil)    toggleLayer('mil');
+    if (view === 'logistics'    && !layers.routes) toggleLayer('routes');
+    if (view === 'logistics'    && !layers.air)    toggleLayer('air');
     if (view === 'planning'     && !layers.zone)   toggleLayer('zone');
   }, [layers, toggleLayer]);
 
@@ -237,6 +240,7 @@ export default function MonitorPage() {
 
       if (e.key === 'Escape') {
         setHelpOpen(false); selectFeature(null); setDrawerOpen(false);
+        useMapStore.getState().setMapFeature(null);
         return;
       }
       if (typing) return;
@@ -253,6 +257,17 @@ export default function MonitorPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [doRefresh, handleViewChange, selectFeature]);
+
+  /* The map's feature card asks for a workspace by event — see VIEW_EVENT. */
+  useEffect(() => {
+    const onView = (e: Event) => {
+      const v = (e as CustomEvent<ViewKey>).detail;
+      setActiveView(v);
+      if (v === 'triage') setMobileTab('triage');
+    };
+    window.addEventListener(VIEW_EVENT, onView);
+    return () => window.removeEventListener(VIEW_EVENT, onView);
+  }, []);
 
   const isWorkspace = WORKSPACE_VIEWS.includes(activeView);
 
@@ -370,7 +385,7 @@ export default function MonitorPage() {
               <button
                 onClick={() => setHelpOpen(true)}
                 title="Raccourcis clavier (?)"
-                className="absolute bottom-3 left-[13.5rem] z-hud hidden md:flex w-7 h-7 items-center justify-center bg-b2/90 border border-b3 text-t3 hover:text-t1 hover:border-t3 text-xs font-mono transition-colors"
+                className="absolute top-[13.5rem] left-3 z-hud hidden md:flex w-7 h-7 items-center justify-center bg-b2/90 border border-b3 text-t3 hover:text-t1 hover:border-t3 text-xs font-mono transition-colors"
               >
                 ?
               </button>

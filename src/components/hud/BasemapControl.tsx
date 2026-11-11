@@ -30,8 +30,6 @@ export default function BasemapControl() {
   const toggleHillshade = useMapStore((s) => s.toggleHillshade);
   const precision       = useMapStore((s) => s.precision);
   const setPrecision    = useMapStore((s) => s.setPrecision);
-  const showUncertainty = useMapStore((s) => s.showUncertainty);
-  const toggleUncertainty = useMapStore((s) => s.toggleUncertainty);
 
   const active = BASEMAPS.find((b) => b.id === basemap) ?? BASEMAPS[0];
 
@@ -129,18 +127,6 @@ export default function BasemapControl() {
                 </button>
               ))}
             </div>
-            <label className="flex items-start gap-1.5 cursor-pointer">
-              <input
-                type="checkbox" checked={showUncertainty} onChange={toggleUncertainty}
-                className="accent-cyn w-3 h-3 mt-0.5"
-              />
-              <span className="text-2xs font-mono text-t2 leading-tight">
-                Halos d&apos;incertitude
-                <span className="block text-3xs text-t3">
-                  Rayon réel au sol ; trait plein = position mesurée, pointillé = déduite.
-                </span>
-              </span>
-            </label>
           </div>
 
           <div className="px-2.5 py-1 border-t border-b3">
