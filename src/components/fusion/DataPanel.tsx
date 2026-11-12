@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Data Access Workspace
+   NKOYI — Data Access Workspace
    ═══════════════════════════════════════════════════════════════════════
 
    One place to answer three questions that a map cannot:
@@ -92,7 +92,7 @@ function ExportBar<T extends object>({ rows, name, geo = true }: {
   const plain = rows as readonly Record<string, unknown>[];
   const go = (ext: string, body: string, mime: string) => {
     if (!rows.length) { push('Rien à exporter', 'warn'); return; }
-    download(`sentinelle-${name}-${stamp}.${ext}`, body, mime);
+    download(`nkoyi-${name}-${stamp}.${ext}`, body, mime);
     push(`${rows.length} enregistrement(s) exporté(s) (.${ext})`, 'success');
   };
   return (

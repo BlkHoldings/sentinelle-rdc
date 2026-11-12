@@ -81,7 +81,7 @@ export default function LoginPage() {
 
       {/* Classification banner */}
       <div className="classify h-6 flex items-center justify-center shrink-0">
-        SECRET // REL TO USA, COD, UNMISS // SENTINELLE-RDC
+        NKOYI // ENVIRONNEMENT DE DÉMONSTRATION // DONNÉES ILLUSTRATIVES — NON VÉRIFIÉES
       </div>
 
       {/* Content */}
@@ -92,12 +92,12 @@ export default function LoginPage() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className="w-2 h-4 bg-alert" />
             <h1 className="text-t1 text-lg font-bold tracking-widest uppercase">
-              SENTINELLE-RDC
+              NKOYI
             </h1>
             <div className="w-2 h-4 bg-alert" />
           </div>
           <p className="text-t3 text-xs font-mono tracking-widest uppercase">
-            C2 INTELLIGENCE MONITOR // AOR EST-DRC
+            INTELLIGENCE STRATÉGIQUE // RDC · GRANDS LACS
           </p>
           <p className="text-t3 text-2xs font-mono mt-1">
             AUTHORIZED USERS ONLY — UNAUTHORIZED ACCESS IS PROHIBITED
@@ -263,7 +263,7 @@ export default function LoginPage() {
 
       {/* Bottom classify */}
       <div className="classify h-6 flex items-center justify-center shrink-0">
-        SECRET // REL TO USA, COD, UNMISS // SENTINELLE-RDC
+        NKOYI // ENVIRONNEMENT DE DÉMONSTRATION // DONNÉES ILLUSTRATIVES — NON VÉRIFIÉES
       </div>
     </div>
   );

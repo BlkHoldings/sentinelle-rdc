@@ -16,7 +16,9 @@ export type ViewKey =
   | 'effects'  | 'logistics' | 'planning'     | 'reports'
   /* Fusion-layer workspaces — these replace the map area rather than
      re-skinning the right panel, because each is a full working surface. */
-  | 'triage'   | 'fusion'    | 'anomalies'  | 'data';
+  | 'triage'   | 'fusion'    | 'anomalies'  | 'data'
+  /* Strategic workspaces — evidence-first records, briefs and review. */
+  | 'dossiers' | 'entites' | 'signaux' | 'atelier' | 'rapports' | 'journal';
 
 interface Props {
   activeView:   ViewKey;
@@ -41,6 +43,12 @@ const NAV: { key: ViewKey; label: string; sym: string; group?: string }[] = [
   { key: 'anomalies',    label: 'ANOMALIES',    sym: '◬' },
   { key: 'data',         label: 'DONNÉES',      sym: '⛁' },
   { key: 'reports',      label: 'SITREP',       sym: '≡' },
+  { key: 'dossiers',     label: 'DOSSIERS',     sym: '▤', group: 'STRATÉGIQUE' },
+  { key: 'entites',      label: 'ENTITÉS',      sym: '⬡' },
+  { key: 'signaux',      label: 'SIGNAUX',      sym: '▲' },
+  { key: 'atelier',      label: 'ATELIER',      sym: '✎' },
+  { key: 'rapports',     label: 'RAPPORTS',     sym: '❏' },
+  { key: 'journal',      label: 'JOURNAL',      sym: '☰' },
 ];
 
 function sevOf(e: IntelEvent): 'HIGH' | 'MED' | 'LOW' {
@@ -120,24 +128,24 @@ export default function Sidebar({
             <div className="w-2.5 h-2.5 bg-alert" />
           </div>
           <div className="min-w-0">
-            <div className="text-t1 font-mono font-bold text-xs tracking-widest leading-none">SENTINELLE</div>
-            <div className="text-t3 text-2xs font-mono tracking-wider">RDC · C2 · GOTHAM</div>
+            <div className="text-t1 font-mono font-bold text-xs tracking-widest leading-none">NKOYI</div>
+            <div className="text-t3 text-2xs font-mono tracking-wider">INTELLIGENCE STRATÉGIQUE</div>
           </div>
         </div>
       </div>
 
       {/* Operation */}
       <div className="px-3 py-2 border-b border-b3 shrink-0">
-        <div className="mvn-label mb-0.5">OPÉRATION</div>
-        <div className="text-t1 text-xs font-mono font-bold">SENTINELLE-RDC</div>
+        <div className="mvn-label mb-0.5">ESPACE DE TRAVAIL</div>
+        <div className="text-t1 text-xs font-mono font-bold">RDC · GRANDS LACS</div>
         <div className="flex items-center gap-1 mt-0.5">
           <div className="w-1.5 h-1.5 bg-grn animate-pulse-slow" />
-          <span className="text-grn text-2xs font-mono font-bold">ACTIVE</span>
+          <span className="text-grn text-2xs font-mono font-bold">DÉMONSTRATION</span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="shrink-0 border-b border-b3">
+      <nav className="min-h-0 shrink overflow-y-auto border-b border-b3">
         {NAV.map(({ key, label, sym, group }) => {
           const badge =
             key === 'triage'    ? triageCount :

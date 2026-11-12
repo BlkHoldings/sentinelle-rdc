@@ -15,7 +15,7 @@ import { DRONE_ISR } from '@/data/drones';
 import GlobeMap from '@/components/globe/GlobeMap';
 import CoordHUD from '@/components/hud/CoordHUD';
 import Sidebar, { type ViewKey } from '@/components/layout/Sidebar';
-import FilterBar from '@/components/layout/FilterBar';
+import FilterBar, { useLiveFeedHealth } from '@/components/layout/FilterBar';
 import RightPanel from '@/components/panels/RightPanel';
 import BottomPanels from '@/components/panels/BottomPanels';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
@@ -29,6 +29,13 @@ import FusionConsole from '@/components/fusion/FusionConsole';
 import AnomalyPanel from '@/components/fusion/AnomalyPanel';
 import SitrepPanel from '@/components/fusion/SitrepPanel';
 import DataPanel from '@/components/fusion/DataPanel';
+import LibraryPanel from '@/components/strategic/LibraryPanel';
+import { EntitiesPanel, SignalsPanel } from '@/components/strategic/InsightPanels';
+import WorkbenchPanel from '@/components/strategic/WorkbenchPanel';
+import ReportsPanel from '@/components/strategic/ReportsPanel';
+import AuditPanel from '@/components/strategic/AuditPanel';
+import { WorkspaceBoundary } from '@/components/strategic/ui';
+import { useStrategicStore } from '@/store/useStrategicStore';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useLiveStore } from '@/store/useLiveStore';
 import type { IntelEvent } from '@/types/intel';
@@ -45,7 +52,10 @@ const MOBILE_TABS: { key: MobileTab; label: string; sym: string }[] = [
 
 /** Views that take over the whole working area instead of sitting beside
  *  the map. Each is a full analyst surface, not a side panel. */
-const WORKSPACE_VIEWS: ViewKey[] = ['triage', 'fusion', 'anomalies', 'reports', 'data'];
+const WORKSPACE_VIEWS: ViewKey[] = [
+  'triage', 'fusion', 'anomalies', 'reports', 'data',
+  'dossiers', 'entites', 'signaux', 'atelier', 'rapports', 'journal',
+];
 
 const DRAW_TOOLS: { key: DrawTool; sym: string; title: string }[] = [
   { key: 'select', sym: '↖', title: 'Sélectionner' },
@@ -111,6 +121,8 @@ export default function MonitorPage() {
   const fusionEvents = useFusionStore((s) => s.events);
   const fusionClusters = useFusionStore((s) => s.clusters);
 
+  const feedHealth  = useLiveFeedHealth();
+  const feedsUp     = feedHealth.filter((h) => h === 'ok').length;
   const fetchedRef  = useRef(false);
   const seededRef   = useRef(false);
   const [activeView, setActiveView] = useState<ViewKey>('overview');
@@ -124,6 +136,10 @@ export default function MonitorPage() {
   useEffect(() => {
     if (selectedFeature && window.innerWidth < 768) setMobileTab('intel');
   }, [selectedFeature]);
+
+  /* Load the strategic workspace from browser storage, once. Done in an
+     effect so the server-rendered shell and the first client render agree. */
+  useEffect(() => { useStrategicStore.getState().hydrate(); }, []);
 
   /* Auth guard */
   useEffect(() => {
@@ -281,7 +297,7 @@ export default function MonitorPage() {
 
       {/* Classification stripe — full width */}
       <div className="classify h-5 flex items-center justify-center shrink-0 truncate px-2">
-        SECRET // REL TO USA, COD, UNMISS // SENTINELLE-RDC C2 INTEL
+        NKOYI // ENVIRONNEMENT DE DÉMONSTRATION // DONNÉES ILLUSTRATIVES — NON VÉRIFIÉES
       </div>
 
       {/* ── Mobile top bar ── */}
@@ -297,11 +313,11 @@ export default function MonitorPage() {
           <div className="w-4 h-4 border border-alert flex items-center justify-center shrink-0">
             <div className="w-2 h-2 bg-alert" />
           </div>
-          <span className="text-t1 font-mono font-bold text-xs tracking-widest truncate">SENTINELLE-RDC</span>
+          <span className="text-t1 font-mono font-bold text-xs tracking-widest truncate">NKOYI</span>
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <div className="w-1.5 h-1.5 bg-grn animate-pulse-slow" />
-          <span className="text-grn text-2xs font-mono font-bold">LIVE</span>
+          <div className={`w-1.5 h-1.5 ${feedsUp ? 'bg-grn animate-pulse-slow' : 'bg-amb'}`} />
+          <span className={`text-2xs font-mono font-bold ${feedsUp ? 'text-grn' : 'text-amb'}`}>FLUX {feedsUp}/{feedHealth.length}</span>
         </div>
       </div>
 
@@ -346,6 +362,14 @@ export default function MonitorPage() {
               {activeView === 'anomalies' && <AnomalyPanel />}
               {activeView === 'reports'   && <SitrepPanel />}
               {activeView === 'data'      && <DataPanel />}
+              <WorkspaceBoundary key={activeView} name={activeView.toUpperCase()}>
+                {activeView === 'dossiers' && <LibraryPanel />}
+                {activeView === 'entites'  && <EntitiesPanel />}
+                {activeView === 'signaux'  && <SignalsPanel />}
+                {activeView === 'atelier'  && <WorkbenchPanel onOpenReports={() => setActiveView('rapports')} />}
+                {activeView === 'rapports' && <ReportsPanel onOpenWorkbench={() => setActiveView('atelier')} />}
+                {activeView === 'journal'  && <AuditPanel />}
+              </WorkspaceBoundary>
             </div>
           )}
 
@@ -372,7 +396,7 @@ export default function MonitorPage() {
               {/* AOR label overlay — sits below the basemap control */}
               <div className="absolute top-16 right-4 z-hud pointer-events-none text-right">
                 <div className="text-t3 text-2xs font-mono tracking-widest uppercase">ZONE D&apos;OPÉRATIONS</div>
-                <div className="text-t1 text-xs font-mono font-bold tracking-widest uppercase">SENTINELLE-RDC EST</div>
+                <div className="text-t1 text-xs font-mono font-bold tracking-widest uppercase">NKOYI — EST RDC</div>
               </div>
 
               {/* Map tools panel — desktop only */}

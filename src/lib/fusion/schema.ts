@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Unified Event Schema (Data Fusion Layer)
+   NKOYI — Unified Event Schema (Data Fusion Layer)
    ═══════════════════════════════════════════════════════════════════════
 
    Every source — ACLED, FIRMS, drone ISR, Radio Okapi, Actualité.cd,

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Source Adapters
+   NKOYI — Source Adapters
    ═══════════════════════════════════════════════════════════════════════
 
    Four adapters feed the raw topics:

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useMapStore } from '@/store/useMapStore';
 import { useFeedStore, applyFilters, type TimeRange, type ClassFilter } from '@/store/useFeedStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
+import { useLiveStore } from '@/store/useLiveStore';
 import { flyTo } from '@/lib/mapController';
 import LayerPanel from '@/components/hud/LayerPanel';
 import { LAYERS } from '@/lib/layers';
@@ -84,7 +85,7 @@ export default function FilterBar() {
           },
         })),
     };
-    download('sentinelle-rdc-events.geojson', 'application/geo+json', JSON.stringify(fc, null, 2));
+    download('nkoyi-events.geojson', 'application/geo+json', JSON.stringify(fc, null, 2));
     setOpenMenu(null);
   };
 
@@ -95,7 +96,7 @@ export default function FilterBar() {
        e.actor1 ?? '', e.actor2 ?? '', (e.notes ?? e.desc ?? '').slice(0, 300)].map(esc).join(','),
     );
     download(
-      'sentinelle-rdc-events.csv',
+      'nkoyi-events.csv',
       'text/csv',
       ['src,type,date,location,lat,lon,fatalities,actor1,actor2,notes', ...rows].join('\n'),
     );
@@ -352,21 +353,36 @@ function DropItem({ active, onClick, children }: DropItemProps) {
   );
 }
 
+/** Health of the four polled upstreams, in a stable order. */
+export function useLiveFeedHealth(): string[] {
+  const w = useLiveStore((s) => s.weather.health);
+  const q = useLiveStore((s) => s.seismic.health);
+  const r = useLiveStore((s) => s.reliefweb.health);
+  const g = useLiveStore((s) => s.gdacs.health);
+  return [w, q, r, g];
+}
+
 function RefreshStatus() {
   const auto      = useRefreshStore((s) => s.auto);
   const countdown = useRefreshStore((s) => s.countdown);
   const setAuto   = useRefreshStore((s) => s.setAuto);
   const refreshFn = useRefreshStore((s) => s.refreshFn);
+  /* The badge counts upstreams that actually answered. It used to read
+     "LIVE" unconditionally — including with every feed down. */
+  const feeds = useLiveFeedHealth();
+  const up = feeds.filter((h) => h === 'ok').length;
 
   return (
     <div className="hidden lg:flex items-center gap-1.5 shrink-0">
       <button
         onClick={() => refreshFn?.()}
-        title="Rafraîchir maintenant (R)"
+        title={`${up} flux temps réel sur ${feeds.length} répondent — rafraîchir (R)`}
         className="flex items-center gap-1.5 px-2 py-1 border border-b3 hover:border-grn/60 transition-colors group"
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-grn animate-pulse-slow" />
-        <span className="text-grn text-2xs font-mono font-bold tracking-wider">LIVE</span>
+        <span className={`w-1.5 h-1.5 rounded-full ${up ? 'bg-grn animate-pulse-slow' : 'bg-amb'}`} />
+        <span className={`text-2xs font-mono font-bold tracking-wider ${up ? 'text-grn' : 'text-amb'}`}>
+          FLUX {up}/{feeds.length}
+        </span>
         <span className="text-t3 text-2xs font-mono group-hover:text-t2">↻</span>
       </button>
       <button

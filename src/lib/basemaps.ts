@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Basemap & Terrain Definitions
+   NKOYI — Basemap & Terrain Definitions
    ═══════════════════════════════════════════════════════════════════════
 
    The map previously ran a single CARTO vector style capped at the style's

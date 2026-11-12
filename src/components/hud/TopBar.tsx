@@ -85,7 +85,7 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
 
       {/* Classification stripe */}
       <div className="classify h-5 flex items-center justify-center shrink-0">
-        SECRET // REL TO USA, COD, UNMISS // SENTINELLE-RDC C2 INTEL
+        NKOYI // ENVIRONNEMENT DE DÉMONSTRATION // DONNÉES ILLUSTRATIVES — NON VÉRIFIÉES
       </div>
 
       {/* System bar */}
@@ -95,7 +95,7 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
         <div className="flex items-center gap-2 shrink-0">
           <div className="w-1.5 h-3 bg-alert shrink-0" />
           <span className="text-t1 font-mono font-bold text-xs tracking-widest uppercase">
-            SENTINELLE-RDC
+            NKOYI
           </span>
         </div>
 

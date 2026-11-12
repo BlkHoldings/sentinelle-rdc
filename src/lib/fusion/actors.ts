@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Armed Actor Lexicon
+   NKOYI — Armed Actor Lexicon
    ═══════════════════════════════════════════════════════════════════════
 
    Generic NER tags "M23" as a product code, "Wazalendo" as O, and

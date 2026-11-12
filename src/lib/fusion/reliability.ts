@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Source Reliability Model
+   NKOYI — Source Reliability Model
    ═══════════════════════════════════════════════════════════════════════
 
    The reference design tracked reliability as a flat dict of floats and

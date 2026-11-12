@@ -41,7 +41,7 @@ export function trunc(s: string | undefined, maxLen: number): string {
  */
 export function exportCSV(data: Record<string, unknown>[], filename?: string): void {
   if (!data.length) return;
-  const file = filename ?? `sentinelle-export-${todayISO()}.csv`;
+  const file = filename ?? `nkoyi-export-${todayISO()}.csv`;
   const cols = ['src','type','subtype','date','time','location','admin1','lat','lon',
                 'fatalities','actor1','actor2','notes','platform','status','id'];
   const rows = [

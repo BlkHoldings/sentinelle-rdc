@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Confidence Fusion
+   NKOYI — Confidence Fusion
    ═══════════════════════════════════════════════════════════════════════
 
    The reference model was:

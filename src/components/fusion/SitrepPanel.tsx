@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — SITREP Panel
+   NKOYI — SITREP Panel
    ═══════════════════════════════════════════════════════════════════════
 
    Generates the situation report from the current fused window and lets
@@ -40,7 +40,7 @@ export default function SitrepPanel() {
       minConfidence: minConf,
       analyst: session?.user?.toUpperCase() ?? 'ANALYSTE',
       monitors,
-      classification: 'SECRET // REL TO USA, COD, UNMISS',
+      classification: 'NKOYI // DÉMONSTRATION — DONNÉES ILLUSTRATIVES',
     }),
     [events, periodH, province, minConf, session, monitors],
   );

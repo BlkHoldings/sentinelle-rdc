@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Fusion Console
+   NKOYI — Fusion Console
    ═══════════════════════════════════════════════════════════════════════
 
    Operator view of the pipeline itself: topic depths, throughput,

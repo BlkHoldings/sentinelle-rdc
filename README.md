@@ -1,156 +1,116 @@
-# SENTINELLE-RDC
+# NKOYI
 
-> Système de surveillance en temps réel — Est de la République Démocratique du Congo
+Espace d'analyse stratégique fondé sur les preuves — RDC et Grands Lacs.
 
-C2 intelligence dashboard integrating real-time satellite imagery, drone ISR, and conflict event data for eastern DRC monitoring. Built for humanitarian and peacekeeping intelligence analysis.
+**En ligne :** https://blkholdings.github.io/sentinelle-rdc/
+(l'adresse garde l'ancien nom du dépôt ; elle changera si le dépôt est renommé, voir plus bas)
 
-**Live:** https://blkholdings.github.io/sentinelle-rdc/
+> **Environnement de démonstration.** Les dossiers de départ, les positions, les relevés
+> et le flux d'événements synthétique sont illustratifs. Rien de ce qui est affiché ne
+> doit être lu comme un constat vérifié.
 
----
+## Ce que fait l'application
 
-## Features
+| Espace | Contenu |
+|---|---|
+| **Carte** | Fonds haute résolution, relief 3D, 17 calques avec compteurs, opacité et isolement ; chaque symbole est cliquable |
+| **Fusion** | Corrélation de rapports multi-sources, confiance bayésienne, file de triage, détection d'anomalies, SITREP |
+| **Données** | État de chaque source temps réel (météo, sismicité, ReliefWeb, GDACS, OSM) avec export |
+| **Dossiers** | Bibliothèque de dossiers stratégiques — énergie, mines, infrastructure, commerce, politique publique — chacun rattaché à ses sources |
+| **Entités / Signaux** | Vues dérivées des dossiers : entités co-citées, indice d'attention décomposé |
+| **Atelier** | Question → brief structuré citant les dossiers utilisés et signalant les lacunes |
+| **Rapports** | Versions, soumission, approbation par un second relecteur |
+| **Journal** | Trace en ajout seul des créations, modifications, relectures et exports |
 
-| Feature | Description |
-|---------|-------------|
-| **ACLED Integration** | Armed conflict events via ACLED API (Jan–present) |
-| **NASA FIRMS** | VIIRS active fire / thermal anomaly detection |
-| **Copernicus Sentinel** | S1 SAR + S2 optical scene catalog (72h window) |
-| **Drone ISR** | MONUSCO UAV sorties, drone strikes, BDA |
-| **Tactical Feed** | Searchable, filterable, exportable event stream |
-| **CSV Export** | One-click export of current filtered view |
-| **Live Map** | Leaflet map with 9 overlay layers and heatmap |
-| **Intel Assessment** | Dynamic assessment panel updated on each refresh |
-| **Auto-refresh** | Configurable polling (default: 3-minute cycle) |
-| **Login rate-limiting** | 5 failed attempts → 30-second lockout |
+## Ce qu'elle ne fait pas
 
----
+Ces limites sont affichées dans l'interface ; elles sont répétées ici pour qu'aucune
+ne soit découverte par surprise.
 
-## Quick Start
+- **Pas de serveur.** Dossiers, rapports et journal vivent dans le `localStorage` du
+  navigateur : rien n'est partagé entre utilisateurs, et vider les données du site efface tout.
+- **Pas de contrôle d'accès.** Les identifiants de démonstration et les rôles sont
+  vérifiés côté client. Ils rendent le flux de relecture cohérent ; ils ne protègent rien.
+- **Pas de modèle d'IA.** L'atelier fait une recherche par mots-clés et assemble le
+  brief par règles. Il le dit dans chaque brief.
+- **Pas d'interception.** Le panneau « communications » est une démonstration sonore
+  synthétique sur des textes du jeu de données.
+- **Le journal n'est pas une preuve d'intégrité** : il est stocké au même endroit que
+  ce qu'il décrit.
 
-The project is a static website — no build step required.
+## Périmètre
+
+Aide à la décision civile et licite : infrastructure, énergie, mines, commerce,
+investissement, politique publique, suivi humanitaire à partir de sources ouvertes.
+Les entités sont des organisations, des projets et des systèmes — jamais des personnes
+privées. Hors périmètre : surveillance clandestine, pistage d'individus, reconnaissance
+faciale, profilage, ciblage, recommandations opérationnelles automatisées.
+
+## Démarrer
 
 ```bash
-# Serve locally (any static server works)
-npx serve .
-# or
-python3 -m http.server 8080
+npm install
+npm run dev          # http://localhost:3000
+npm test             # tests unitaires (Vitest)
+npm run type-check
+npm run build        # export statique dans out/
 ```
 
-Then open `http://localhost:8080`.
+Comptes de démonstration : `analyst` / `analyst2026` · `operator` / `op3rator!` ·
+`commander` / `cmd@rdc2026`. Un analyste ne peut ni vérifier un dossier ni approuver
+un rapport ; il faut un second compte pour approuver le rapport d'un autre.
 
-### Demo credentials
+Les clés NASA FIRMS et ACLED sont facultatives et se saisissent à la connexion.
 
-| Identifier | Key | Level |
-|------------|-----|-------|
-| `deepq` | `sentinelle2026` | Analyst |
-| `gbk-ops` | `kivu-watch` | Operator |
-| `gedeon` | `deepq-admin` | Commander |
-| `monusco` | `un-force-2026` | Operator |
-| `fardc-cmd` | `goma-secure` | Commander |
-
----
-
-## API Keys
-
-All APIs are optional. Without keys, the application loads a verified static dataset (Jan–Mar 2026).
-
-### NASA FIRMS (thermal anomalies)
-1. Register at https://firms.modaps.eosdis.nasa.gov/api/area/
-2. Copy your MAP_KEY
-3. Open the dashboard → ⚙ tab → paste under **NASA FIRMS** → SAVE
-
-### ACLED (conflict events)
-1. Register at https://acleddata.com/register/
-2. Copy your API key and email
-3. Open the dashboard → ⚙ tab → paste under **ACLED** → SAVE
-
-### Copernicus (Sentinel imagery)
-No key required. The catalog API is public.
-
----
-
-## Project Structure
+## Architecture
 
 ```
-sentinelle-rdc/
-├── index.html          # Login portal
-├── monitor.html        # C2 dashboard
-├── css/
-│   ├── base.css        # Design tokens, resets, toast styles
-│   ├── login.css       # Login page styles
-│   └── monitor.css     # Dashboard styles
-├── js/
-│   ├── config.js       # Application constants
-│   ├── utils.js        # escHtml, parseCSV, exportCSV, date helpers
-│   ├── toast.js        # Toast notification system
-│   ├── data.js         # Static data: DRONE_ISR, MIL, ACLED fallback
-│   ├── api.js          # FIRMS, Copernicus, ACLED API clients
-│   ├── map.js          # Leaflet map, layers, markers
-│   ├── feed.js         # Tactical feed & intel panel rendering
-│   ├── monitor.js      # Main app controller (refresh, search, export)
-│   └── auth.js         # Authentication with rate-limiting
-└── .github/
-    └── workflows/
-        └── deploy.yml  # GitHub Pages CI/CD pipeline
+src/
+├── app/                    pages (connexion, console)
+├── components/
+│   ├── globe/ hud/         carte, calques, légende, fiche d'entité
+│   ├── fusion/             triage, pipeline, anomalies, données, SITREP
+│   └── strategic/          dossiers, entités, signaux, atelier, rapports, journal
+├── lib/
+│   ├── fusion/             moteur de fusion (pur, sans React)
+│   ├── live/               clients des sources temps réel
+│   ├── strategic/          modèle de dossier, validation, filtrage, brief (pur)
+│   ├── layers.ts           registre unique des calques
+│   └── cluster.ts          regroupement en espace écran
+├── store/                  états Zustand ; useStrategicStore = couche d'accès aux données
+tests/                      Vitest
 ```
 
----
+`lib/strategic` ne dépend ni de React ni du stockage. `useStrategicStore` est le seul
+endroit qui touche au `localStorage` : passer à une base serveur ne modifie que ce fichier.
 
-## Data Sources
+### Modèle de dossier
 
-| Source | Coverage | Update frequency |
-|--------|----------|-----------------|
-| [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/) | DRC thermal anomalies | ~3h (satellite pass) |
-| [Copernicus DataSpace](https://dataspace.copernicus.eu/) | Sentinel-1/2 scenes, eastern DRC | 6h revisit |
-| [ACLED](https://acleddata.com/) | Armed conflict events, DRC (ISO 180) | Daily |
-| Drone ISR | MONUSCO UAV ops (simulated feed) | Static / session |
-| Military positions | UN GoE reports, OSINT | Static / updated per release |
+Un dossier porte deux champs volontairement distincts : la **confiance** (jugement de
+l'analyste sur la preuve) et le **statut** (brouillon, en revue, vérifié, contesté,
+archivé). Chaque source conserve titre, éditeur, URL ou référence, date de publication,
+date de consultation, base d'accès et notes. Règles appliquées à l'enregistrement :
+pas de mise en revue sans source, pas de confiance élevée avec moins de deux sources,
+seules les URL `http(s)` sont acceptées comme liens.
 
----
+## Feuille de route
 
-## Security Notes
+Fait : fondation applicative (validation, états vides et d'erreur, couche d'accès
+typée, tests), modèle fondé sur les preuves, carte MapLibre avec calques, flux de
+relecture et journal en démonstration.
 
-This application uses **client-side authentication only**, suitable for:
-- Demo and training environments
-- Access-controlled intranet deployments
-- Development and testing
+Reste, dans l'ordre, et chacun demande un serveur :
 
-For production deployments requiring real access control, implement server-side authentication (OAuth2, JWT, LDAP) before exposing to untrusted networks.
+1. **Identité et rôles** — authentification réelle, autorisation côté serveur, sécurité au niveau des lignes.
+2. **Base de données** — PostgreSQL/PostGIS, migrations, journal d'audit côté serveur.
+3. **Ingestion** — tâches planifiées avec provenance, fraîcheur, licence et erreurs enregistrées.
+4. **Analyse assistée** — orchestration côté serveur, récupération limitée aux dossiers autorisés, citations exactes ; aucune clé de modèle dans le navigateur.
+5. **Exploitation** — exports PDF contrôlés, sauvegardes, observabilité, limites de débit.
 
-Current client-side security mitigations:
-- Login rate-limiting: 5 failed attempts → 30-second lockout
-- 24-hour session expiry with auto-logout
-- XSS prevention: all external API data is HTML-escaped via `escHtml()` before DOM insertion
-- No credentials stored in localStorage (API keys only)
+## Déploiement
 
----
+Un push sur `main` lance le contrôle de types, les tests, la compilation et la
+publication sur GitHub Pages (`.github/workflows/deploy.yml`).
 
-## Deployment
-
-Push to `main` → GitHub Actions validates HTML/JS → deploys to GitHub Pages automatically.
-
-Manual deploy:
-```bash
-git push origin main
-```
-
-See `.github/workflows/deploy.yml` for the full pipeline.
-
----
-
-## Coverage Area
-
-Eastern DRC focus: North Kivu, South Kivu, Ituri provinces.  
-Key locations monitored: Goma, Bukavu, Beni, Bunia, Rutshuru, Masisi, Uvira, Kasindi.
-
----
-
-## Context
-
-Built for intelligence analysis support in the context of the M23/RDF occupation of Goma (27 Jan 2026) and Bukavu (5 Feb 2026), ongoing ADF-ISCAP insurgency in Beni territory, and CODECO militia activity in Djugu (Ituri).
-
-Data reflects conflict dynamics documented by MONUSCO, OCHA, ACLED, HRW, and the UN Group of Experts.
-
----
-
-*DeepQ Intelligence Division — CONFIDENTIEL DÉFENSE*
+**Renommer le dépôt** en `nkoyi` change l'adresse publique : il faut alors remplacer
+`/sentinelle-rdc` par `/nkoyi` dans `basePath` (`next.config.ts`).

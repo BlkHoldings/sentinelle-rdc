@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — OpenStreetMap Infrastructure (Overpass)
+   NKOYI — OpenStreetMap Infrastructure (Overpass)
    ═══════════════════════════════════════════════════════════════════════
 
    The embedded infrastructure layer in `lib/fusion/infrastructure.ts` is

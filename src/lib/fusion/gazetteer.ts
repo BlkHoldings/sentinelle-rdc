@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — DRC Gazetteer
+   NKOYI — DRC Gazetteer
    ═══════════════════════════════════════════════════════════════════════
 
    Why a gazetteer instead of `spacy.load("xx_ent_wiki_sm")`:

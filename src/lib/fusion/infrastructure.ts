@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Infrastructure & Boundary Reference Layer
+   NKOYI — Infrastructure & Boundary Reference Layer
    ═══════════════════════════════════════════════════════════════════════
 
    The reference design loaded GADM boundaries, a WorldPop raster and OSM

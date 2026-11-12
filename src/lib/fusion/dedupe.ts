@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Deduplication & Clustering
+   NKOYI — Deduplication & Clustering
    ═══════════════════════════════════════════════════════════════════════
 
    The reference implementation had three defects worth naming, because

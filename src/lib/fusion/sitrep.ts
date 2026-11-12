@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — SITREP Generation
+   NKOYI — SITREP Generation
    ═══════════════════════════════════════════════════════════════════════
 
    The reference `generate_sitrep` hard-coded its own trends:
@@ -110,7 +110,7 @@ export function generateSitrep(events: FusedEvent[], opts: SitrepOptions = {}): 
 
   const province = opts.province;
   const minConf = opts.minConfidence ?? 0.45;
-  const classification = opts.classification ?? 'SECRET // REL TO USA, COD, UNMISS';
+  const classification = opts.classification ?? 'NKOYI // DÉMONSTRATION — DONNÉES ILLUSTRATIVES';
 
   const scoped = events.filter((e) => matchesProvince(e, province) && e.status !== 'rejected' && e.status !== 'merged');
   const current = scoped.filter((e) => inWindow(e, start, end));

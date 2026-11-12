@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Layer Registry
+   NKOYI — Layer Registry
    ═══════════════════════════════════════════════════════════════════════
 
    One declaration per map layer, used by the map, the layer manager and
@@ -33,7 +33,7 @@ export type LayerOrigin =
   | 'analyst'   // drawn or adjudicated by the operator
   | 'static';   // curated dataset shipped with the build
 
-export type LayerGroupId = 'fusion' | 'sources' | 'tactical' | 'reference' | 'live';
+export type LayerGroupId = 'strategic' | 'fusion' | 'sources' | 'tactical' | 'reference' | 'live';
 
 export interface LegendEntry {
   color: string;
@@ -84,6 +84,7 @@ export const C = {
 } as const;
 
 export const LAYER_GROUPS: LayerGroupDef[] = [
+  { id: 'strategic', label: 'STRATÉGIQUE',      hint: 'Dossiers de la bibliothèque, saisis et sourcés par les analystes' },
   { id: 'fusion',    label: 'PRODUIT FUSIONNÉ', hint: 'Sortie du moteur de fusion — événements corrélés et notés' },
   { id: 'sources',   label: 'SOURCES BRUTES',   hint: 'Collectes individuelles avant corrélation' },
   { id: 'tactical',  label: 'SITUATION',        hint: 'Contrôle du terrain et dispositif' },
@@ -92,6 +93,15 @@ export const LAYER_GROUPS: LayerGroupDef[] = [
 ];
 
 export const LAYERS: LayerDef[] = [
+  {
+    key: 'dossiers', label: 'DOSSIERS STRATÉGIQUES', group: 'strategic',
+    color: '#3bd6c8', origin: 'analyst',
+    hint: 'Dossiers géolocalisés — énergie, mines, infrastructure, commerce',
+    legend: [
+      { color: '#3bd6c8', label: 'Dossier sourcé', shape: 'square' },
+      { color: C.amb,     label: 'Illustratif ou sans source', shape: 'square' },
+    ],
+  },
   /* ── Fused product ─────────────────────────────────────────────
      Listed first because it is the analytic output, and it was the one
      thing the map did not draw. The console fused, scored and ranked

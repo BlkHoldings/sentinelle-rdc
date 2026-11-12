@@ -103,7 +103,7 @@ export default function IntelAssessmentPanel({ onClose }: Props) {
         {/* Footer */}
         <div className="panel-header px-3 py-1 flex items-center justify-between">
           <span className="mvn-label text-t3">SOURCES: ACLED · MONUSCO · GoE · OSINT SAR</span>
-          <span className="text-t3 text-2xs font-mono">SENTINELLE-RDC</span>
+          <span className="text-t3 text-2xs font-mono">NKOYI</span>
         </div>
       </div>
     </div>
