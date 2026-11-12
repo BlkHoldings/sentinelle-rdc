@@ -1,0 +1,789 @@
+{
+ "status": "ok",
+ "data": {
+  "report1": {
+   "fundingTotals": {
+    "total": 1217361365,
+    "objects": [
+     {
+      "type": "Organization",
+      "direction": "source",
+      "singleFundingTotal": 1217361365,
+      "singleFundingObjects": [
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": 4314,
+        "name": "France, Government of",
+        "totalFunding": 17790236,
+        "behavior": "single"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": 971,
+        "name": "UN Multi-Partner Trust Fund",
+        "totalFunding": 2070178,
+        "behavior": "single"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": 8524,
+        "name": "European Commission Directorate-General for International Partnerships (formerly EuropeAid DEVCO)",
+        "totalFunding": 3387818,
+        "behavior": "single"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": 1371,
+        "name": "Democratic Republic of the Congo, Government of",
+        "totalFunding": 8181443,
+        "behavior": "single"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": 2917,
+        "name": "United Kingdom, Government of",
+        "totalFunding": 33866460,
+        "behavior": "single"
+       }
+      ],
+      "sharedFundingTotal": 0,
+      "sharedFundingObjects": [
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "8523"
+        ],
+        "onBoundaryFunding": 3990569,
+        "name": [
+         "European Commission's Humanitarian Aid and Civil Protection Department"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "2924"
+        ],
+        "onBoundaryFunding": 2283105,
+        "name": [
+         "Switzerland, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "4537"
+        ],
+        "onBoundaryFunding": 59995605,
+        "name": [
+         "Japan, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "2178"
+        ],
+        "onBoundaryFunding": 1010305,
+        "name": [
+         "Norwegian Refugee Council"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "14269"
+        ],
+        "onBoundaryFunding": 16811254,
+        "name": [
+         "United States Department of State"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "225"
+        ],
+        "onBoundaryFunding": 300000,
+        "name": [
+         "Children's Investment Fund Foundation"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "2917"
+        ],
+        "onBoundaryFunding": 0,
+        "name": [
+         "United Kingdom, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "4306"
+        ],
+        "onBoundaryFunding": 3596907,
+        "name": [
+         "Germany, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "2684"
+        ],
+        "onBoundaryFunding": 0,
+        "name": [
+         "UN Peacebuilding Fund"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "8550"
+        ],
+        "onBoundaryFunding": 200205,
+        "name": [
+         "Jersey Overseas Aid"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "2927"
+        ],
+        "onBoundaryFunding": 0,
+        "name": [
+         "Belgium, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "4314"
+        ],
+        "onBoundaryFunding": 389799,
+        "name": [
+         "France, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": [
+         "2933"
+        ],
+        "onBoundaryFunding": 0,
+        "name": [
+         "United States of America, Government of"
+        ],
+        "totalFunding": 0,
+        "behavior": "shared"
+       }
+      ],
+      "objectsBreakdown": [
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4314",
+        "name": "France, Government of",
+        "totalFunding": 17790236,
+        "singleFunding": 17790236,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 389799
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "971",
+        "name": "UN Multi-Partner Trust Fund",
+        "totalFunding": 2070178,
+        "singleFunding": 2070178,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "8524",
+        "name": "European Commission Directorate-General for International Partnerships (formerly EuropeAid DEVCO)",
+        "totalFunding": 3387818,
+        "singleFunding": 3387818,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "1371",
+        "name": "Democratic Republic of the Congo, Government of",
+        "totalFunding": 8181443,
+        "singleFunding": 8181443,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2917",
+        "name": "United Kingdom, Government of",
+        "totalFunding": 33866460,
+        "singleFunding": 33866460,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2928",
+        "name": "Canada, Government of",
+        "totalFunding": 27528867,
+        "singleFunding": 27528867,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4829",
+        "name": "Slovenia, Government of",
+        "totalFunding": 233918,
+        "singleFunding": 233918,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4762",
+        "name": "Central Emergency Response Fund",
+        "totalFunding": 68050007,
+        "singleFunding": 68050007,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "8523",
+        "name": "European Commission's Humanitarian Aid and Civil Protection Department",
+        "totalFunding": 105293893,
+        "singleFunding": 105293893,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 3990569
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2933",
+        "name": "United States of America, Government of",
+        "totalFunding": 616304312,
+        "singleFunding": 616304312,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "14269",
+        "name": "United States Department of State",
+        "totalFunding": 152799047,
+        "singleFunding": 152799047,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 16811254
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "6416",
+        "name": "Novo Nordisk",
+        "totalFunding": 2292877,
+        "singleFunding": 2292877,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2927",
+        "name": "Belgium, Government of",
+        "totalFunding": 22843330,
+        "singleFunding": 22843330,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4306",
+        "name": "Germany, Government of",
+        "totalFunding": 28446643,
+        "singleFunding": 28446643,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 3596907
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4543",
+        "name": "Private (individuals & organizations)",
+        "totalFunding": 3576793,
+        "singleFunding": 3576793,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2924",
+        "name": "Switzerland, Government of",
+        "totalFunding": 29040959,
+        "singleFunding": 29040959,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 2283105
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2921",
+        "name": "Sweden, Government of",
+        "totalFunding": 3725099,
+        "singleFunding": 3725099,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2976",
+        "name": "China, Government of",
+        "totalFunding": 137017,
+        "singleFunding": 137017,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2930",
+        "name": "Norway, Government of",
+        "totalFunding": 10250869,
+        "singleFunding": 10250869,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4537",
+        "name": "Japan, Government of",
+        "totalFunding": 9691945,
+        "singleFunding": 9691945,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 59995605
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "8896",
+        "name": "Mission de l'Organisation des Nations Unies pour la Stabilisation en RD Congo",
+        "totalFunding": 48402,
+        "singleFunding": 48402,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4384",
+        "name": "Luxembourg, Government of",
+        "totalFunding": 1050714,
+        "singleFunding": 1050714,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "5295",
+        "name": "Finland, Government of",
+        "totalFunding": 1052632,
+        "singleFunding": 1052632,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "3009",
+        "name": "Ireland, Government of",
+        "totalFunding": 4651163,
+        "singleFunding": 4651163,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2849",
+        "name": "Save the Children",
+        "totalFunding": 3829185,
+        "singleFunding": 3829185,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "14445",
+        "name": "Swedish International Development Cooperation Agency (SIDA)",
+        "totalFunding": 25617863,
+        "singleFunding": 25617863,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "1657",
+        "name": "United Nations Foundation",
+        "totalFunding": 20746,
+        "singleFunding": 20746,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4058",
+        "name": "United States Fund for UNICEF",
+        "totalFunding": 370940,
+        "singleFunding": 370940,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "3274",
+        "name": "UNICEF National Committees",
+        "totalFunding": 7217,
+        "singleFunding": 7217,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4337",
+        "name": "UNICEF National Committee/France",
+        "totalFunding": 230415,
+        "singleFunding": 230415,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "15564",
+        "name": "Louis Dreyfus Foundation",
+        "totalFunding": 29124,
+        "singleFunding": 29124,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "8550",
+        "name": "Jersey Overseas Aid",
+        "totalFunding": 334906,
+        "singleFunding": 334906,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 200205
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "14393",
+        "name": "Qatar Airways",
+        "totalFunding": 272478,
+        "singleFunding": 272478,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "11811",
+        "name": "Coalition for Epidemic Preparedness Innovations",
+        "totalFunding": 1000000,
+        "singleFunding": 1000000,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "3008",
+        "name": "Netherlands, Government of",
+        "totalFunding": 9193332,
+        "singleFunding": 9193332,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2400",
+        "name": "Swiss Solidarity",
+        "totalFunding": 1107673,
+        "singleFunding": 1107673,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2646",
+        "name": "Swiss Development Cooperation/Swiss Humanitarian Aid",
+        "totalFunding": 4930679,
+        "singleFunding": 4930679,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "5260",
+        "name": "United Nations",
+        "totalFunding": 7500,
+        "singleFunding": 7500,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4326",
+        "name": "Gates Foundation",
+        "totalFunding": 5000000,
+        "singleFunding": 5000000,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2684",
+        "name": "UN Peacebuilding Fund",
+        "totalFunding": 755000,
+        "singleFunding": 755000,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "16152",
+        "name": "Mohamed Bin Zayed Foundation For Humanity",
+        "totalFunding": 1500000,
+        "singleFunding": 1500000,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "3776",
+        "name": "Denmark, Government of",
+        "totalFunding": 54566,
+        "singleFunding": 54566,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2681",
+        "name": "Die Uno-Flüchtlingshilfe Stiftung",
+        "totalFunding": 265258,
+        "singleFunding": 265258,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4547",
+        "name": "Greece, Government of",
+        "totalFunding": 356718,
+        "singleFunding": 356718,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "3774",
+        "name": "Italy, Government of",
+        "totalFunding": 1636604,
+        "singleFunding": 1636604,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "10268",
+        "name": "UN agencies and NGOs (Confidential)",
+        "totalFunding": 15831,
+        "singleFunding": 15831,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "5319",
+        "name": "Spain, Government of",
+        "totalFunding": 2161322,
+        "singleFunding": 2161322,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "4396",
+        "name": "Office for the Coordination of Humanitarian Affairs",
+        "totalFunding": 6349386,
+        "singleFunding": 6349386,
+        "overlapFunding": 0,
+        "sharedFunding": 0,
+        "onBoundaryFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "2178",
+        "onBoundaryFunding": 1010305,
+        "name": "Norwegian Refugee Council",
+        "totalFunding": 0,
+        "singleFunding": 0,
+        "overlapFunding": 0,
+        "sharedFunding": 0
+       },
+       {
+        "type": "Organization",
+        "direction": "source",
+        "id": "225",
+        "onBoundaryFunding": 300000,
+        "name": "Children's Investment Fund Foundation",
+        "totalFunding": 0,
+        "singleFunding": 0,
+        "overlapFunding": 0,
+        "sharedFunding": 0
+       }
+      ],
+      "totalBreakdown": {
+       "objectsSum": 1217361365,
+       "overlapCorrection": 0,
+       "sharedFunding": 0,
+       "totalFunding": 1217361365
+      }
+     }
+    ]
+   }
+  }
+ }
+}

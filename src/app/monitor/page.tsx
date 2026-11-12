@@ -14,10 +14,12 @@ import { useFusionStore } from '@/store/useFusionStore';
 import { useLiveStore } from '@/store/useLiveStore';
 import { useStrategicStore } from '@/store/useStrategicStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { useOpenDataStore } from '@/store/useOpenDataStore';
 import { fetchFIRMS, fetchCopernicus, fetchACLED } from '@/lib/api';
 import { ACLED_FALLBACK } from '@/data/acled-fallback';
 import { DRONE_ISR } from '@/data/drones';
 import { ALL_ITEMS, WORKSPACE_VIEWS, type ViewKey } from '@/lib/views';
+import { LAYERS } from '@/lib/layers';
 import { useT } from '@/lib/i18n';
 import { filterFeed } from '@/lib/intel/derive';
 import { preloadMGRS } from '@/lib/mgrs';
@@ -117,8 +119,11 @@ function OverviewSide({ activeView, mobileVisible }: { activeView: ViewKey; mobi
   const query = useFeedStore((s) => s.searchQuery);
   const [tab, setTab] = useState<'latest' | 'situation'>('latest');
   const latest = useMemo(() => filterFeed(events, { range, query }).slice(0, 200), [events, range, query]);
+  const demo = useSettingsStore((s) => s.dataMode) === 'demo';
 
-  if (activeView !== 'overview') return <RightPanel activeView={activeView} mobileVisible={mobileVisible} />;
+  /* The legacy side panel reads the illustrative datasets; outside
+     demonstration mode every map view shows the live feed instead. */
+  if (activeView !== 'overview' && demo) return <RightPanel activeView={activeView} mobileVisible={mobileVisible} />;
 
   return (
     <aside className={`${mobileVisible ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-[340px] shrink-0 bg-b1 md:border-l border-b3 min-h-0`}
@@ -126,12 +131,12 @@ function OverviewSide({ activeView, mobileVisible }: { activeView: ViewKey; mobi
       <div className="shrink-0 flex items-center px-3 py-2 border-b border-b3">
         <div className="flex" role="group">
           <SegButton active={tab === 'latest'} onClick={() => setTab('latest')}>{t('ov.latest')}</SegButton>
-          <SegButton active={tab === 'situation'} onClick={() => setTab('situation')}>Situation</SegButton>
+          {demo && <SegButton active={tab === 'situation'} onClick={() => setTab('situation')}>Situation</SegButton>}
         </div>
       </div>
       <div className="flex-1 min-h-0 flex">
-        {tab === 'situation' ? <RightPanel activeView={activeView} mobileVisible embedded /> : !seeded ? <div className="flex-1"><Skeleton rows={5} /></div>
-          : latest.length === 0 ? <div className="flex-1"><EmptyState title={t('feed.empty')}>{t('feed.empty.hint')}</EmptyState></div>
+        {tab === 'situation' && demo ? <RightPanel activeView={activeView} mobileVisible embedded /> : !seeded ? <div className="flex-1"><Skeleton rows={5} /></div>
+          : latest.length === 0 ? <div className="flex-1"><EmptyState title={t(demo ? 'feed.empty' : 'feed.empty.real')}>{t(demo ? 'feed.empty.hint' : 'feed.empty.real.hint')}</EmptyState></div>
           : <div className="flex-1 min-w-0"><IntelFeed events={latest} selectedId={selectedId} onSelect={select} compact /></div>}
       </div>
     </aside>
@@ -169,6 +174,7 @@ export default function MonitorPage() {
   const scale         = useSettingsStore((s) => s.scale);
   const sidePanelOpen = useSettingsStore((s) => s.sidePanelOpen);
   const toggleSide    = useSettingsStore((s) => s.toggleSidePanel);
+  const demo          = useSettingsStore((s) => s.dataMode) === 'demo';
 
   const fetchedRef  = useRef(false);
   const seededRef   = useRef(false);
@@ -187,6 +193,13 @@ export default function MonitorPage() {
   }, [scale]);
 
   useEffect(() => { useStrategicStore.getState().hydrate(); void preloadMGRS(); }, []);
+
+  /* Layers drawn from illustrative datasets cannot be on outside
+     demonstration mode, whatever the defaults or an earlier session set. */
+  useEffect(() => {
+    if (demo) return;
+    for (const l of LAYERS) if (l.demoOnly) useMapStore.getState().setLayer(l.key, false);
+  }, [demo]);
 
   /* On phones, surface the situation panel when a map marker is tapped */
   useEffect(() => {
@@ -210,8 +223,11 @@ export default function MonitorPage() {
       classification: r.classification, desc: r.desc, id: r.id,
     }));
 
-    setEvents([...ACLED_FALLBACK, ...droneEvents]);
-    setStatus('drone', 'ok');
+    /* The bundled ACLED set and the airborne-sensor records are
+       illustrative. They load in demonstration mode only; in real mode
+       the feed store starts empty and holds what the APIs return. */
+    setEvents(demo ? [...ACLED_FALLBACK, ...droneEvents] : []);
+    setStatus('drone', demo ? 'ok' : 'idle');
 
     setStatus('acled', 'loading');
     const acledData = await fetchACLED(acledKey, acledEmail);
@@ -221,7 +237,7 @@ export default function MonitorPage() {
       push(`${acledData.length} événements ACLED chargés`, 'success');
     } else {
       setStatus('acled', acledKey ? 'error' : 'idle');
-      if (acledKey) push('ACLED indisponible — données de secours actives', 'warn');
+      if (acledKey) push(demo ? 'ACLED indisponible — données de secours actives' : 'ACLED indisponible', 'warn');
     }
 
     setStatus('firms', 'loading');
@@ -242,7 +258,7 @@ export default function MonitorPage() {
     } else {
       setStatus('copernicus', 'error');
     }
-  }, [session, firmKey, acledKey, acledEmail, setEvents, addEvents, setStatus, reset, push]);
+  }, [session, firmKey, acledKey, acledEmail, setEvents, addEvents, setStatus, reset, push, demo]);
 
   /* Initial fetch */
   useEffect(() => {
@@ -256,16 +272,21 @@ export default function MonitorPage() {
      Guarded by a ref as well as the store flag: the effect can fire
      twice under React strict mode. */
   useEffect(() => {
-    if (!session || fusionSeeded || seededRef.current || !feedCount) return;
+    /* Demonstration waits for the bundled datasets so they are fused
+       with the simulated history. Real mode has nothing to wait for. */
+    if (!session || fusionSeeded || seededRef.current || (demo && !feedCount)) return;
     seededRef.current = true;
-    seedFusion(useFeedStore.getState().events, session.user.toUpperCase());
+    seedFusion(useFeedStore.getState().events, session.user.toUpperCase(), demo);
     void useLiveStore.getState().refreshAll();
     useLiveStore.getState().startAuto();
-  }, [session, fusionSeeded, seedFusion, feedCount]);
+    void useOpenDataStore.getState().refreshAll();
+    useOpenDataStore.getState().startAuto();
+  }, [session, fusionSeeded, seedFusion, feedCount, demo]);
 
   useEffect(() => () => {
     stopFusion();
     useLiveStore.getState().stopAuto();
+    useOpenDataStore.getState().stopAuto();
   }, [stopFusion]);
 
   /* Auto-refresh timer */
@@ -344,9 +365,9 @@ export default function MonitorPage() {
       </a>
 
       {/* Environment notice — always visible, on every screen. */}
-      <div className="classify h-5 flex items-center justify-center shrink-0 truncate px-2" role="note" data-testid="demo-stripe">
-        <span className="sm:hidden">NKOYI — {t('app.demo.short')}</span>
-        <span className="hidden sm:inline">NKOYI — {t('app.demo')}</span>
+      <div className="classify h-5 flex items-center justify-center shrink-0 truncate px-2" role="note" data-testid="demo-stripe" data-mode={demo ? 'demo' : 'real'}>
+        <span className="sm:hidden">NKOYI — {t(demo ? 'app.demo.short' : 'app.real.short')}</span>
+        <span className="hidden sm:inline">NKOYI — {t(demo ? 'app.demo' : 'app.real')}</span>
       </div>
 
       <div className="flex flex-1 overflow-hidden min-h-0">
@@ -448,7 +469,9 @@ export default function MonitorPage() {
               )}
             </div>
 
-            {!isWorkspace && !mapOnly && (
+            {/* The lower panels (timeline, raw activity, audio demonstration)
+                are built on the illustrative datasets. */}
+            {!isWorkspace && !mapOnly && demo && (
               <BottomPanels
                 mobileSection={mobileTab === 'activity' ? 'activity' : mobileTab === 'comms' ? 'comms' : null}
               />
@@ -460,7 +483,7 @@ export default function MonitorPage() {
       {/* Mobile tab bar — map views only */}
       {!isWorkspace && (
         <nav className="flex md:hidden bg-b1 border-t border-b3 shrink-0 pb-[env(safe-area-inset-bottom)]" aria-label="Sections">
-          {MOBILE_TABS.map(({ key, fr, en, icon }) => (
+          {MOBILE_TABS.filter((m) => demo || (m.key !== 'activity' && m.key !== 'comms' && m.key !== 'intel')).map(({ key, fr, en, icon }) => (
             <button key={key} type="button" onClick={() => setMobileTab(key)} aria-current={mobileTab === key ? 'page' : undefined}
               className={`flex-1 flex flex-col items-center gap-1 pt-2 pb-1.5 border-t-2 transition-colors ${
                 mobileTab === key ? 'text-t1 border-amb' : 'text-t3 border-transparent'

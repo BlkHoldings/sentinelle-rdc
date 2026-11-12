@@ -72,13 +72,15 @@ export const DEM_SOURCE = {
 const ESRI_IMAGERY =
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
-/* CARTO's label-only overlay: place names and boundaries on transparent
-   background, so imagery keeps its detail while staying navigable. */
-const CARTO_LABELS =
-  'https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}@2x.png';
-
-const CARTO_DARK =
-  'https://basemaps.cartocdn.com/rastertiles/dark_nolabels/{z}/{x}/{y}@2x.png';
+/* Every tile service here is ESRI's public ArcGIS Online, which needs no
+   key. CARTO's raster basemaps were used before and now return tiles
+   watermarked "API KEY REQUIRED" — found only once the tiles could be
+   seen in a browser, which is the argument for looking. */
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
+const ESRI_DARK = `${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+/** Place names and boundaries on a transparent background, for imagery. */
+const ESRI_PLACES = `${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`;
+const ESRI_TOPO = `${ESRI}/World_Topo_Map/MapServer/tile/{z}/{y}/{x}`;
 
 const ESRI_ATTRIB = 'Imagery © Esri, Maxar, Earthstar Geographics';
 
@@ -128,13 +130,14 @@ export const BASEMAPS: BasemapDef[] = [
        the data. */
     style: rasterStyle(
       [
-        { id: 'carto-dark', tiles: [CARTO_DARK], maxzoom: 20 },
-        { id: 'carto-dark-labels', tiles: [CARTO_LABELS], maxzoom: 20, opacity: 0.75 },
+        /* No label layer: the build draws its own province and settlement
+           names, and two sets of labels for the same towns collide. */
+        { id: 'esri-dark', tiles: [ESRI_DARK], maxzoom: 16 },
       ],
-      '© OpenStreetMap, © CARTO',
+      'Esri, HERE, Garmin, © OpenStreetMap contributors',
     ),
-    attribution: '© OpenStreetMap, © CARTO',
-    probe: { kind: 'image', url: `https://basemaps.cartocdn.com/rastertiles/dark_nolabels/${PROBE_Z}/${PROBE_X}/${PROBE_Y}@2x.png` },
+    attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors',
+    probe: { kind: 'image', url: `${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/${PROBE_Z}/${PROBE_Y}/${PROBE_X}` },
   },
   {
     id: 'satellite',
@@ -158,25 +161,25 @@ export const BASEMAPS: BasemapDef[] = [
     style: rasterStyle(
       [
         { id: 'esri', tiles: [ESRI_IMAGERY], maxzoom: 19 },
-        { id: 'labels', tiles: [CARTO_LABELS], maxzoom: 18, tileSize: 512, opacity: 0.9 },
+        { id: 'labels', tiles: [ESRI_PLACES], maxzoom: 18, opacity: 0.9 },
       ],
-      `${ESRI_ATTRIB}, © CARTO`,
+      ESRI_ATTRIB,
     ),
-    attribution: `${ESRI_ATTRIB}, © CARTO`,
+    attribution: ESRI_ATTRIB,
     probe: { kind: 'image', url: ESRI_IMAGERY.replace('{z}', String(PROBE_Z)).replace('{y}', String(PROBE_Y)).replace('{x}', String(PROBE_X)) },
   },
   {
     id: 'topo',
     label: 'TOPO',
-    hint: 'Courbes de niveau et pistes — planification de mouvement',
+    hint: 'Carte topographique — relief, hydrographie, routes',
     maxZoom: 17,
     overlayContrast: 'onLight',
     style: rasterStyle(
-      [{ id: 'otm', tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'], maxzoom: 17 }],
-      '© OpenTopoMap, © OpenStreetMap',
+      [{ id: 'esri-topo', tiles: [ESRI_TOPO], maxzoom: 18 }],
+      'Esri, HERE, Garmin, FAO, USGS, © OpenStreetMap contributors',
     ),
-    attribution: '© OpenTopoMap (CC-BY-SA), © OpenStreetMap',
-    probe: { kind: 'image', url: `https://a.tile.opentopomap.org/${PROBE_Z}/${PROBE_X}/${PROBE_Y}.png` },
+    attribution: 'Esri, HERE, Garmin, FAO, USGS, © OpenStreetMap contributors',
+    probe: { kind: 'image', url: `${ESRI}/World_Topo_Map/MapServer/tile/${PROBE_Z}/${PROBE_Y}/${PROBE_X}` },
   },
   {
     id: 'terrain',

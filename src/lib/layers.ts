@@ -33,7 +33,7 @@ export type LayerOrigin =
   | 'analyst'   // drawn or adjudicated by the operator
   | 'static';   // curated dataset shipped with the build
 
-export type LayerGroupId = 'strategic' | 'fusion' | 'sources' | 'tactical' | 'reference' | 'live';
+export type LayerGroupId = 'satellite' | 'strategic' | 'fusion' | 'sources' | 'tactical' | 'reference' | 'live';
 
 export interface LegendEntry {
   color: string;
@@ -58,6 +58,10 @@ export interface LayerDef {
   minzoom?: number;
   /** Layer renders nothing until the operator asks for data. */
   onDemand?: boolean;
+  /** Drawn from an illustrative dataset: offered in demonstration mode only. */
+  demoOnly?: boolean;
+  /** A picture, not a set of features: it has no count. */
+  imagery?: boolean;
 }
 
 export interface LayerGroupDef {
@@ -90,6 +94,7 @@ export const LAYER_GROUPS: LayerGroupDef[] = [
   { id: 'tactical',  label: 'SITUATION',        hint: 'Contrôle du terrain et dispositif' },
   { id: 'reference', label: 'RÉFÉRENCE',        hint: 'Géographie fixe — localités, axes, points d’entrée' },
   { id: 'live',      label: 'FLUX TEMPS RÉEL',  hint: 'Upstreams interrogés en continu' },
+  { id: 'satellite', label: 'IMAGERIE SATELLITE', hint: 'NASA GIBS — images du jour précédent, sans clé' },
 ];
 
 export const LAYERS: LayerDef[] = [
@@ -160,6 +165,7 @@ export const LAYERS: LayerDef[] = [
   },
   {
     key: 'drone', label: 'UAV / ISR', group: 'sources',
+    demoOnly: true,
     color: C.drone, origin: 'static',
     hint: 'Relevés de capteurs aéroportés — SECRET',
     legend: [
@@ -173,6 +179,7 @@ export const LAYERS: LayerDef[] = [
   /* ── Situation ─────────────────────────────────────────────── */
   {
     key: 'zone', label: 'CONTRÔLE DU TERRAIN', group: 'tactical',
+    demoOnly: true,
     color: C.alert, origin: 'static',
     hint: 'Emprises approximatives — GoE, JMAC, ACLED',
     legend: [
@@ -183,6 +190,7 @@ export const LAYERS: LayerDef[] = [
   },
   {
     key: 'mil', label: 'POSITIONS', group: 'tactical',
+    demoOnly: true,
     color: C.mag, origin: 'static',
     hint: 'Dispositif FARDC / MONUSCO / sites PDI — SECRET',
     legend: [
@@ -271,6 +279,38 @@ export const LAYERS: LayerDef[] = [
     color: C.grn, origin: 'live',
     hint: 'Requête Overpass sur la vue courante — à la demande',
     onDemand: true,
+  },
+  {
+    key: 'eonet', label: 'ÉVÉNEMENTS NATURELS', group: 'live',
+    color: C.fire, origin: 'live',
+    hint: 'NASA EONET — feux, volcans, inondations des 60 derniers jours',
+    legend: [{ color: C.fire, label: 'Événement naturel', shape: 'square' }],
+  },
+  {
+    key: 'rivers', label: 'DÉBIT DES COURS D’EAU', group: 'live',
+    color: C.blu, origin: 'live',
+    hint: 'GloFAS — débit modélisé du jour et tendance, sept points du bassin',
+    legend: [
+      { color: C.blu, label: 'Stable ou en baisse', shape: 'square' },
+      { color: C.amb, label: 'En hausse (> +15 % sur 7 j)', shape: 'square' },
+    ],
+  },
+
+  /* ── Satellite imagery ───────────────────────────────────────── */
+  {
+    key: 'sat_true', label: 'COULEURS RÉELLES (VEILLE)', group: 'satellite',
+    color: C.grn, origin: 'live', imagery: true,
+    hint: 'MODIS Terra, 250 m — la mosaïque d’hier. Nuages compris : c’est ce que le capteur a vu.',
+  },
+  {
+    key: 'sat_rain', label: 'PRÉCIPITATIONS (VEILLE)', group: 'satellite',
+    color: C.blu, origin: 'live', imagery: true,
+    hint: 'IMERG, ~10 km — taux de précipitation estimé par satellite',
+  },
+  {
+    key: 'sat_night', label: 'LUMIÈRES NOCTURNES 2016', group: 'satellite',
+    color: C.amb, origin: 'static', imagery: true,
+    hint: 'Black Marble — composite de référence 2016, pas une image récente',
   },
 ];
 

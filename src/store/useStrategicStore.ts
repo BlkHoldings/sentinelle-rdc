@@ -28,6 +28,7 @@ import {
   validateRecord, newId, type StrategicRecord, type FieldErrors, type VerificationStatus,
 } from '@/lib/strategic/model';
 import { SEED_RECORDS } from '@/lib/strategic/seed';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 const KEY = 'nkoyi.strategic.v1';
 const SCHEMA_VERSION = 1;
@@ -156,12 +157,17 @@ export const useStrategicStore = create<StrategicState>((set, get) => {
 
   return {
     hydrated: false, persisted: true,
-    records: SEED_RECORDS, reports: [], audit: [],
+    records: [], reports: [], audit: [],
 
     hydrate() {
       if (get().hydrated) return;
       const { data, persisted } = load();
-      set({ hydrated: true, persisted, records: data.records, reports: data.reports, audit: data.audit });
+      /* Seed records are invented examples. Outside demonstration mode
+         they are not shown anywhere — the library starts empty and holds
+         what analysts enter. */
+      const demo = useSettingsStore.getState().dataMode === 'demo';
+      const records = demo ? data.records : data.records.filter((r) => !r.illustrative);
+      set({ hydrated: true, persisted, records, reports: data.reports, audit: data.audit });
     },
 
     saveRecord(r, actor) {

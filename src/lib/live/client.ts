@@ -98,6 +98,16 @@ export async function fetchJSON<T>(
         continue;
       }
 
+      /* 204: the upstream answered and has nothing to report. That is a
+         healthy source with an empty result, not a failure — GDACS does
+         this whenever no alert is active for the country. */
+      if (res.status === 204) {
+        return {
+          ok: true, health: 'ok', data: null, count: 0, latencyMs,
+          fetchedAt: new Date().toISOString(), url,
+        };
+      }
+
       const data = (await res.json()) as T;
       return {
         ok: true, health: 'ok', data, count: 0, latencyMs,

@@ -27,8 +27,7 @@ import {
   fetchReliefWeb, toRawReports, RELIEFWEB_META, type ReliefWebReport,
 } from '@/lib/live/reliefweb';
 import { fetchOsmInfrastructure, OSM_META, type OsmFeature } from '@/lib/live/osm';
-import { getPipeline } from '@/lib/fusion/pipeline';
-import { TOPICS } from '@/lib/fusion/bus';
+import { useFusionStore } from '@/store/useFusionStore';
 
 /** Refresh intervals, in ms, matched to each upstream's real cadence. */
 const CADENCE = {
@@ -105,19 +104,13 @@ export const useLiveStore = create<LiveState>((set, get) => ({
     const fresh = res.data.filter((r) => !seen.has(r.id));
     if (!fresh.length) return;
 
-    try {
-      const pipe = getPipeline();
-      for (const raw of toRawReports(fresh)) {
-        pipe.ingest(raw, TOPICS.RAW_FIELD);
-      }
-      pipe.flush(true);
-      const next = new Set(seen);
-      for (const r of fresh) next.add(r.id);
-      set({ ingestedIds: next });
-    } catch {
-      // The pipeline may not be seeded yet if the operator opened the data
-      // view first. The reports are still shown; they just miss this pass.
-    }
+    /* Through the fusion store, which owns the one engine the interface
+       reads. An earlier version wrote to a second, private engine
+       instance, so these reports were fused and then never shown. */
+    useFusionStore.getState().ingestReports(toRawReports(fresh), 'field');
+    const next = new Set(seen);
+    for (const r of fresh) next.add(r.id);
+    set({ ingestedIds: next });
   },
 
   async queryOsm(bbox) {

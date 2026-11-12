@@ -39,6 +39,7 @@ import { EVENT_TYPE_SEVERITY, type FusedEvent, type Adjudication } from '@/lib/f
 import { type ReliabilityState, emptyReliability } from '@/lib/fusion/reliability';
 import type { PairScore } from '@/lib/fusion/dedupe';
 import type { IntelEvent } from '@/types/intel';
+import type { RawReport } from '@/lib/fusion/schema';
 
 const RELIABILITY_KEY = 'sentinelle.reliability.v1';
 
@@ -78,7 +79,12 @@ export interface FusionState {
   analyst: string;
   lastScanMs: number;
 
-  seed: (intelEvents: IntelEvent[], analyst: string) => void;
+  /** `demo` adds the simulated stream and simulated telemetry. Without
+   *  it the engine holds only what real upstreams deliver. */
+  seed: (intelEvents: IntelEvent[], analyst: string, demo?: boolean) => void;
+  /** Hand real reports to the engine. Queued if it has not started. */
+  ingestReports: (reports: RawReport[], topic: 'news' | 'field') => void;
+  demo: boolean;
   start: () => void;
   stop: () => void;
   select: (id: string | null) => void;
@@ -99,6 +105,7 @@ let tickTimer: ReturnType<typeof setInterval> | null = null;
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 let telemetryTimer: ReturnType<typeof setInterval> | null = null;
 let scanTimer: ReturnType<typeof setInterval> | null = null;
+let pending: { reports: RawReport[]; topic: typeof TOPICS.RAW_NEWS | typeof TOPICS.RAW_FIELD }[] = [];
 
 const STREAM_TICK_MS = 6_000;
 const FLUSH_MS = 4_000;
@@ -120,6 +127,7 @@ export const useFusionStore = create<FusionState>((set, get) => ({
   feeds: [],
   selectedId: null,
   analyst: 'ANALYSTE',
+  demo: false,
   lastScanMs: 0,
 
   /* ── Seeding ────────────────────────────────────────────────────
@@ -127,29 +135,36 @@ export const useFusionStore = create<FusionState>((set, get) => ({
      history so the analyst opens onto a populated theatre rather than an
      empty queue, and folds in whatever the real ACLED/FIRMS/UAS feeds
      returned so both paths share one fusion layer. */
-  seed(intelEvents, analyst) {
+  seed(intelEvents, analyst, demo = false) {
     if (get().seeded) return;
 
     pipeline = new FusionPipeline();
     pipeline.setReliability(loadReliability());
     pipeline.start();
 
-    stream = new SyntheticStream(Date.now() % 1_000_000);
-    telecom = new TelecomTelemetry();
+    /* Simulated inputs exist only in demonstration mode. In real mode
+       there is no synthetic backfill, no synthetic tick and no simulated
+       connectivity telemetry: an empty engine is the correct picture of
+       "no upstream has delivered anything yet". */
+    let monitors: ProvinceMonitor[] = [];
+    if (demo) {
+      stream = new SyntheticStream(Date.now() % 1_000_000);
+      telecom = new TelecomTelemetry();
 
-    // Warm the connectivity baselines on 14 days of history so the
-    // detector has a seasonal profile before the first live sample.
-    const monitors = MONITORED_PROVINCES.map((p) => createProvinceMonitor(p));
-    const t0 = Date.now() - 14 * 86_400_000;
-    for (const m of monitors) {
-      for (let h = 0; h < 14 * 24; h++) {
-        const at = new Date(t0 + h * 3_600_000);
-        pushSample(m, telecom.sample(m.province, at), at);
+      // Warm the connectivity baselines on 14 days of history so the
+      // detector has a seasonal profile before the first live sample.
+      monitors = MONITORED_PROVINCES.map((p) => createProvinceMonitor(p));
+      const t0 = Date.now() - 14 * 86_400_000;
+      for (const m of monitors) {
+        for (let h = 0; h < 14 * 24; h++) {
+          const at = new Date(t0 + h * 3_600_000);
+          pushSample(m, telecom.sample(m.province, at), at);
+        }
       }
-    }
 
-    for (const { report, topic } of stream.backfill(240, 45)) {
-      pipeline.ingest(report, topic as typeof TOPICS.RAW_NEWS);
+      for (const { report, topic } of stream.backfill(240, 45)) {
+        pipeline.ingest(report, topic as typeof TOPICS.RAW_NEWS);
+      }
     }
     for (const { report, topic } of bridgeIntelEvents(intelEvents)) {
       pipeline.ingest(report, topic as typeof TOPICS.RAW_NEWS);
@@ -164,9 +179,13 @@ export const useFusionStore = create<FusionState>((set, get) => ({
       });
     });
 
+    // Anything real that arrived before the engine was up.
+    for (const q of pending) for (const r of q.reports) pipeline.ingest(r, q.topic);
+    pending = [];
+
     const snap = pipeline.flush(true);
     set({
-      seeded: true, analyst,
+      seeded: true, analyst, demo,
       monitors,
       events: snap.events,
       reviewPairs: snap.reviewPairs,
@@ -179,7 +198,7 @@ export const useFusionStore = create<FusionState>((set, get) => ({
   },
 
   start() {
-    if (get().running || !pipeline || !stream || !telecom) return;
+    if (get().running || !pipeline) return;
 
     tickTimer = setInterval(() => {
       if (!pipeline || !stream) return;
@@ -211,6 +230,14 @@ export const useFusionStore = create<FusionState>((set, get) => ({
     scanTimer = setInterval(() => { get().runScan(); }, SCAN_MS);
 
     set({ running: true });
+  },
+
+  ingestReports(reports, kind) {
+    if (!reports.length) return;
+    const topic = kind === 'news' ? TOPICS.RAW_NEWS : TOPICS.RAW_FIELD;
+    if (!pipeline) { pending.push({ reports, topic }); return; }
+    for (const r of reports) pipeline.ingest(r, topic);
+    pipeline.flush(true);
   },
 
   stop() {

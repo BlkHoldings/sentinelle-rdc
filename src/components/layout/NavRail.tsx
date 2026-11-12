@@ -36,6 +36,7 @@ export default function NavRail({ activeView, onViewChange, badges = {}, drawer 
   const collapsedPref = useSettingsStore((s) => s.navCollapsed);
   const toggleNav = useSettingsStore((s) => s.toggleNav);
   const collapsed = !drawer && collapsedPref;
+  const demo = useSettingsStore((s) => s.dataMode) === 'demo';
 
   return (
     <nav
@@ -65,7 +66,7 @@ export default function NavRail({ activeView, onViewChange, badges = {}, drawer 
             )}
             {!group.label && group.id === 'system' && <div className="mx-3 my-1.5 border-t border-b3" role="separator" />}
             <ul>
-              {group.items.map((item) => {
+              {group.items.filter((item) => demo || !item.demoOnly).map((item) => {
                 const active = activeView === item.key;
                 const badge = badges[item.key] ?? 0;
                 const label = t(item.label);

@@ -8,12 +8,17 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type Lang = 'fr' | 'en';
 export type TextScale = 'md' | 'lg' | 'xl';
+/** 'real': only data fetched from named upstreams. 'demo': adds the
+ *  simulated stream and the illustrative datasets, all labelled. */
+export type DataMode = 'real' | 'demo';
 
 interface SettingsState {
   lang: Lang;
   scale: TextScale;
   navCollapsed: boolean;
   sidePanelOpen: boolean;
+  dataMode: DataMode;
+  setDataMode: (m: DataMode) => void;
   setLang: (l: Lang) => void;
   setScale: (s: TextScale) => void;
   toggleNav: () => void;
@@ -27,6 +32,8 @@ export const useSettingsStore = create<SettingsState>()(
       scale: 'md',
       navCollapsed: false,
       sidePanelOpen: true,
+      dataMode: 'real',
+      setDataMode: (dataMode) => set({ dataMode }),
       setLang: (lang) => set({ lang }),
       setScale: (scale) => set({ scale }),
       toggleNav: () => set((s) => ({ navCollapsed: !s.navCollapsed })),

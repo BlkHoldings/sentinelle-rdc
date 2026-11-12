@@ -15,6 +15,8 @@ import { useMemo } from 'react';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useFeedStore } from '@/store/useFeedStore';
 import { useLiveStore } from '@/store/useLiveStore';
+import { useOpenDataStore } from '@/store/useOpenDataStore';
+import type { FetchResult } from '@/lib/live/client';
 import { SOURCE_PROFILES, posteriorFor } from '@/lib/fusion/reliability';
 import type { EventStatus } from '@/lib/fusion/schema';
 import { useT, eventTypeLabel, familyLabel, statusKey } from '@/lib/i18n';
@@ -148,12 +150,23 @@ export function RegionalPanel() {
   );
 }
 
+/** Loading, failed, or the content — the three states every live card has. */
+function Live<T>({ r, name, children }: { r: FetchResult<T>; name: string; children: (d: T) => React.ReactNode }) {
+  const { t } = useT();
+  if (r.data) return <>{children(r.data)}</>;
+  if (r.health === 'loading' || r.health === 'idle') return <Skeleton rows={2} />;
+  return <p className="text-2xs text-amb leading-relaxed" data-testid="src-down">{t('src.down', { name })} <span className="text-t3">{r.error}</span></p>;
+}
+
 export function HumanitarianPanel({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
   const { t, lang } = useT();
   const { events, seeded, range, inWin } = useWindow();
   const select = useFusionStore((s) => s.select);
   const reliefweb = useLiveStore((s) => s.reliefweb);
   const gdacs = useLiveStore((s) => s.gdacs);
+  const displacement = useOpenDataStore((s) => s.displacement);
+  const who = useOpenDataStore((s) => s.who);
+  const hydro = useOpenDataStore((s) => s.hydro);
 
   const hum = useMemo(() => inWin.filter((e) => categoryOf(e) === 'humanitarian'), [inWin]);
   const days = RANGE_DAYS[range];
@@ -176,6 +189,89 @@ export function HumanitarianPanel({ onNavigate }: { onNavigate: (v: ViewKey) => 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {!seeded ? <Skeleton rows={6} /> : (
           <div className="p-3 md:p-4 grid gap-3 lg:grid-cols-2 max-w-[90rem]" data-testid="humanitarian">
+            {/* Official series first: they are the reference figures. */}
+            <Card title={t('hum.official')} hint={t('hum.official.hint')} className="lg:col-span-2" testid="hum-official">
+              <Live r={displacement} name="UNHCR">
+                {(rows) => {
+                  const data = rows.map((r) => ({
+                    year: `${r.year}`, idps: r.idpsUnhcr ?? 0, idmc: r.idpsIdmc ?? 0,
+                    abroad: r.refugeesAbroad ?? 0, hosted: r.refugeesHosted ?? 0,
+                  }));
+                  const last = rows[rows.length - 1];
+                  const n = (v: number | null) => (v == null ? '—' : v.toLocaleString('fr-FR'));
+                  return (
+                    <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+                      <div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                          {([['hum.series.idps', last.idpsUnhcr], ['hum.series.idmc', last.idpsIdmc], ['hum.series.abroad', last.refugeesAbroad], ['hum.series.hosted', last.refugeesHosted]] as const).map(([k, v]) => (
+                            <div key={k}>
+                              <div className="text-3xs text-t3 leading-tight">{t(k)}</div>
+                              <div className="font-data text-base text-t1 tabular-nums">{n(v)}</div>
+                              <div className="font-data text-3xs text-t3">{last.year}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <BarList
+                          rows={rows.map((r) => ({ key: String(r.year), label: String(r.year), value: r.idpsUnhcr ?? r.idpsIdmc ?? 0, color: '#58c4dc', note: t('hum.series.idps') }))}
+                          limit={12}
+                        />
+                      </div>
+                      <div className="lg:w-[26rem]">
+                        <DataTable
+                          head={[t('year'), t('hum.series.idps'), t('hum.series.idmc'), t('hum.series.abroad'), t('hum.series.hosted')]}
+                          rows={[...data].reverse().map((d) => [d.year, d.idps.toLocaleString('fr-FR'), d.idmc.toLocaleString('fr-FR'), d.abroad.toLocaleString('fr-FR'), d.hosted.toLocaleString('fr-FR')])}
+                        />
+                      </div>
+                    </div>
+                  );
+                }}
+              </Live>
+            </Card>
+
+            <Card title={t('hum.who')} testid="hum-who"
+              hint={who.fetchedAt ? `${t('feed.updated')} ${ago(who.fetchedAt, lang)}` : undefined}>
+              <Live r={who} name="OMS">
+                {(items) => items.length === 0 ? <p className="text-2xs text-t3">{t('hum.who.none')}</p> : (
+                  <ul className="divide-y divide-b3 max-h-72 overflow-y-auto -mx-3">
+                    {items.map((w) => (
+                      <li key={w.id} className="px-3 py-2">
+                        <a href={w.url} target="_blank" rel="noopener noreferrer" className="text-xs text-t1 hover:text-blu hover:underline leading-snug">{w.title}</a>
+                        <div className="font-data text-3xs text-t3 mt-0.5">{w.published.slice(0, 10)} · {w.id}</div>
+                        <p className="text-2xs text-t2 mt-1 leading-relaxed line-clamp-4">{w.summary}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Live>
+            </Card>
+
+            <Card title={t('hum.rivers')} hint={t('hum.rivers.hint')} className="lg:col-span-2" testid="hum-rivers">
+              <Live r={hydro} name="GloFAS">
+                {(rows) => (
+                  <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2 xl:grid-cols-4">
+                    {rows.map((r) => {
+                      const pct = r.ratio == null ? null : Math.round((r.ratio - 1) * 100);
+                      const rising = pct != null && pct > 15;
+                      return (
+                        <div key={r.name} className="flex items-end gap-2 border-b border-b3 pb-1.5">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs text-t1 truncate">{r.name} <span className="text-t3 text-2xs">· {r.river}</span></div>
+                            <div className="font-data text-2xs text-t2 tabular-nums">{r.today == null ? '—' : `${Math.round(r.today).toLocaleString('fr-FR')} m³/s`}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`font-data text-2xs tabular-nums ${rising ? 'text-amb' : 'text-t2'}`}>
+                              {pct == null ? '—' : `${pct >= 0 ? '▲ +' : '▼ '}${pct} %`} <span className="text-t3">{t('hum.rivers.vsWeek')}</span>
+                            </div>
+                            <div className="font-data text-3xs text-t3">{t('hum.rivers.peak')} {r.forecastPeakDate.slice(5) || '—'}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </Live>
+            </Card>
+
             <ChartCard
               title={t('hum.trend')} empty={daily.every((d) => d.humanitarian === 0)} testid="hum-trend"
               chart={<TrendChart data={daily} xKey="day" label={t('hum.trend')}
@@ -198,7 +294,7 @@ export function HumanitarianPanel({ onNavigate }: { onNavigate: (v: ViewKey) => 
             <Card title={t('hum.reliefweb')} testid="hum-reliefweb"
               hint={reliefweb.fetchedAt ? `${t('feed.updated')} ${ago(reliefweb.fetchedAt, lang)}` : undefined}>
               {reliefweb.health === 'loading' ? <Skeleton rows={2} />
-                : rwDown ? <p className="text-2xs text-amb leading-relaxed" data-testid="rw-down">{t('hum.reliefweb.down')}</p>
+                : rwDown ? <p className="text-2xs text-amb leading-relaxed" data-testid="rw-down">{reliefweb.error || t('hum.reliefweb.down')}</p>
                 : !reliefweb.data?.length ? <p className="text-2xs text-t3">{t('hum.reliefweb.empty')}</p>
                 : (
                   <ul className="divide-y divide-b3 max-h-64 overflow-y-auto -mx-3">

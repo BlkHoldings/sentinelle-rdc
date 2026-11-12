@@ -11,6 +11,8 @@ import { useDrawStore, rectRing, circleRing } from '@/store/useDrawStore';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useLiveStore } from '@/store/useLiveStore';
 import { useStrategicStore } from '@/store/useStrategicStore';
+import { useOpenDataStore } from '@/store/useOpenDataStore';
+import { SAT_LAYERS, gibsTileUrl } from '@/lib/live/opendata';
 import { standingLabel } from '@/lib/strategic/model';
 import { OSM_CATEGORY_COLOR } from '@/lib/live/osm';
 import type { IsrAssessment } from '@/lib/live/weather';
@@ -138,6 +140,8 @@ export default function GlobeMapInner() {
   const setZoom       = useMapStore((s) => s.setZoom);
   const scanClusters  = useFusionStore((s) => s.clusters);
   const strategic     = useStrategicStore((s) => s.records);
+  const eonet         = useOpenDataStore((s) => s.eonet.data);
+  const rivers        = useOpenDataStore((s) => s.hydro.data);
   /* One predicate for "is this layer drawn", so solo cannot be honoured
      by some layers and ignored by others. */
   const on = useCallback((k: LayerKey) => isShown({ layers, solo }, k), [layers, solo]);
@@ -806,6 +810,16 @@ export default function GlobeMapInner() {
              raw points → fused points → DOM markers. Areas first so no
              polygon ever covers the point it contains. ══ */}
 
+      {/* Satellite imagery, directly above the basemap and under every
+          overlay. Tile URLs carry the image date, so the layer is the
+          picture of one stated day and not an undated mosaic. */}
+      {SAT_LAYERS.filter((l) => on(l.key)).map((l) => (
+        <Source key={l.key} id={`${l.key}-src`} type="raster" tiles={[gibsTileUrl(l)]} tileSize={256} maxzoom={l.maxzoom}
+          attribution="NASA GIBS / EOSDIS">
+          <Layer id={`${l.key}-layer`} type="raster" paint={{ 'raster-opacity': (l.key === 'sat_rain' ? 0.75 : 0.9) * op(l.key) }} />
+        </Source>
+      ))}
+
       {/* Administrative outlines and the outside-country dim */}
       {on('bounds') && bounds && maskGeoJSON && (
         <>
@@ -1116,6 +1130,55 @@ export default function GlobeMapInner() {
               className="w-3.5 h-3.5 border-2 bg-b0/85 flex items-center justify-center hover:scale-125 transition-transform"
               style={{ borderColor: color, opacity: op('dossiers') }}>
               <span className="w-1 h-1" style={{ background: color }} />
+            </button>
+          </Marker>
+        );
+      })}
+
+      {/* NASA EONET natural events */}
+      {on('eonet') && (eonet ?? []).map((ev) => (
+        <Marker key={`eo-${ev.id}`} longitude={ev.lon} latitude={ev.lat} anchor="center"
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            setMapFeature({
+              layer: 'eonet', title: ev.title, color: C.fire, lon: ev.lon, lat: ev.lat,
+              subtitle: ev.category,
+              rows: [['DATE', fmtZ(ev.date)], ['ÉTAT', ev.closed ? 'Clos' : 'En cours'], ['ORIGINE', ev.url.replace(/^https?:\/\//, '').split('/')[0]]],
+              body: 'Recensé par NASA EONET à partir de la source indiquée. Position : dernier point connu de l’événement.',
+            });
+          }}
+        >
+          <button title={ev.title}
+            className="w-3 h-3 rotate-45 border bg-b0/80 hover:scale-125 transition-transform"
+            style={{ borderColor: C.fire, opacity: (ev.closed ? 0.5 : 1) * op('eonet') }} />
+        </Marker>
+      ))}
+
+      {/* River discharge sites */}
+      {on('rivers') && (rivers ?? []).map((r) => {
+        const rising = r.ratio != null && r.ratio > 1.15;
+        const color = rising ? C.amb : C.blu;
+        const f = (v: number | null) => (v == null ? '—' : `${Math.round(v).toLocaleString('fr-FR')} m³/s`);
+        return (
+          <Marker key={`rv-${r.name}`} longitude={r.lon} latitude={r.lat} anchor="bottom"
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setMapFeature({
+                layer: 'rivers', title: `${r.river} à ${r.name}`, color, lon: r.lon, lat: r.lat,
+                rows: [
+                  ['DÉBIT DU JOUR', f(r.today)], ['MOYENNE 7 J', f(r.weekMean)],
+                  ['TENDANCE', r.ratio == null ? '—' : `${r.ratio >= 1 ? '+' : ''}${Math.round((r.ratio - 1) * 100)} %`],
+                  ['PIC PRÉVU', r.forecastPeak == null ? '—' : `${f(r.forecastPeak)} le ${r.forecastPeakDate.slice(5)}`],
+                ],
+                body: 'Valeurs issues du modèle hydrologique GloFAS, pas d’une station de mesure. À lire comme une tendance.',
+              });
+            }}
+          >
+            <button className="select-none flex flex-col items-center" style={{ opacity: op('rivers') }}>
+              <span className="bg-b1/95 border px-1 py-0.5 text-3xs font-data whitespace-nowrap rounded-sm" style={{ borderColor: color, color }}>
+                {r.name} {r.ratio == null ? '' : `${r.ratio >= 1 ? '▲' : '▼'}${Math.abs(Math.round((r.ratio - 1) * 100))}%`}
+              </span>
+              <span className="w-px h-1.5" style={{ background: color }} />
             </button>
           </Marker>
         );
