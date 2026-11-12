@@ -110,7 +110,7 @@ export default function LibraryPanel() {
             </select>
           </div>
 
-          <div className="px-3 md:px-4 py-1 text-t3 text-3xs font-mono tracking-wider" data-testid="record-count">
+          <div className="px-3 md:px-4 py-1 text-t3 text-3xs tracking-wider" data-testid="record-count">
             {shown.length} DOSSIER{shown.length > 1 ? 'S' : ''} SUR {records.length}
           </div>
 
@@ -132,18 +132,18 @@ export default function LibraryPanel() {
                       }`}
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-t1 text-xs font-mono font-bold">{r.title}</span>
+                        <span className="text-t1 text-xs font-bold">{r.title}</span>
                         {r.illustrative && <IllustrativeTag />}
                       </div>
-                      <div className="text-t3 text-2xs font-mono mt-0.5 line-clamp-2">{r.summary}</div>
+                      <div className="text-t3 text-2xs mt-0.5 line-clamp-2">{r.summary}</div>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                        <span className="text-t2 text-3xs font-mono tracking-wider">{r.sector.toUpperCase()} · {r.country}{r.region ? ` / ${r.region}` : ''}</span>
+                        <span className="text-t2 text-3xs tracking-wider">{r.sector.toUpperCase()} · {r.country}{r.region ? ` / ${r.region}` : ''}</span>
                         <ConfidenceTag value={r.confidence} />
                         <StatusTag value={r.status} />
-                        <span className={`text-3xs font-mono ${r.sources.length ? 'text-t3' : 'text-alert'}`}>
+                        <span className={`text-3xs ${r.sources.length ? 'text-t3' : 'text-alert'}`}>
                           {r.sources.length ? `${r.sources.length} source${r.sources.length > 1 ? 's' : ''}` : 'AUCUNE SOURCE'}
                         </span>
-                        <span className="text-3xs font-mono text-t3 ml-auto" title="Indice d’attention — voir Signaux">▲ {att.score}</span>
+                        <span className="text-3xs text-t3 ml-auto" title="Indice d’attention — voir Signaux">▲ {att.score}</span>
                       </div>
                     </button>
                   </li>
@@ -180,30 +180,30 @@ function RecordDetail({
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="mvn-label">{r.sector} · {r.country}{r.region ? ` / ${r.region}` : ''}</div>
-          <h2 className="text-t1 text-sm font-mono font-bold leading-snug">{r.title}</h2>
+          <h2 className="text-t1 text-sm font-bold leading-snug">{r.title}</h2>
         </div>
         <button onClick={onClose} aria-label="Fermer" className="text-t3 hover:text-t1 text-xs">✕</button>
       </div>
 
       {r.illustrative && (
-        <div className="border border-amb/40 bg-amb/10 px-2 py-1 text-amb text-2xs font-mono leading-snug">
+        <div className="border border-amb/40 bg-amb/10 px-2 py-1 text-amb text-2xs leading-snug">
           Contenu illustratif, inventé pour la démonstration. Ne pas citer. Le modifier en fait votre dossier.
         </div>
       )}
 
-      <p className="text-t2 text-2xs font-mono leading-relaxed">{r.summary}</p>
+      <p className="text-t2 text-2xs leading-relaxed">{r.summary}</p>
 
       <div className="flex flex-wrap gap-1.5">
         <ConfidenceTag value={r.confidence} />
         <StatusTag value={r.status} />
       </div>
-      <div className="text-t3 text-3xs font-mono">{standingLabel(r)}</div>
+      <div className="text-t3 text-3xs ">{standingLabel(r)}</div>
 
       {r.entities.length > 0 && (
         <div>
           <div className="mvn-label mb-0.5">ENTITÉS</div>
           <div className="flex flex-wrap gap-1">
-            {r.entities.map((e) => <span key={e} className="px-1 border border-b3 text-t2 text-3xs font-mono">{e}</span>)}
+            {r.entities.map((e) => <span key={e} className="px-1 border border-b3 text-t2 text-3xs ">{e}</span>)}
           </div>
         </div>
       )}
@@ -211,20 +211,20 @@ function RecordDetail({
       <div>
         <div className="mvn-label mb-0.5">SOURCES ({r.sources.length})</div>
         {r.sources.length === 0 ? (
-          <div className="text-alert text-2xs font-mono">Aucune source rattachée — ce dossier n’est étayé par rien.</div>
+          <div className="text-alert text-2xs ">Aucune source rattachée — ce dossier n’est étayé par rien.</div>
         ) : (
           <ul className="space-y-1.5">
             {r.sources.map((s) => (
               <li key={s.id} className="border border-b3 bg-b0 px-2 py-1.5">
-                <div className="text-t1 text-2xs font-mono font-bold break-words">{s.title}</div>
-                <div className="text-t2 text-3xs font-mono">{s.publisher}</div>
+                <div className="text-t1 text-2xs font-bold break-words">{s.title}</div>
+                <div className="text-t2 text-3xs ">{s.publisher}</div>
                 {/^https?:/i.test(s.url)
-                  ? <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-cyn text-3xs font-mono break-all hover:underline">{s.url}</a>
-                  : <div className="text-t2 text-3xs font-mono break-words">Réf. {s.url}</div>}
-                <div className="text-t3 text-3xs font-mono mt-0.5">
+                  ? <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-cyn text-3xs break-all hover:underline">{s.url}</a>
+                  : <div className="text-t2 text-3xs break-words">Réf. {s.url}</div>}
+                <div className="text-t3 text-3xs mt-0.5">
                   Publiée {s.published || 'date inconnue'} · consultée {s.retrieved} · {s.access}
                 </div>
-                {s.notes && <div className="text-t3 text-3xs font-mono mt-0.5 italic">{s.notes}</div>}
+                {s.notes && <div className="text-t3 text-3xs mt-0.5 italic">{s.notes}</div>}
               </li>
             ))}
           </ul>
@@ -233,14 +233,14 @@ function RecordDetail({
 
       <div>
         <div className="mvn-label mb-0.5">INDICE D’ATTENTION — {att.score}/100</div>
-        <ul className="text-3xs font-mono text-t3 space-y-0.5">
+        <ul className="text-3xs text-t3 space-y-0.5">
           {att.factors.length ? att.factors.map((f) => (
             <li key={f.label} className="flex gap-2"><span className="text-t2 w-7 text-right shrink-0">+{f.points}</span>{f.label}</li>
           )) : <li>Rien à signaler.</li>}
         </ul>
       </div>
 
-      <div className="text-t3 text-3xs font-mono">
+      <div className="text-t3 text-3xs ">
         Créé par {r.createdBy} · mis à jour {r.updatedAt.slice(0, 16).replace('T', ' ')} UTC
       </div>
 
@@ -276,12 +276,12 @@ function RecordForm({
   return (
     <form className="p-3 space-y-2.5" onSubmit={(e) => { e.preventDefault(); onSubmit(); }} noValidate data-testid="record-form">
       <div className="flex items-center gap-2">
-        <h2 className="text-t1 text-sm font-mono font-bold flex-1">{draft.title ? 'Modifier le dossier' : 'Nouveau dossier'}</h2>
+        <h2 className="text-t1 text-sm font-bold flex-1">{draft.title ? 'Modifier le dossier' : 'Nouveau dossier'}</h2>
         <button type="button" onClick={onCancel} aria-label="Annuler" className="text-t3 hover:text-t1 text-xs">✕</button>
       </div>
 
       {nErr > 0 && (
-        <div className="border border-alert/50 bg-alert/10 px-2 py-1 text-alert text-2xs font-mono" role="alert" data-testid="form-errors">
+        <div className="border border-alert/50 bg-alert/10 px-2 py-1 text-alert text-2xs " role="alert" data-testid="form-errors">
           {nErr} point{nErr > 1 ? 's' : ''} à corriger avant l’enregistrement.
         </div>
       )}
@@ -333,7 +333,7 @@ function RecordForm({
           </div>
         </Field>
       </div>
-      {errors.status && <div className="text-alert text-3xs font-mono" role="alert">▸ {errors.status}</div>}
+      {errors.status && <div className="text-alert text-3xs " role="alert">▸ {errors.status}</div>}
 
       <div>
         <div className="flex items-center gap-2 mb-1">
@@ -341,7 +341,7 @@ function RecordForm({
           <Btn onClick={() => set('sources', [...draft.sources, blankSource()])} testid="add-source">＋ SOURCE</Btn>
         </div>
         {draft.sources.length === 0 && (
-          <div className="text-t3 text-3xs font-mono">Un dossier sans source reste un brouillon et ne peut pas être mis en revue.</div>
+          <div className="text-t3 text-3xs ">Un dossier sans source reste un brouillon et ne peut pas être mis en revue.</div>
         )}
         <div className="space-y-2">
           {draft.sources.map((s, i) => {
@@ -350,7 +350,7 @@ function RecordForm({
               <fieldset key={s.id} className="border border-b3 bg-b0 p-2 space-y-1.5">
                 <div className="flex items-center">
                   <span className="mvn-label flex-1">SOURCE {i + 1}</span>
-                  <button type="button" className="text-t3 hover:text-alert text-3xs font-mono"
+                  <button type="button" className="text-t3 hover:text-alert text-3xs "
                     onClick={() => set('sources', draft.sources.filter((_, j) => j !== i))}>RETIRER</button>
                 </div>
                 <Field label="TITRE" error={er('title')}>

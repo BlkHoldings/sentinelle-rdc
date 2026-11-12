@@ -6,24 +6,24 @@ import { useMapStore } from '@/store/useMapStore';
 
 /* Affiliation color by event type — Maven: red=HOSTILE, amber=UNKNOWN, green=CONFIRM */
 const TYPE_COLOR: Record<string, string> = {
-  'Battles':                    '#e03030',
-  'Violence against civilians': '#d09820',
-  'Explosions/Remote violence': '#c83048',
-  'Strategic developments':     '#20c880',
-  'Drone Strike':               '#e03030',
-  'ISR Patrol':                 '#18d8f0',
-  'Reconnaissance':             '#18d8f0',
-  'Thermal Anomaly':            '#e06020',
-  'Night ISR':                  '#8060d8',
-  'Air/drone strike':           '#e03030',
-  'Drone Attack (Failed)':      '#d09820',
-  'Post-Strike BDA':            '#d09820',
-  'Maritime Patrol':            '#1e70f0',
-  'Humanitarian Corridor':      '#20c880',
-  'Border Monitoring':          '#18c8e0',
-  'Road Surveillance':          '#18c8e0',
-  'Damage Assessment':          '#d09820',
-  'Artillery Spotting':         '#8060d8',
+  'Battles':                    '#e5484d',
+  'Violence against civilians': '#e2a336',
+  'Explosions/Remote violence': '#d6577a',
+  'Strategic developments':     '#3fb984',
+  'Drone Strike':               '#e5484d',
+  'ISR Patrol':                 '#6fd3e6',
+  'Reconnaissance':             '#6fd3e6',
+  'Thermal Anomaly':            '#f0803c',
+  'Night ISR':                  '#9d8cff',
+  'Air/drone strike':           '#e5484d',
+  'Drone Attack (Failed)':      '#e2a336',
+  'Post-Strike BDA':            '#e2a336',
+  'Maritime Patrol':            '#6f9bff',
+  'Humanitarian Corridor':      '#3fb984',
+  'Border Monitoring':          '#58c4dc',
+  'Road Surveillance':          '#58c4dc',
+  'Damage Assessment':          '#e2a336',
+  'Artillery Spotting':         '#9d8cff',
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -62,7 +62,7 @@ export default function FeedCard({ event }: { event: IntelEvent }) {
     }
   };
 
-  const typeColor = TYPE_COLOR[event.type] ?? '#7890a8';
+  const typeColor = TYPE_COLOR[event.type] ?? '#9aa3b0';
   const typeLabel = TYPE_LABEL[event.type] ?? event.type.substring(0, 7).toUpperCase();
   const isLive    = event.status === 'TRACKING — LIVE';
   const isStrike  = event.status === 'CONFIRMED STRIKE';
@@ -81,16 +81,16 @@ export default function FeedCard({ event }: { event: IntelEvent }) {
       {/* Track header row */}
       <div className="flex items-center gap-2 px-2.5 pt-2 pb-1">
         <span
-          className="shrink-0 font-mono text-2xs font-bold tracking-widest px-1 py-px"
+          className="shrink-0 text-2xs font-bold tracking-widest px-1 py-px"
           style={{ color: typeColor, background: typeColor + '18' }}
         >
           {typeLabel}
         </span>
-        <span className="flex-1 text-t1 text-2xs font-mono font-medium truncate">
+        <span className="flex-1 text-t1 text-2xs font-medium truncate">
           {trunc(title, 32)}
         </span>
         {event.fatalities != null && event.fatalities > 0 && (
-          <span className="shrink-0 text-alert text-2xs font-mono font-bold">
+          <span className="shrink-0 text-alert text-2xs font-bold">
             ▲{event.fatalities}KIA
           </span>
         )}
@@ -98,7 +98,7 @@ export default function FeedCard({ event }: { event: IntelEvent }) {
 
       {/* Body text */}
       {body && (
-        <p className="text-t3 text-2xs font-mono leading-relaxed px-2.5 pb-1.5 line-clamp-2">
+        <p className="text-t3 text-2xs leading-relaxed px-2.5 pb-1.5 line-clamp-2">
           {body}
         </p>
       )}
@@ -107,22 +107,22 @@ export default function FeedCard({ event }: { event: IntelEvent }) {
       <div className="flex items-center gap-2 px-2.5 pb-2 flex-wrap">
         <div className={`w-1 h-1 shrink-0 ${SRC_DOT[event.src] ?? 'bg-t3'}`} />
         {event.date && (
-          <span className="text-t3 text-2xs font-mono">{fmtDate(event.date)}</span>
+          <span className="text-t3 text-2xs ">{fmtDate(event.date)}</span>
         )}
         {event.time && (
-          <span className="text-t3 text-2xs font-mono">{event.time}</span>
+          <span className="text-t3 text-2xs ">{event.time}</span>
         )}
         {event.admin1 && (
-          <span className="text-t3 text-2xs font-mono">{event.admin1}</span>
+          <span className="text-t3 text-2xs ">{event.admin1}</span>
         )}
         {event.platform && (
-          <span className="text-drone text-2xs font-mono">{event.platform}</span>
+          <span className="text-drone text-2xs ">{event.platform}</span>
         )}
         {isLive && (
-          <span className="text-alert text-2xs font-mono font-bold animate-pulse-fast">● LIVE</span>
+          <span className="text-alert text-2xs font-bold animate-pulse-fast">● LIVE</span>
         )}
         {isStrike && (
-          <span className="text-alert text-2xs font-mono">● CONFIRMED</span>
+          <span className="text-alert text-2xs ">● CONFIRMED</span>
         )}
       </div>
     </button>

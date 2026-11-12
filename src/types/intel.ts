@@ -80,7 +80,9 @@ export type LayerKey =
   /* Reference geography drawn from datasets already in the build. */
   | 'air' | 'border'
   /* Strategic records that carry coordinates. */
-  | 'dossiers';
+  | 'dossiers'
+  /* National and provincial outlines. */
+  | 'bounds';
 
 export interface LayerVisibility extends Record<LayerKey, boolean> {}
 

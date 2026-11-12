@@ -41,7 +41,7 @@ function Waveform({ progress }: { progress: number }) {
           <rect
             key={i}
             x={i * 4 + 0.5} y={y} width={3} height={h}
-            fill={played ? '#18c8e0' : '#445870'}
+            fill={played ? '#58c4dc' : '#7f8896'}
             fillOpacity={played ? 0.95 : 0.55}
           />
         );
@@ -49,7 +49,7 @@ function Waveform({ progress }: { progress: number }) {
       {progress > 0 && progress < 1 && (
         <line
           x1={progress * bars * 4} x2={progress * bars * 4} y1={0} y2={40}
-          stroke="#c8d8e8" strokeWidth={1}
+          stroke="#e6e9ee" strokeWidth={1}
         />
       )}
     </svg>
@@ -215,15 +215,15 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
       <div className="panel-header px-3 py-1.5 flex items-center justify-between shrink-0">
         <span className="mvn-label">COMMUNICATIONS INTERCEPT</span>
         <div className="flex items-center gap-1">
-          <button onClick={() => cycle(-1)} className="text-t3 hover:text-t1 text-2xs font-mono px-1 transition-colors">‹</button>
-          <span className="text-t3 text-2xs font-mono">{idx + 1}/{intercepts.length}</span>
-          <button onClick={() => cycle(1)} className="text-t3 hover:text-t1 text-2xs font-mono px-1 transition-colors">›</button>
+          <button onClick={() => cycle(-1)} className="text-t3 hover:text-t1 text-2xs px-1 transition-colors">‹</button>
+          <span className="text-t3 text-2xs ">{idx + 1}/{intercepts.length}</span>
+          <button onClick={() => cycle(1)} className="text-t3 hover:text-t1 text-2xs px-1 transition-colors">›</button>
         </div>
       </div>
       <div className="panel-header px-3 py-1 shrink-0 flex items-center justify-between">
-        <span className="text-t3 text-2xs font-mono">{rec.id} · {rec.time}</span>
+        <span className="text-t3 text-2xs ">{rec.id} · {rec.time}</span>
         {playState !== 'idle' && (
-          <span className="text-cyn text-2xs font-mono font-bold animate-pulse-slow">
+          <span className="text-cyn text-2xs font-bold animate-pulse-slow">
             {playState === 'playing' ? '● REC' : '❚❚'}
           </span>
         )}
@@ -248,7 +248,7 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
           </button>
           <Waveform progress={progress} />
         </div>
-        <div className="flex justify-between text-t3 text-2xs font-mono">
+        <div className="flex justify-between text-t3 text-2xs ">
           <span className={playState !== 'idle' ? 'text-cyn' : ''}>{fmt(elapsed)}</span>
           <span>{fmt(duration)}</span>
         </div>
@@ -264,7 +264,7 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
         ].map(({ label, val }) => (
           <div key={label}>
             <div className="mvn-label">{label}</div>
-            <div className="text-t2 text-2xs font-mono truncate">{val}</div>
+            <div className="text-t2 text-2xs truncate">{val}</div>
           </div>
         ))}
       </div>
@@ -272,7 +272,7 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
       {/* Transcription */}
       <div className="flex-1 px-3 py-1.5 border-t border-b3 overflow-y-auto min-h-0">
         <div className="mvn-label mb-1">TRANSCRIPTION (TRADUIT)</div>
-        <p className="text-t2 text-2xs font-mono leading-relaxed">
+        <p className="text-t2 text-2xs leading-relaxed">
           &quot;…{rec.desc}…&quot;
         </p>
       </div>
@@ -280,7 +280,7 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
       <div className="panel-header px-3 py-1 shrink-0">
         <button
           onClick={() => setModal(true)}
-          className="text-t3 text-2xs font-mono hover:text-blu transition-colors"
+          className="text-t3 text-2xs hover:text-blu transition-colors"
         >
           VIEW FULL INTERCEPT
         </button>
@@ -308,19 +308,19 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
               ].map(({ label, val }) => (
                 <div key={label}>
                   <div className="mvn-label">{label}</div>
-                  <div className="text-t2 text-2xs font-mono">{val}</div>
+                  <div className="text-t2 text-2xs ">{val}</div>
                 </div>
               ))}
             </div>
             <div className="px-3 py-2 border-b border-b3 shrink-0">
               <div className="mvn-label mb-0.5">POSITION</div>
-              <div className="text-cyn text-2xs font-mono">
+              <div className="text-cyn text-2xs ">
                 {rec.lat.toFixed(4)}°, {rec.lon.toFixed(4)}°
               </div>
             </div>
             <div className="px-3 py-2 overflow-y-auto">
               <div className="mvn-label mb-1">TRANSCRIPTION COMPLÈTE (TRADUIT DU SWAHILI/FR)</div>
-              <p className="text-t1 text-xs font-mono leading-relaxed whitespace-pre-wrap">
+              <p className="text-t1 text-xs leading-relaxed whitespace-pre-wrap">
                 {rec.desc}
               </p>
             </div>
@@ -328,7 +328,7 @@ export default function CommsIntercept({ mobileActive = false }: Props) {
               <span className="classify px-1.5 py-0.5 text-2xs">SECRET // SIGINT</span>
               <button
                 onClick={() => { setModal(false); playState === 'playing' ? pause() : play(); }}
-                className="text-blu text-2xs font-mono hover:text-t1 transition-colors"
+                className="text-blu text-2xs hover:text-t1 transition-colors"
               >
                 {playState === 'playing' ? '❚❚ PAUSE AUDIO' : '▶ LECTURE AUDIO'}
               </button>

@@ -33,7 +33,7 @@ export default function IntelPanel() {
           <StatRow label="FRAPPES DRONE"   value={strikes}    color="text-mag"   />
           <div className="flex items-center justify-between px-2.5 py-1.5 bg-alert/[0.06]">
             <span className="mvn-label text-alert">TOTAL KIA</span>
-            <span className="font-mono font-bold text-sm text-alert">
+            <span className="font-bold text-sm text-alert">
               {totalKIA.toLocaleString()}
             </span>
           </div>
@@ -49,7 +49,7 @@ export default function IntelPanel() {
                 className={`w-3 h-1.5 ${i <= 4 ? 'bg-alert' : 'bg-b3'}`}
               />
             ))}
-            <span className="text-alert text-2xs font-mono font-bold ml-1">CRITICAL</span>
+            <span className="text-alert text-2xs font-bold ml-1">CRITICAL</span>
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ function StatRow({ label, value, color }: {
   return (
     <div className="flex items-center justify-between px-2.5 py-1.5">
       <span className="mvn-label">{label}</span>
-      <span className={`font-mono font-bold text-xs ${color}`}>
+      <span className={`font-bold text-xs ${color}`}>
         {value.toLocaleString()}
       </span>
     </div>

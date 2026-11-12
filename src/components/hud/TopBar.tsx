@@ -94,7 +94,7 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
         {/* Brand */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="w-1.5 h-3 bg-alert shrink-0" />
-          <span className="text-t1 font-mono font-bold text-xs tracking-widest uppercase">
+          <span className="text-t1 font-bold text-xs tracking-widest uppercase">
             NKOYI
           </span>
         </div>
@@ -104,7 +104,7 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
         {/* LIVE OPS indicator */}
         <div className="flex items-center gap-1 shrink-0">
           <div className={`w-1.5 h-1.5 shrink-0 ${isLive ? 'bg-alert animate-pulse-slow' : 'bg-t3'}`} />
-          <span className={`text-2xs font-mono font-bold ${isLive ? 'text-alert' : 'text-t3'}`}>
+          <span className={`text-2xs font-bold ${isLive ? 'text-alert' : 'text-t3'}`}>
             {isLive ? 'LIVE OPS' : 'STANDBY'}
           </span>
         </div>
@@ -113,11 +113,11 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
 
         {/* Date + clocks */}
         <div className="hidden md:flex items-center gap-1.5 shrink-0">
-          <span className="text-t3 text-2xs font-mono">{utcDate}</span>
-          <span className="text-grn text-xs font-mono font-bold tracking-widest">{utcClock}</span>
-          <span className="text-t3 text-2xs font-mono">|</span>
-          <span className="text-t3 text-2xs font-mono">GOMA</span>
-          <span className="text-amb text-2xs font-mono font-bold">{gomaTime}</span>
+          <span className="text-t3 text-2xs ">{utcDate}</span>
+          <span className="text-grn text-xs font-bold tracking-widest">{utcClock}</span>
+          <span className="text-t3 text-2xs ">|</span>
+          <span className="text-t3 text-2xs ">GOMA</span>
+          <span className="text-amb text-2xs font-bold">{gomaTime}</span>
         </div>
 
         {/* API health */}
@@ -127,10 +127,10 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
             return (
               <div key={key} className="flex items-center gap-1">
                 <div className={`w-1.5 h-1.5 shrink-0 ${dot}`} />
-                <span className="text-t3 text-2xs font-mono">
+                <span className="text-t3 text-2xs ">
                   {key === 'copernicus' ? 'COP' : key.toUpperCase()}
                 </span>
-                <span className={`text-2xs font-mono ${
+                <span className={`text-2xs ${
                   status[key] === 'ok'      ? 'text-grn'   :
                   status[key] === 'error'   ? 'text-alert' :
                   status[key] === 'loading' ? 'text-amb'   : 'text-t3'
@@ -148,7 +148,7 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
           {/* Intelligence Summary toggle */}
           <button
             onClick={onToggleIntsum}
-            className={`px-2 py-0.5 text-2xs font-mono border transition-colors ${
+            className={`px-2 py-0.5 text-2xs border transition-colors ${
               intsumOpen
                 ? 'bg-alert/10 border-alert/50 text-alert'
                 : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
@@ -159,7 +159,7 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
 
           <button
             onClick={() => setAuto(!auto)}
-            className={`px-2 py-0.5 text-2xs font-mono border transition-colors ${
+            className={`px-2 py-0.5 text-2xs border transition-colors ${
               auto
                 ? 'bg-grn/10 border-grn/50 text-grn'
                 : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
@@ -170,21 +170,21 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
 
           <button
             onClick={onRefresh}
-            className="px-2 py-0.5 border border-b3 text-t3 hover:border-t2 hover:text-t2 text-2xs font-mono transition-colors"
+            className="px-2 py-0.5 border border-b3 text-t3 hover:border-t2 hover:text-t2 text-2xs transition-colors"
           >
             REFRESH
           </button>
 
           <button
             onClick={() => exportCSV(events as unknown as Record<string, unknown>[])}
-            className="hidden sm:block px-2 py-0.5 border border-b3 text-t3 hover:border-t2 hover:text-t2 text-2xs font-mono transition-colors"
+            className="hidden sm:block px-2 py-0.5 border border-b3 text-t3 hover:border-t2 hover:text-t2 text-2xs transition-colors"
           >
             CSV↓
           </button>
 
           <button
             onClick={toggleFullscreen}
-            className={`px-2 py-0.5 border text-2xs font-mono transition-colors ${
+            className={`px-2 py-0.5 border text-2xs transition-colors ${
               isFullscreen
                 ? 'border-cyn/50 text-cyn bg-cyn/10'
                 : 'border-b3 text-t3 hover:border-t2 hover:text-t2'
@@ -198,15 +198,15 @@ export default function TopBar({ onRefresh, onToggleIntsum, intsumOpen }: Props)
 
           {session && (
             <div className="hidden sm:flex items-center gap-1.5">
-              <span className="text-t3 text-2xs font-mono">{session.clearance}</span>
-              <span className="text-t3 text-2xs font-mono">|</span>
-              <span className="text-t2 text-2xs font-mono uppercase">{session.user}</span>
+              <span className="text-t3 text-2xs ">{session.clearance}</span>
+              <span className="text-t3 text-2xs ">|</span>
+              <span className="text-t2 text-2xs uppercase">{session.user}</span>
             </div>
           )}
 
           <button
             onClick={handleLogout}
-            className="px-2 py-0.5 border border-alert/30 text-alert/50 hover:border-alert hover:text-alert text-2xs font-mono transition-colors"
+            className="px-2 py-0.5 border border-alert/30 text-alert/50 hover:border-alert hover:text-alert text-2xs transition-colors"
           >
             LOGOUT
           </button>

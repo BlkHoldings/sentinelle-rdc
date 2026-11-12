@@ -43,8 +43,8 @@ export default function HelpOverlay({ onClose }: { onClose: () => void }) {
           <div className="space-y-1">
             {SHORTCUTS.map(({ keys, label }) => (
               <div key={keys} className="flex items-center gap-3">
-                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-cyn text-2xs font-mono">{keys}</kbd>
-                <span className="text-t2 text-2xs font-mono">{label}</span>
+                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-cyn text-2xs ">{keys}</kbd>
+                <span className="text-t2 text-2xs ">{label}</span>
               </div>
             ))}
           </div>
@@ -53,8 +53,8 @@ export default function HelpOverlay({ onClose }: { onClose: () => void }) {
           <div className="space-y-1">
             {TRIAGE_HELP.map(({ keys, label }) => (
               <div key={keys} className="flex items-center gap-3">
-                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-amb text-2xs font-mono">{keys}</kbd>
-                <span className="text-t2 text-2xs font-mono">{label}</span>
+                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-amb text-2xs ">{keys}</kbd>
+                <span className="text-t2 text-2xs ">{label}</span>
               </div>
             ))}
           </div>
@@ -63,15 +63,15 @@ export default function HelpOverlay({ onClose }: { onClose: () => void }) {
           <div className="space-y-1">
             {MAP_HELP.map(({ keys, label }) => (
               <div key={label} className="flex items-center gap-3">
-                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-t1 text-2xs font-mono">{keys}</kbd>
-                <span className="text-t2 text-2xs font-mono">{label}</span>
+                <kbd className="min-w-[3rem] text-center px-1.5 py-0.5 bg-b2 border border-b3 text-t1 text-2xs ">{keys}</kbd>
+                <span className="text-t2 text-2xs ">{label}</span>
               </div>
             ))}
           </div>
         </div>
 
         <div className="panel-header px-3 py-1.5 flex items-center justify-between sticky bottom-0">
-          <span className="text-t3 text-2xs font-mono">Données live : ACLED · FIRMS · Copernicus</span>
+          <span className="text-t3 text-2xs ">Données live : ACLED · FIRMS · Copernicus</span>
           <span className="classify px-1.5 py-0.5 text-2xs">SECRET</span>
         </div>
       </div>

@@ -91,7 +91,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
       <div className="hidden md:flex flex-col w-[230px] shrink-0 border-r border-b3">
         <div className="panel-header px-3 py-1.5 flex items-center justify-between shrink-0">
           <span className="mvn-label">TIMELINE</span>
-          <span className="text-t3 text-2xs font-mono">PAST 24H</span>
+          <span className="text-t3 text-2xs ">PAST 24H</span>
         </div>
 
         {/* Horizontal line with dots */}
@@ -119,7 +119,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
               );
             })}
           </div>
-          <div className="flex justify-between mt-1 text-t3 text-2xs font-mono">
+          <div className="flex justify-between mt-1 text-t3 text-2xs ">
             <span>12:00</span><span>18:00</span><span>00:00</span><span>06:00</span><span>NOW</span>
           </div>
         </div>
@@ -135,13 +135,13 @@ export default function BottomPanels({ mobileSection = null }: Props) {
               <EventIcon e={e} />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-t3 text-2xs font-mono shrink-0">{e.date?.slice(5)}</span>
-                  <span className="text-t2 text-2xs font-mono truncate">{e.type}</span>
+                  <span className="text-t3 text-2xs shrink-0">{e.date?.slice(5)}</span>
+                  <span className="text-t2 text-2xs truncate">{e.type}</span>
                 </div>
-                <div className="text-t3 text-2xs font-mono truncate">{e.location ?? ''}</div>
+                <div className="text-t3 text-2xs truncate">{e.location ?? ''}</div>
               </div>
               {(e.fatalities ?? 0) > 0 && (
-                <span className="text-alert text-2xs font-mono font-bold ml-auto shrink-0">▲{e.fatalities}</span>
+                <span className="text-alert text-2xs font-bold ml-auto shrink-0">▲{e.fatalities}</span>
               )}
             </button>
           ))}
@@ -150,7 +150,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
         <div className="panel-header px-3 py-1 shrink-0">
           <button
             onClick={() => setTlFull((v) => !v)}
-            className={`text-2xs font-mono transition-colors ${tlFull ? 'text-blu' : 'text-t3 hover:text-blu'}`}
+            className={`text-2xs transition-colors ${tlFull ? 'text-blu' : 'text-t3 hover:text-blu'}`}
           >
             {tlFull ? '▲ COLLAPSE TIMELINE' : 'VIEW FULL TIMELINE'}
           </button>
@@ -161,7 +161,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
       <div className={`${mobileSection === 'activity' ? 'flex' : 'hidden'} md:flex flex-col flex-1 min-w-0 md:border-r border-b3`}>
         <div className="panel-header px-3 py-1.5 shrink-0 flex items-center justify-between">
           <span className="mvn-label">RECENT ACTIVITY</span>
-          <span className="text-t3 text-2xs font-mono">{displayed.length} ITEMS</span>
+          <span className="text-t3 text-2xs ">{displayed.length} ITEMS</span>
         </div>
 
         <div className="flex border-b border-b3 shrink-0">
@@ -169,7 +169,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
             <button
               key={t}
               onClick={() => setActTab(t)}
-              className={`flex-1 py-1 text-2xs font-mono transition-colors ${
+              className={`flex-1 py-1 text-2xs transition-colors ${
                 actTab === t
                   ? 'text-t1 border-b-2 border-blu bg-blu/[0.07]'
                   : 'text-t3 hover:text-t2 hover:bg-b2/50'
@@ -182,7 +182,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
 
         <div className="flex-1 overflow-y-auto">
           {displayed.length === 0 ? (
-            <div className="text-t3 text-2xs font-mono text-center py-5">NO ACTIVITY</div>
+            <div className="text-t3 text-2xs text-center py-5">NO ACTIVITY</div>
           ) : (
             displayed.map((e, i) => (
               <button
@@ -193,15 +193,15 @@ export default function BottomPanels({ mobileSection = null }: Props) {
                 <EventIcon e={e} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-t3 text-2xs font-mono shrink-0">{e.date?.slice(5) ?? ''}</span>
-                    <span className="text-t2 text-2xs font-mono truncate">
+                    <span className="text-t3 text-2xs shrink-0">{e.date?.slice(5) ?? ''}</span>
+                    <span className="text-t2 text-2xs truncate">
                       {e.location ? `${e.type} — ${e.location}` : e.type}
                     </span>
                     {(e.fatalities ?? 0) > 0 && (
-                      <span className="text-alert text-2xs font-mono font-bold shrink-0">▲{e.fatalities}</span>
+                      <span className="text-alert text-2xs font-bold shrink-0">▲{e.fatalities}</span>
                     )}
                   </div>
-                  <div className="text-t3 text-2xs font-mono truncate">{e.notes?.slice(0, 60) ?? e.desc ?? ''}</div>
+                  <div className="text-t3 text-2xs truncate">{e.notes?.slice(0, 60) ?? e.desc ?? ''}</div>
                 </div>
               </button>
             ))
@@ -211,7 +211,7 @@ export default function BottomPanels({ mobileSection = null }: Props) {
         <div className="panel-header px-3 py-1 shrink-0">
           <button
             onClick={() => setActAll((v) => !v)}
-            className={`text-2xs font-mono transition-colors ${actAll ? 'text-blu' : 'text-t3 hover:text-blu'}`}
+            className={`text-2xs transition-colors ${actAll ? 'text-blu' : 'text-t3 hover:text-blu'}`}
           >
             {actAll ? '▲ SHOW RECENT ONLY' : 'VIEW ALL ACTIVITY'}
           </button>

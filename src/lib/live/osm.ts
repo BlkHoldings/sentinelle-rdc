@@ -158,12 +158,12 @@ export async function fetchOsmInfrastructure(
 }
 
 export const OSM_CATEGORY_COLOR: Record<OsmCategory, string> = {
-  health:    '#20c880',
-  transport: '#18c8e0',
-  water:     '#1e70f0',
-  power:     '#d09820',
-  education: '#8060d8',
-  other:     '#7890a8',
+  health:    '#3fb984',
+  transport: '#58c4dc',
+  water:     '#6f9bff',
+  power:     '#e2a336',
+  education: '#9d8cff',
+  other:     '#9aa3b0',
 };
 
 export const OSM_CATEGORY_LABEL: Record<OsmCategory, string> = {

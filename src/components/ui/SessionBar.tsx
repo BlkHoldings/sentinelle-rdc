@@ -55,21 +55,21 @@ export default function SessionBar() {
           <div className="w-1 h-1 bg-grn" />
           <span className="mvn-label text-grn">SESSION ACTIVE</span>
         </div>
-        <span className="text-b3 text-2xs font-mono">|</span>
+        <span className="text-b3 text-2xs ">|</span>
         <span className="mvn-label">{session.clearance}</span>
-        <span className="text-b3 text-2xs font-mono">|</span>
-        <span className="text-t3 text-2xs font-mono uppercase">{session.user}</span>
+        <span className="text-b3 text-2xs ">|</span>
+        <span className="text-t3 text-2xs uppercase">{session.user}</span>
       </div>
       <div className="flex items-center gap-3">
         <span className="mvn-label">AOR: EST-DRC</span>
-        <span className="text-b3 text-2xs font-mono">|</span>
+        <span className="text-b3 text-2xs ">|</span>
         {majTime && (
           <>
-            <span className="text-t3 text-2xs font-mono">MAJ:{majTime}</span>
-            <span className="text-b3 text-2xs font-mono">|</span>
+            <span className="text-t3 text-2xs ">MAJ:{majTime}</span>
+            <span className="text-b3 text-2xs ">|</span>
           </>
         )}
-        <span className={`text-2xs font-mono ${warn ? 'text-alert animate-pulse-slow' : 'text-t3'}`}>
+        <span className={`text-2xs ${warn ? 'text-alert animate-pulse-slow' : 'text-t3'}`}>
           TTL:{remaining}
         </span>
       </div>

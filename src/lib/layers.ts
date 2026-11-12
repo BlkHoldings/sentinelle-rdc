@@ -69,18 +69,18 @@ export interface LayerGroupDef {
 /* Colours are literals, not Tailwind class names: these are consumed by
    MapLibre paint expressions as well as by React style props. */
 export const C = {
-  alert: '#e03030',
-  mag:   '#c83048',
-  amb:   '#d09820',
-  grn:   '#20c880',
-  blu:   '#1e70f0',
-  cyn:   '#18c8e0',
-  pur:   '#8060d8',
-  fire:  '#e06020',
-  drone: '#18d8f0',
-  t1:    '#c8d8e8',
-  t2:    '#7890a8',
-  t3:    '#445870',
+  alert: '#e5484d',
+  mag:   '#d6577a',
+  amb:   '#e2a336',
+  grn:   '#3fb984',
+  blu:   '#6f9bff',
+  cyn:   '#58c4dc',
+  pur:   '#9d8cff',
+  fire:  '#f0803c',
+  drone: '#6fd3e6',
+  t1:    '#e6e9ee',
+  t2:    '#9aa3b0',
+  t3:    '#7f8896',
 } as const;
 
 export const LAYER_GROUPS: LayerGroupDef[] = [
@@ -95,10 +95,10 @@ export const LAYER_GROUPS: LayerGroupDef[] = [
 export const LAYERS: LayerDef[] = [
   {
     key: 'dossiers', label: 'DOSSIERS STRATÉGIQUES', group: 'strategic',
-    color: '#3bd6c8', origin: 'analyst',
+    color: '#58c4dc', origin: 'analyst',
     hint: 'Dossiers géolocalisés — énergie, mines, infrastructure, commerce',
     legend: [
-      { color: '#3bd6c8', label: 'Dossier sourcé', shape: 'square' },
+      { color: '#58c4dc', label: 'Dossier sourcé', shape: 'square' },
       { color: C.amb,     label: 'Illustratif ou sans source', shape: 'square' },
     ],
   },
@@ -190,6 +190,16 @@ export const LAYERS: LayerDef[] = [
       { color: C.pur,   label: 'Artillerie' },
       { color: C.amb,   label: 'Logistique / camp' },
       { color: C.grn,   label: 'Site PDI' },
+    ],
+  },
+
+  {
+    key: 'bounds', label: 'LIMITES ADMINISTRATIVES', group: 'reference',
+    color: C.t2, origin: 'static',
+    hint: 'Frontière nationale et 26 provinces — geoBoundaries / OSM, tracé simplifié',
+    legend: [
+      { color: C.t1, label: 'Frontière nationale', shape: 'line' },
+      { color: C.t3, label: 'Limite de province', shape: 'line' },
     ],
   },
 

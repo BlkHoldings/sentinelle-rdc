@@ -6,40 +6,47 @@ const config: Config = {
     extend: {
       /* ── Maven tactical color palette ─────────────────────────── */
       colors: {
-        b0: '#090d13',   // deep background
-        b1: '#0d1520',   // panel surface
-        b2: '#121e2e',   // panel header / stripe
-        b3: '#1a2e42',   // border / grid line
-        bd: '#1f3a52',   // hover surface
-        t1: '#c8d8e8',   // primary text
-        t2: '#7890a8',   // secondary text
-        t3: '#445870',   // muted / label
-        alert: { DEFAULT: '#e03030', muted: 'rgba(224,48,48,0.14)' },
-        amb:   { DEFAULT: '#d09820', muted: 'rgba(208,152,32,0.14)' },
-        grn:   { DEFAULT: '#20c880', muted: 'rgba(32,200,128,0.14)' },
-        blu:   { DEFAULT: '#1e70f0', muted: 'rgba(30,112,240,0.14)' },
-        cyn:   { DEFAULT: '#18c8e0', muted: 'rgba(24,200,224,0.14)' },
-        pur:   { DEFAULT: '#8060d8', muted: 'rgba(128,96,216,0.14)' },
-        fire:  { DEFAULT: '#e06020', muted: 'rgba(224,96,32,0.14)' },
-        mag:   { DEFAULT: '#c83048', muted: 'rgba(200,48,72,0.14)' },
-        drone: { DEFAULT: '#18d8f0', muted: 'rgba(24,216,240,0.14)' },
+        b0: '#0b0d10',   // deep background
+        b1: '#101318',   // panel surface
+        b2: '#161a21',   // panel header / stripe
+        b3: '#242a34',   // border / grid line
+        bd: '#2c3440',   // hover surface
+        t1: '#e6e9ee',   // primary text
+        t2: '#9aa3b0',   // secondary text
+        t3: '#7f8896',   // muted / label
+        alert: { DEFAULT: '#e5484d', muted: 'rgba(229,72,77,0.14)' },
+        amb:   { DEFAULT: '#e2a336', muted: 'rgba(226,163,54,0.14)' },
+        grn:   { DEFAULT: '#3fb984', muted: 'rgba(63,185,132,0.14)' },
+        blu:   { DEFAULT: '#6f9bff', muted: 'rgba(111,155,255,0.14)' },
+        cyn:   { DEFAULT: '#58c4dc', muted: 'rgba(88,196,220,0.14)' },
+        pur:   { DEFAULT: '#9d8cff', muted: 'rgba(157,140,255,0.14)' },
+        fire:  { DEFAULT: '#f0803c', muted: 'rgba(240,128,60,0.14)' },
+        mag:   { DEFAULT: '#d6577a', muted: 'rgba(214,87,122,0.14)' },
+        drone: { DEFAULT: '#6fd3e6', muted: 'rgba(111,211,230,0.14)' },
       },
       /* ── Maven typography: monospace-first ──────────────────── */
+      /* Sans for interface text; mono only where characters must align
+         (coordinates, timestamps, counts, identifiers). */
       fontFamily: {
-        sans: ['ui-monospace', 'IBM Plex Mono', 'Consolas', 'monospace'],
-        mono: ['ui-monospace', 'IBM Plex Mono', 'Consolas', 'monospace'],
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['var(--font-mono)', 'IBM Plex Mono', 'ui-monospace', 'Consolas', 'monospace'],
+        data: ['var(--font-mono)', 'IBM Plex Mono', 'ui-monospace', 'Consolas', 'monospace'],
       },
+      /* rem-based, so the text-size setting scales everything together.
+         Nothing in the interface renders below 10 px at the default size. */
       fontSize: {
-        '2xs': ['0.625rem',  { lineHeight: '1.2' }],
-        '3xs': ['0.5625rem', { lineHeight: '1' }],
+        '3xs': ['0.625rem',  { lineHeight: '1.3' }],
+        '2xs': ['0.6875rem', { lineHeight: '1.35' }],
+        xs:    ['0.75rem',   { lineHeight: '1.4' }],
+        sm:    ['0.8125rem', { lineHeight: '1.45' }],
       },
       /* ── Square corners: override all rounded-* ─────────────── */
       borderRadius: {
-        DEFAULT: '2px',
+        DEFAULT: '3px',
         none:    '0px',
         sm:      '1px',
-        md:      '2px',
-        lg:      '2px',
+        md:      '3px',
+        lg:      '4px',
         xl:      '3px',
         '2xl':   '3px',
         '3xl':   '3px',
@@ -90,10 +97,10 @@ const config: Config = {
       boxShadow: {
         panel: '0 4px 20px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.8)',
         float: '0 8px 32px rgba(0,0,0,0.95)',
-        'glow-alert': '0 0 6px rgba(224,48,48,0.5)',
-        'glow-blu':   '0 0 6px rgba(30,112,240,0.5)',
-        'glow-cyn':   '0 0 6px rgba(24,200,224,0.5)',
-        'glow-grn':   '0 0 6px rgba(32,200,128,0.5)',
+        'glow-alert': '0 0 6px rgba(229,72,77,0.5)',
+        'glow-blu':   '0 0 6px rgba(111,155,255,0.5)',
+        'glow-cyn':   '0 0 6px rgba(88,196,220,0.5)',
+        'glow-grn':   '0 0 6px rgba(63,185,132,0.5)',
       },
     },
   },

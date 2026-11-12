@@ -90,7 +90,7 @@ export const CONFIDENCE_LABEL: Record<Confidence, string> = {
 };
 
 export const CONFIDENCE_COLOR: Record<Confidence, string> = {
-  high: '#20c880', medium: '#d09820', low: '#e03030',
+  high: '#3fb984', medium: '#e2a336', low: '#e5484d',
 };
 
 export const STATUS_LABEL: Record<VerificationStatus, string> = {
@@ -102,11 +102,11 @@ export const STATUS_LABEL: Record<VerificationStatus, string> = {
 };
 
 export const STATUS_COLOR: Record<VerificationStatus, string> = {
-  draft: '#7890a8',
-  in_review: '#18c8e0',
-  verified: '#20c880',
-  disputed: '#e03030',
-  archived: '#445870',
+  draft: '#9aa3b0',
+  in_review: '#58c4dc',
+  verified: '#3fb984',
+  disputed: '#e5484d',
+  archived: '#7f8896',
 };
 
 /**

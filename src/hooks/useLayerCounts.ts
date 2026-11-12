@@ -10,6 +10,7 @@ import { AXES, AIRSTRIPS, BORDER_CROSSINGS } from '@/lib/fusion/infrastructure';
 import { MIL_POSITIONS } from '@/data/military';
 import { DRONE_ISR } from '@/data/drones';
 import { M23_ZONES_GEOJSON } from '@/data/zones';
+import { useMapStore } from '@/store/useMapStore';
 import type { LayerKey } from '@/types/intel';
 
 /**
@@ -33,6 +34,7 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
   const weather     = useLiveStore((s) => s.weather);
   const osm         = useLiveStore((s) => s.osm);
   const strategic   = useStrategicStore((s) => s.records);
+  const boundsLoaded = useMapStore((s) => s.boundsLoaded);
 
   return useMemo(() => {
     const visible = applyFilters(events, { query: searchQuery, timeRange, classFilter });
@@ -46,6 +48,7 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
       r.data ? r.data.length : null;
 
     return {
+      bounds: boundsLoaded != null && boundsLoaded > 0 ? boundsLoaded : null,
       dossiers: strategic.filter((r) => r.lat != null && r.lon != null && r.status !== 'archived').length,
       fusion: seeded ? fused : null,
       halo:   seeded ? Math.min(400, fused) : null,
@@ -62,5 +65,5 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
       weather: live(weather),
       osm:     live(osm),
     };
-  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic]);
+  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic, boundsLoaded]);
 }

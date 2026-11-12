@@ -2,33 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Maven tactical CSS custom properties ─────────────────────── */
+/* ── NKOYI design tokens ──────────────────────────────────────────
+   Graphite surfaces with a faint navy cast; one cool accent; three
+   status hues. Full reference: docs/DESIGN.md */
 :root {
-  --color-b0: #090d13;
-  --color-b1: #0d1520;
-  --color-b2: #121e2e;
-  --color-b3: #1a2e42;
-  --color-bd: #1f3a52;
-  --color-t1: #c8d8e8;
-  --color-t2: #7890a8;
-  --color-t3: #445870;
-  --color-alert: #e03030;
-  --color-amb:   #d09820;
-  --color-grn:   #20c880;
-  --color-blu:   #1e70f0;
-  --color-cyn:   #18c8e0;
-  --color-pur:   #8060d8;
-  --color-fire:  #e06020;
-  --color-mag:   #c83048;
-  --color-drone: #18d8f0;
+  --color-b0: #0b0d10;
+  --color-b1: #101318;
+  --color-b2: #161a21;
+  --color-b3: #242a34;
+  --color-bd: #2c3440;
+  --color-t1: #e6e9ee;
+  --color-t2: #9aa3b0;
+  --color-t3: #7f8896;
+  --color-alert: #e5484d;
+  --color-amb:   #e2a336;
+  --color-grn:   #3fb984;
+  --color-blu:   #6f9bff;
+  --color-cyn:   #58c4dc;
+  --color-pur:   #9d8cff;
+  --color-fire:  #f0803c;
+  --color-mag:   #d6577a;
+  --color-drone: #6fd3e6;
 
-  --panel-bg:     #0d1520;
-  --panel-border: #1a2e42;
-  --panel-header: #121e2e;
+  --panel-bg:     #101318;
+  --panel-border: #242a34;
+  --panel-header: #161a21;
 
   /* Classification stripe colors */
-  --classify-bg:  #7a5a10;
-  --classify-fg:  #ffd060;
+  --classify-bg:  #2a2314;
+  --classify-fg:  #e2a336;
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
@@ -39,16 +41,17 @@ html, body {
   overflow: hidden;
   background: var(--color-b0);
   color: var(--color-t1);
-  font-family: ui-monospace, 'IBM Plex Mono', Consolas, monospace;
+  font-family: var(--font-sans), Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'calt';
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-b3); border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-blu); }
+::-webkit-scrollbar-thumb { background: var(--color-b3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-t3); }
 
 /* ── Utility: Maven solid panel ─────────────────────────────── */
 @layer components {
@@ -73,10 +76,9 @@ html, body {
   .classify {
     background: var(--classify-bg);
     color: var(--classify-fg);
-    font-family: ui-monospace, monospace;
-    font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     text-align: center;
     user-select: none;
@@ -84,10 +86,10 @@ html, body {
 
   /* Uppercase mono section label */
   .mvn-label {
-    font-family: ui-monospace, monospace;
-    font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    line-height: 1.3;
     text-transform: uppercase;
     color: var(--color-t3);
   }
@@ -103,40 +105,38 @@ html, body {
     transition: background 0.1s;
   }
   .mvn-row:hover {
-    background: rgba(30,112,240,0.06);
+    background: rgba(111,155,255,0.06);
   }
 }
 
 /* ── Maplibre GL overrides ──────────────────────────────────── */
-.maplibregl-map { font-family: ui-monospace, monospace !important; }
+.maplibregl-map { font-family: inherit !important; }
 .maplibregl-ctrl-attrib { display: none !important; }
 .maplibregl-ctrl-logo   { display: none !important; }
 .maplibregl-canvas-container { cursor: crosshair !important; }
 
 /* ── Popup — Maven tactical style ──────────────────────────── */
-.maplibregl-popup {
-  font-family: ui-monospace, monospace !important;
-}
+.maplibregl-popup { font-family: inherit !important; }
 .maplibregl-popup-content {
-  background: #0d1520 !important;
-  border: 1px solid #1a2e42 !important;
+  background: #101318 !important;
+  border: 1px solid #242a34 !important;
   border-radius: 2px !important;
   padding: 10px 12px !important;
-  color: #c8d8e8 !important;
+  color: #e6e9ee !important;
   font-size: 11px !important;
   max-width: 280px !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.9) !important;
 }
 .maplibregl-popup-tip { display: none !important; }
 .maplibregl-popup-close-button {
-  color: #445870 !important;
+  color: #7f8896 !important;
   font-size: 14px !important;
   right: 8px !important;
   top: 6px !important;
   line-height: 1 !important;
   transition: color 0.15s !important;
 }
-.maplibregl-popup-close-button:hover { color: #c8d8e8 !important; background: transparent !important; }
+.maplibregl-popup-close-button:hover { color: #e6e9ee !important; background: transparent !important; }
 
 /* ── Strike pulse ring ──────────────────────────────────────── */
 .blast-ring::before {
@@ -159,31 +159,23 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--color-t1);
-  -webkit-box-shadow: 0 0 0 100px #121e2e inset;
+  -webkit-box-shadow: 0 0 0 100px #161a21 inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 /* ── Focus ring ─────────────────────────────────────────────── */
-:focus-visible { outline: 1px solid rgba(30,112,240,0.7); outline-offset: 1px; }
+:focus-visible { outline: 2px solid var(--color-blu); outline-offset: 2px; border-radius: 2px; }
 /* Don't paint a focus ring for pointer users clicking buttons */
 button:focus:not(:focus-visible),
 [role="button"]:focus:not(:focus-visible) { outline: none; }
 
-/* ── Map tactical overlay: vignette + scanlines ─────────────── */
+/* ── Map edge falloff ───────────────────────────────────────── */
 .map-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 5;
-  background:
-    radial-gradient(ellipse at center, transparent 58%, rgba(4,8,14,0.42) 100%),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(0,0,0,0) 0px,
-      rgba(0,0,0,0) 2px,
-      rgba(10,20,32,0.14) 3px
-    );
-  mix-blend-mode: multiply;
+  background: radial-gradient(ellipse at center, transparent 62%, rgba(6,8,11,0.38) 100%);
 }
 
 /* Marker interaction easing */
@@ -199,5 +191,31 @@ button:focus:not(:focus-visible),
     scroll-behavior: auto !important;
   }
   .blast-ring::before { animation: none; opacity: 0.25; }
-  .map-vignette { background: radial-gradient(ellipse at center, transparent 58%, rgba(4,8,14,0.42) 100%); }
 }
+
+/* ── Text size setting ──────────────────────────────────────────
+   Every size in the interface is rem-based, so scaling the root is all
+   it takes. Set from Settings; persisted per browser. */
+html[data-scale='lg'] { font-size: 112.5%; }
+html[data-scale='xl'] { font-size: 125%; }
+
+/* ── Screen-reader only ─────────────────────────────────────── */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ── Loading skeleton ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-b2) 25%, var(--color-b3) 50%, var(--color-b2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 2px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Native controls follow the dark scheme (select menus, date pickers). */
+:root { color-scheme: dark; }
+
+/* Range inputs: a thin track that matches the rest of the chrome. */
+input[type='range'] { height: 2px; }

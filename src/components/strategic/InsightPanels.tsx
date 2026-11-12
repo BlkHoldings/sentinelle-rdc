@@ -30,8 +30,8 @@ export function EntitiesPanel() {
               <div key={e.name} className={`panel p-2.5 ${active ? 'border-cyn' : ''}`} data-testid="entity-card">
                 <button className="w-full text-left" onClick={() => setSel(active ? null : e.name)}>
                   <div className="mvn-label">{e.sectors.join(' · ')}</div>
-                  <div className="text-t1 text-xs font-mono font-bold leading-snug">{e.name}</div>
-                  <div className="text-t3 text-2xs font-mono mt-0.5">
+                  <div className="text-t1 text-xs font-bold leading-snug">{e.name}</div>
+                  <div className="text-t3 text-2xs mt-0.5">
                     {e.records.length} dossier{e.records.length > 1 ? 's' : ''} · {e.linked.length} entité{e.linked.length > 1 ? 's' : ''} liée{e.linked.length > 1 ? 's' : ''}
                   </div>
                 </button>
@@ -41,7 +41,7 @@ export function EntitiesPanel() {
                       <div className="mvn-label mb-0.5">DOSSIERS</div>
                       <ul className="space-y-1">
                         {e.records.map((r) => (
-                          <li key={r.id} className="text-2xs font-mono text-t2">
+                          <li key={r.id} className="text-2xs text-t2">
                             {r.title}
                             <span className="flex flex-wrap gap-1 mt-0.5">
                               <ConfidenceTag value={r.confidence} /><StatusTag value={r.status} />
@@ -57,7 +57,7 @@ export function EntitiesPanel() {
                         <ul className="space-y-0.5">
                           {e.linked.map((l) => (
                             <li key={l.name}>
-                              <button onClick={() => setSel(l.name)} className="text-cyn text-2xs font-mono hover:underline text-left">
+                              <button onClick={() => setSel(l.name)} className="text-cyn text-2xs hover:underline text-left">
                                 {l.name} <span className="text-t3">· {l.shared} dossier{l.shared > 1 ? 's' : ''} en commun</span>
                               </button>
                             </li>
@@ -96,23 +96,23 @@ export function SignalsPanel() {
       ) : (
         <div className="p-3 md:p-4 grid gap-2 md:grid-cols-2">
           {ranked.map(({ r, att }) => {
-            const color = att.score >= 60 ? '#e03030' : att.score >= 35 ? '#d09820' : '#20c880';
+            const color = att.score >= 60 ? '#e5484d' : att.score >= 35 ? '#e2a336' : '#3fb984';
             return (
               <div key={r.id} className="panel p-2.5" data-testid="signal-card">
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
                     <div className="mvn-label">{r.sector} · {r.region || r.country}</div>
-                    <div className="text-t1 text-xs font-mono font-bold leading-snug">{r.title}</div>
+                    <div className="text-t1 text-xs font-bold leading-snug">{r.title}</div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-lg font-mono font-bold leading-none" style={{ color }}>{att.score}</div>
-                    <div className="text-t3 text-3xs font-mono">/100</div>
+                    <div className="text-lg font-bold leading-none" style={{ color }}>{att.score}</div>
+                    <div className="text-t3 text-3xs ">/100</div>
                   </div>
                 </div>
                 <div className="h-1 bg-b3 mt-1.5">
                   <div className="h-full" style={{ width: `${att.score}%`, background: color }} />
                 </div>
-                <ul className="mt-1.5 text-3xs font-mono text-t3 space-y-0.5">
+                <ul className="mt-1.5 text-3xs text-t3 space-y-0.5">
                   {att.factors.map((f) => (
                     <li key={f.label} className="flex gap-2"><span className="text-t2 w-7 text-right shrink-0">+{f.points}</span>{f.label}</li>
                   ))}
