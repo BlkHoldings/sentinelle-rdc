@@ -33,7 +33,7 @@ export function originOf(e: FusedEvent): Origin {
 
 /* ── Categories ──────────────────────────────────────────────────── */
 
-export type Category = 'conflict' | 'humanitarian' | 'political' | 'sensor';
+export type Category = 'conflict' | 'humanitarian' | 'political' | 'sensor' | 'other';
 
 const CATEGORY: Record<EventType, Category> = {
   armed_clash: 'conflict', shelling: 'conflict', airstrike: 'conflict', drone_strike: 'conflict',
@@ -42,7 +42,11 @@ const CATEGORY: Record<EventType, Category> = {
   troop_movement: 'conflict',
   displacement: 'humanitarian', humanitarian_access: 'humanitarian',
   protest: 'political', arrest: 'political',
-  comms_blackout: 'sensor', thermal_anomaly: 'sensor', unknown: 'conflict',
+  comms_blackout: 'sensor', thermal_anomaly: 'sensor',
+  /* A report the classifier could not place is not thereby a conflict
+     event. Counting it as one would inflate the incident figures with
+     every unrelated headline that mentions the region. */
+  unknown: 'other',
 };
 
 export const categoryOf = (e: FusedEvent): Category => CATEGORY[e.event_type];
@@ -134,7 +138,7 @@ export function dailySeries(events: FusedEvent[], days: number, now = Date.now()
     const p = index.get(e.timestamp.slice(0, 10));
     if (!p) continue;
     const c = categoryOf(e);
-    if (c === 'sensor') continue;           // telemetry is not an incident
+    if (c === 'sensor' || c === 'other') continue;   // not incidents
     p.total++; p[c]++;
   }
   return out;
@@ -187,7 +191,7 @@ export interface Situation {
 
 export function situation(events: FusedEvent[], range: TimeRange, now = Date.now()): Situation {
   const from = windowStart(range, now);
-  const inWin = activeEvents(events).filter((e) => categoryOf(e) !== 'sensor');
+  const inWin = activeEvents(events).filter((e) => { const c = categoryOf(e); return c !== 'sensor' && c !== 'other'; });
   const cur = inWin.filter((e) => new Date(e.timestamp).getTime() >= from);
   const s: Situation = {
     total: cur.length, conflict: 0, humanitarian: 0, political: 0, corroboratedShare: null,
@@ -196,7 +200,7 @@ export function situation(events: FusedEvent[], range: TimeRange, now = Date.now
   let backed = 0;
   for (const e of cur) {
     const c = categoryOf(e);
-    if (c !== 'sensor') s[c]++;
+    if (c !== 'sensor' && c !== 'other') s[c]++;
     if (e.status === 'confirmed' || e.status === 'corroborated') backed++;
     s.fatalities += e.casualties.fatalities ?? 0;
     s.displaced += e.casualties.displaced ?? 0;

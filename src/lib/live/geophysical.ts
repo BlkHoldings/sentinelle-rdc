@@ -147,9 +147,10 @@ interface GdacsFeature {
 export async function fetchGdacs(): Promise<FetchResult<GdacsAlert[]>> {
   const url = 'https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?country=COD';
   const res = await fetchJSON<{ features?: GdacsFeature[] }>(url, { timeoutMs: 20_000 });
-  if (!res.ok || !res.data) return { ...res, data: null, count: 0 };
+  if (!res.ok) return { ...res, data: null, count: 0 };
 
-  const feats = res.data.features ?? [];
+  // No body means no active alert: an empty list, reported as healthy.
+  const feats = res.data?.features ?? [];
   const alerts: GdacsAlert[] = feats.map((f) => {
     const p = f.properties ?? {};
     const str = (k: string) => (typeof p[k] === 'string' ? (p[k] as string) : '');

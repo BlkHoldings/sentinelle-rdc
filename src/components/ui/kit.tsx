@@ -35,6 +35,7 @@ export const CATEGORY_STYLE: Record<Category, { color: string }> = {
   humanitarian: { color: '#58c4dc' },
   political:    { color: '#9d8cff' },
   sensor:       { color: '#7f8896' },
+  other:        { color: '#9aa3b0' },
 };
 
 function Glyph({ children, color }: { children: ReactNode; color: string }) {

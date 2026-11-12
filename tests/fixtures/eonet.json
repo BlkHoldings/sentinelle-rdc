@@ -1,0 +1,162 @@
+{
+ "title": "EONET Events",
+ "description": "Natural events from EONET.",
+ "link": "https://eonet.gsfc.nasa.gov/api/v3/events",
+ "events": [
+  {
+   "id": "EONET_12855",
+   "title": "Wildfire in The Democratic Republic of Congo 1023565",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_12855",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "Wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "GDACS",
+     "url": "https://www.gdacs.org/report.aspx?eventtype=WF&eventid=1023565"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2025-03-02T19:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      29.319199493766188,
+      4.11778052420226
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_12709",
+   "title": "Wildfire in Cameroon 1023517",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_12709",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "Wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "GDACS",
+     "url": "https://www.gdacs.org/report.aspx?eventtype=WF&eventid=1023517"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2025-02-15T19:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      13.448953535900284,
+      5.740728789547437
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_12761",
+   "title": "Wildfire in The Democratic Republic of Congo 1023534",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_12761",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "Wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "GDACS",
+     "url": "https://www.gdacs.org/report.aspx?eventtype=WF&eventid=1023534"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2025-02-15T19:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      29.188091947155684,
+      -1.41379366550985
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_12673",
+   "title": "Wildfire in Cameroon 1023507",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_12673",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "Wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "GDACS",
+     "url": "https://www.gdacs.org/report.aspx?eventtype=WF&eventid=1023507"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2025-02-07T19:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      12.765299415367926,
+      5.992173212751177
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_12664",
+   "title": "Wildfire in The Democratic Republic of Congo 1023500",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_12664",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "Wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "GDACS",
+     "url": "https://www.gdacs.org/report.aspx?eventtype=WF&eventid=1023500"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2025-02-03T19:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      29.60683213109463,
+      4.244247573323041
+     ]
+    }
+   ]
+  }
+ ]
+}

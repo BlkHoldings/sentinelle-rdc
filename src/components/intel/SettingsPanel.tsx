@@ -20,12 +20,25 @@ export default function SettingsPanel() {
   const setLang = useSettingsStore((s) => s.setLang);
   const scale = useSettingsStore((s) => s.scale);
   const setScale = useSettingsStore((s) => s.setScale);
+  const mode = useSettingsStore((s) => s.dataMode);
+  const setMode = useSettingsStore((s) => s.setDataMode);
 
   return (
     <div className="h-full flex flex-col bg-b0 min-h-0">
       <WorkspaceHeader title={t('set.title')} hint={t('set.hint')} />
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="p-3 md:p-4 grid gap-3 max-w-2xl" data-testid="settings">
+          <Card title={t('mode.title')} hint={t('mode.reload')} testid="set-mode">
+            <div className="flex" role="group" aria-label={t('mode.title')}>
+              {(['real', 'demo'] as const).map((m) => (
+                <SegButton key={m} active={mode === m}
+                  onClick={() => { if (m !== mode) { setMode(m); setTimeout(() => window.location.reload(), 150); } }}>
+                  {t(m === 'real' ? 'mode.real' : 'mode.demo')}
+                </SegButton>
+              ))}
+            </div>
+            <p className="text-2xs text-t3 mt-2 leading-relaxed">{t(mode === 'real' ? 'mode.real.help' : 'mode.demo.help')}</p>
+          </Card>
           <Card title={t('set.language')} hint={t('set.language.note')}>
             <div className="flex" role="group" aria-label={t('set.language')}>
               {LANGS.map((l) => (

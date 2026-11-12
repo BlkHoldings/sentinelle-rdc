@@ -92,6 +92,11 @@ const DEFAULT_LAYERS: LayerVisibility = {
   seismic: false,
   weather: false,
   osm:     false,
+  eonet:   true,
+  rivers:  false,
+  sat_true: false,
+  sat_rain: false,
+  sat_night: false,
 };
 
 const DEFAULT_OPACITY = Object.fromEntries(

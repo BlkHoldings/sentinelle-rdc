@@ -53,6 +53,9 @@ export const SOURCE_PROFILES: SourceProfile[] = [
   { type: 'actualite_cd',       family: 'press',     label: 'Actualité.cd',       baseGrade: 'B', baseCredibility: 3, priorStrength: 20 },
   { type: '7sur7',              family: 'press',     label: '7sur7.cd',           baseGrade: 'C', baseCredibility: 3, priorStrength: 12 },
   { type: 'politico_cd',        family: 'press',     label: 'Politico.cd',        baseGrade: 'C', baseCredibility: 3, priorStrength: 12 },
+  /* Any outlet reached through a news index and not individually profiled.
+     Deliberately a weak prior: the index vouches for nothing. */
+  { type: 'press_other',        family: 'press',     label: 'Presse (index GDELT)', baseGrade: 'D', baseCredibility: 3, priorStrength: 8 },
   { type: 'twitter_verified',   family: 'social',    label: 'X — vérifié',        baseGrade: 'C', baseCredibility: 3, priorStrength: 8 },
   { type: 'twitter_unverified', family: 'social',    label: 'X — non vérifié',    baseGrade: 'E', baseCredibility: 4, priorStrength: 4 },
   { type: 'facebook',           family: 'social',    label: 'Facebook',           baseGrade: 'E', baseCredibility: 4, priorStrength: 4 },

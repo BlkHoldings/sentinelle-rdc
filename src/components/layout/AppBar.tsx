@@ -20,6 +20,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useFeedStore, type TimeRange } from '@/store/useFeedStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
 import { useLiveStore } from '@/store/useLiveStore';
+import { useOpenDataStore } from '@/store/useOpenDataStore';
+import { useFeedHealth } from '@/hooks/useFeedHealth';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useT, LANGS, type MsgKey } from '@/lib/i18n';
@@ -97,26 +99,20 @@ export default function AppBar({
   useEffect(() => { setQ(searchQuery); }, [searchQuery]);
 
   /* ── Synchronisation ── */
-  const weather = useLiveStore((s) => s.weather);
-  const seismic = useLiveStore((s) => s.seismic);
-  const reliefweb = useLiveStore((s) => s.reliefweb);
-  const gdacs = useLiveStore((s) => s.gdacs);
   const busy = useLiveStore((s) => s.busy);
   const refreshAll = useLiveStore((s) => s.refreshAll);
+  const refreshOpen = useOpenDataStore((s) => s.refreshAll);
   const lastRefresh = useRefreshStore((s) => s.lastRefresh);
   const refreshFn = useRefreshStore((s) => s.refreshFn);
-  const feeds = [
-    { name: 'Open-Meteo', r: weather }, { name: 'USGS', r: seismic },
-    { name: 'ReliefWeb', r: reliefweb }, { name: 'GDACS', r: gdacs },
-  ];
-  const up = feeds.filter((f) => f.r.health === 'ok').length;
+  const { feeds: status, up, total } = useFeedHealth();
+  const feeds = status.map((f) => ({ name: f.name, r: f.result }));
 
   /* ── Notifications: derived, never stored ── */
   const events = useFusionStore((s) => s.events);
   const clusters = useFusionStore((s) => s.clusters);
   const triage = events.filter(needsTriage).length;
   const significant = clusters.filter((c) => c.significant).length;
-  const down = feeds.filter((f) => f.r.health === 'error');
+  const down = feeds.filter((f) => f.r.health === 'error' && !f.r.data);
   const notes: { key: string; text: string; view: ViewKey; tone: string; glyph: string }[] = [];
   if (significant) notes.push({
     key: 'c', view: 'anomalies', tone: 'text-alert', glyph: '▲',
@@ -201,23 +197,24 @@ export default function AppBar({
 
       {/* Synchronisation */}
       <Menu
-        label={`${t('bar.sync')} — ${up ? t('bar.sync.feeds', { up, n: feeds.length }) : t('bar.sync.none')}`}
+        label={`${t('bar.sync')} — ${up ? t('bar.sync.feeds', { up, n: total }) : t('bar.sync.none')}`}
         icon="sync" testid="sync-menu"
-        text={<span className={`hidden sm:inline font-data text-2xs tabular-nums ${up ? 'text-grn' : 'text-amb'}`}>{up}/{feeds.length}</span>}
+        text={<span className={`hidden sm:inline font-data text-2xs tabular-nums ${up ? 'text-grn' : 'text-amb'}`}>{up}/{total}</span>}
         badge={<span className={`absolute top-1.5 left-5 w-1.5 h-1.5 rounded-full ${up ? 'bg-grn' : 'bg-amb'}`} aria-hidden="true" />}
       >
         {(close) => (
           <>
-            <MenuTitle>{up ? t('bar.sync.feeds', { up, n: feeds.length }) : t('bar.sync.none')}</MenuTitle>
+            <MenuTitle>{up ? t('bar.sync.feeds', { up, n: total }) : t('bar.sync.none')}</MenuTitle>
             <ul className="py-1">
               {feeds.map((f) => {
-                const ok = f.r.health === 'ok';
+                const ok = f.r.health === 'ok' || f.r.health === 'degraded';
+                const off = f.r.health === 'idle' && !!f.r.error;
                 return (
                   <li key={f.name} className="px-3 py-1 flex items-center gap-2 text-2xs">
                     <span aria-hidden="true" className={ok ? 'text-grn' : f.r.health === 'loading' ? 'text-t3' : 'text-amb'}>{ok ? '●' : f.r.health === 'loading' ? '◌' : '○'}</span>
                     <span className="text-t1 flex-1">{f.name}</span>
                     <span className="text-t3 font-data">
-                      {ok ? (f.r.fetchedAt ? ago(new Date(f.r.fetchedAt).toISOString(), lang) : 'ok') : f.r.health === 'loading' ? '…' : (lang === 'fr' ? 'hors ligne' : 'offline')}
+                      {ok ? (f.r.fetchedAt ? ago(new Date(f.r.fetchedAt).toISOString(), lang) : 'ok') : f.r.health === 'loading' ? '…' : off ? (lang === 'fr' ? 'à configurer' : 'needs setup') : (lang === 'fr' ? 'hors ligne' : 'offline')}
                     </span>
                   </li>
                 );
@@ -228,7 +225,7 @@ export default function AppBar({
             </div>
             <div className="p-2 border-t border-b3 flex gap-1.5">
               <button type="button" disabled={busy}
-                onClick={() => { refreshFn?.(); void refreshAll(); }}
+                onClick={() => { refreshFn?.(); void refreshAll(); void refreshOpen(); }}
                 className="flex-1 h-7 rounded border border-b3 text-2xs text-t1 hover:bg-b2 disabled:opacity-40">
                 {t('bar.sync.refresh')}
               </button>

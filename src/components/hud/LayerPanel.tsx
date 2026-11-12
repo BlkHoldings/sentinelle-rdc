@@ -20,6 +20,7 @@
 import { useMapStore, isShown } from '@/store/useMapStore';
 import { useLiveStore } from '@/store/useLiveStore';
 import { useFeedStore } from '@/store/useFeedStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useLayerCounts } from '@/hooks/useLayerCounts';
 import { getMapBounds } from '@/lib/mapController';
 import {
@@ -39,6 +40,7 @@ export default function LayerPanel({ onClose }: { onClose: () => void }) {
   const queryOsm    = useLiveStore((s) => s.queryOsm);
   const osm         = useLiveStore((s) => s.osm);
   const counts      = useLayerCounts();
+  const demo        = useSettingsStore((s) => s.dataMode) === 'demo';
   /* Newest ACLED record regardless of the time filter. When the window
      excludes everything, the useful answer is how far back the data
      actually ends — not just that nothing matched. */
@@ -81,7 +83,8 @@ export default function LayerPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       {LAYER_GROUPS.map((g) => {
-        const defs = layersInGroup(g.id);
+        const defs = layersInGroup(g.id).filter((d) => demo || !d.demoOnly);
+        if (!defs.length) return null;
         const nOn = defs.filter((d) => layers[d.key]).length;
         const allOn = nOn === defs.length;
         return (
@@ -151,7 +154,8 @@ function LayerRow({
      shown, in order of how directly it answers "why is nothing there". */
   let note: string | null = null;
   if (enabled && !dimmedBySolo) {
-    if (count === null) note = def.onDemand ? 'Aucune requête — charger la vue courante' : 'En attente de la source';
+    if (def.imagery) note = null;
+    else if (count === null) note = def.onDemand ? 'Aucune requête — charger la vue courante' : 'En attente de la source';
     else if (count === 0) note = emptyNote ?? 'Aucun élément sous les filtres actifs';
     else if (belowZoom) note = `Symboles visibles à partir du zoom ${def.minzoom} (actuel ${zoom.toFixed(1)})`;
   }
@@ -193,7 +197,7 @@ function LayerRow({
           }`}
           title={count === null ? 'Non chargé' : `${count} éléments`}
         >
-          {count === null ? '—' : count.toLocaleString('fr-FR')}
+          {def.imagery ? 'IMAGE' : count === null ? '—' : count.toLocaleString('fr-FR')}
         </span>
 
         <button

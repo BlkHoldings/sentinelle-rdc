@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useMapStore } from '@/store/useMapStore';
 import { useFeedStore, applyFilters, type TimeRange, type ClassFilter } from '@/store/useFeedStore';
 import { useRefreshStore } from '@/store/useRefreshStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useLiveStore } from '@/store/useLiveStore';
 import { flyTo } from '@/lib/mapController';
 import LayerPanel from '@/components/hud/LayerPanel';
@@ -145,7 +146,9 @@ export default function FilterBar() {
     flyTo({ longitude: o.lon, latitude: o.lat, zoom: o.zoom, pitch: 0, bearing: 0 });
   };
 
-  const activeLayerCount = solo ? 1 : LAYERS.filter((l) => layers[l.key]).length;
+  const demo = useSettingsStore((s) => s.dataMode) === 'demo';
+  const offered = LAYERS.filter((l) => demo || !l.demoOnly);
+  const activeLayerCount = solo ? 1 : offered.filter((l) => layers[l.key]).length;
   const timeLabel = TIME_OPTS.find((o) => o.value === timeRange)?.label ?? '7J';
 
   return (
@@ -182,7 +185,7 @@ export default function FilterBar() {
           }`}
         >
           <span className="mvn-label text-t3">CALQUES</span>
-          <span className="text-t1 font-bold">{solo ? 'SOLO' : `${activeLayerCount}/${LAYERS.length}`}</span>
+          <span className="text-t1 font-bold">{solo ? 'SOLO' : `${activeLayerCount}/${offered.length}`}</span>
           <span className="text-t3 text-xs">▾</span>
         </button>
         {openMenu === 'layers' && <LayerPanel onClose={() => setOpenMenu(null)} />}

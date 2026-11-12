@@ -5,9 +5,38 @@ Espace d'analyse stratégique fondé sur les preuves — RDC et Grands Lacs.
 **En ligne :** https://blkholdings.github.io/sentinelle-rdc/
 (l'adresse garde l'ancien nom du dépôt ; elle changera si le dépôt est renommé, voir plus bas)
 
-> **Environnement de démonstration.** Les dossiers de départ, les positions, les relevés
-> et le flux d'événements synthétique sont illustratifs. Rien de ce qui est affiché ne
-> doit être lu comme un constat vérifié.
+> **Par défaut, seules des sources réelles sont affichées.** Un signalement de presse
+> n'est pas un fait établi : il reste « non vérifié » tant qu'une autre famille de
+> sources ne le recoupe pas ou qu'un analyste ne le confirme pas. Un mode démonstration
+> (flux simulé, jeux de données illustratifs, tous étiquetés) s'active dans
+> *Gestion des sources* ou *Paramètres*.
+
+## Sources de données
+
+Vérifiées dans un navigateur réel le 12 novembre 2026. Aucune ne demande de clé, sauf mention.
+
+| Source | Contenu | Cadence | État |
+|---|---|---|---|
+| **GDELT** | Titres de presse sur l'est de la RDC → moteur de fusion | 15 min | Connectée ; limitée à 1 requête / 5 s par adresse |
+| **OMS — Disease Outbreak News** | Bulletins officiels d'épidémie | à la publication | Connectée |
+| **UNHCR + IDMC** | Réfugiés, déplacés internes, séries annuelles | annuelle | Connectée |
+| **NASA EONET** | Feux, volcans, inondations (filtrés sur le territoire) | quotidienne | Connectée |
+| **NASA GIBS** | Imagerie : couleurs réelles de la veille, précipitations, lumières nocturnes | quotidienne | Connectée |
+| **GloFAS (Open-Meteo)** | Débit modélisé de six points du bassin | quotidienne | Connectée |
+| **USGS** | Sismicité | 5 min | Connectée |
+| **GDACS** | Alertes catastrophes | 15 min | Connectée |
+| **Open-Meteo** | Météo, faisabilité d'observation | 10 min | Connectée |
+| **OpenStreetMap (Overpass)** | Infrastructure, à la demande | — | Connectée |
+| **ReliefWeb v2** | Rapports humanitaires → moteur de fusion | continu | **À configurer** : `appname` gratuit à demander à ReliefWeb, à saisir dans *Gestion des sources* |
+| **ACLED**, **NASA FIRMS** | Conflits géocodés ; points chauds | — | Clé à saisir à la connexion |
+| **OCHA FTS** | Financement humanitaire | — | **Non connectable depuis un navigateur** : l'API renvoie des en-têtes CORS invalides. Analyseur prêt et testé, en attente d'un relais serveur |
+| **UCDP**, **OIM-DTM**, **HDX HAPI** | Violence organisée ; déplacements par zone ; besoins | — | Demandent un jeton ou un identifiant |
+| **Radio Okapi, Actualité.cd (RSS)** | Presse congolaise | — | Demandent un relais serveur (lecture inter-domaines refusée) |
+
+Fonds de carte : ESRI ArcGIS Online (sans clé). Limites administratives : geoBoundaries / OpenStreetMap (ODbL).
+
+Les analyseurs sont testés contre des réponses réelles enregistrées (`tests/fixtures`) :
+si un fournisseur change de format, un test échoue au lieu de vider un panneau en silence.
 
 ## Ce que fait l'application
 
@@ -34,9 +63,10 @@ ne soit découverte par surprise.
   navigateur : rien n'est partagé entre utilisateurs, et vider les données du site efface tout.
 - **Pas de contrôle d'accès.** Les identifiants de démonstration et les rôles sont
   vérifiés côté client. Ils rendent le flux de relecture cohérent ; ils ne protègent rien.
-- **Le flux d'événements est en grande partie simulé.** Chaque événement et chaque source
-  issus du flux de démonstration portent l'étiquette « Simulé » ; les noms de médias qui y
-  figurent sont fictifs dans ce contexte.
+- **GDELT ne fournit que des titres.** L'extraction du lieu et du type se fait sur une
+  ligne ; beaucoup d'articles restent « non classés » ou localisés à la province.
+- **En mode démonstration**, chaque événement et chaque source simulés portent l'étiquette
+  « Simulé » ; les noms de médias qui y figurent sont fictifs dans ce contexte.
 - **Pas de modèle d'IA.** L'atelier fait une recherche par mots-clés et assemble le
   brief par règles. Il le dit dans chaque brief.
 - **Pas d'interception.** Le panneau « communications » est une démonstration sonore
@@ -81,7 +111,7 @@ src/
 │   └── strategic/          dossiers, entités, signaux, atelier, rapports, journal
 ├── lib/
 │   ├── fusion/             moteur de fusion (pur, sans React)
-│   ├── live/               clients des sources temps réel
+│   ├── live/               connecteurs : GDELT, OMS, UNHCR/IDMC, NASA, GloFAS, USGS, GDACS, météo, OSM
 │   ├── strategic/          modèle de dossier, validation, filtrage, brief (pur)
 │   ├── intel/              dérivations sur les événements fusionnés (pur)
 │   ├── i18n/               dictionnaires français / anglais

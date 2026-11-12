@@ -5,6 +5,7 @@ import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useLiveStore } from '@/store/useLiveStore';
 import { useStrategicStore } from '@/store/useStrategicStore';
+import { useOpenDataStore } from '@/store/useOpenDataStore';
 import { PLACES } from '@/lib/fusion/gazetteer';
 import { AXES, AIRSTRIPS, BORDER_CROSSINGS } from '@/lib/fusion/infrastructure';
 import { MIL_POSITIONS } from '@/data/military';
@@ -35,6 +36,8 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
   const osm         = useLiveStore((s) => s.osm);
   const strategic   = useStrategicStore((s) => s.records);
   const boundsLoaded = useMapStore((s) => s.boundsLoaded);
+  const eonet = useOpenDataStore((s) => s.eonet);
+  const hydro = useOpenDataStore((s) => s.hydro);
 
   return useMemo(() => {
     const visible = applyFilters(events, { query: searchQuery, timeRange, classFilter });
@@ -64,6 +67,10 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
       seismic: live(seismic),
       weather: live(weather),
       osm:     live(osm),
+      eonet:   live(eonet),
+      rivers:  live(hydro),
+      // Imagery has no feature count.
+      sat_true: null, sat_rain: null, sat_night: null,
     };
-  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic, boundsLoaded]);
+  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic, boundsLoaded, eonet, hydro]);
 }

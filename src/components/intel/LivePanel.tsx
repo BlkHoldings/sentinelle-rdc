@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useFeedStore } from '@/store/useFeedStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import type { EventStatus } from '@/lib/fusion/schema';
 import { useT, statusKey, type MsgKey } from '@/lib/i18n';
 import { filterFeed, activeEvents, provinceOf, type Category } from '@/lib/intel/derive';
@@ -15,7 +16,7 @@ import IntelFeed from './IntelFeed';
 import IntelDetail from './IntelDetail';
 import type { ViewKey } from '@/lib/views';
 
-const CATS: (Category | 'all')[] = ['all', 'conflict', 'humanitarian', 'political'];
+const CATS: (Category | 'all')[] = ['all', 'conflict', 'humanitarian', 'political', 'other'];
 const STATUSES: EventStatus[] = ['confirmed', 'corroborated', 'unverified', 'disputed'];
 
 export default function LivePanel({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
@@ -26,6 +27,7 @@ export default function LivePanel({ onNavigate }: { onNavigate: (v: ViewKey) => 
   const select = useFusionStore((s) => s.select);
   const range = useFeedStore((s) => s.timeRange);
   const query = useFeedStore((s) => s.searchQuery);
+  const demo = useSettingsStore((s) => s.dataMode) === 'demo';
 
   const [category, setCategory] = useState<Category | 'all'>('all');
   const [status, setStatus] = useState<EventStatus | 'all'>('all');
@@ -62,11 +64,11 @@ export default function LivePanel({ onNavigate }: { onNavigate: (v: ViewKey) => 
             <option value="all">{t('feed.province.all')}</option>
             {provinces.map((p) => <option key={p}>{p}</option>)}
           </select>
-          <label className="inline-flex items-center gap-1.5 text-2xs text-t2 cursor-pointer">
+          {demo && <label className="inline-flex items-center gap-1.5 text-2xs text-t2 cursor-pointer">
             <input type="checkbox" checked={hideSimulated} onChange={(e) => setHideSimulated(e.target.checked)}
               className="accent-[#6f9bff] w-3.5 h-3.5" data-testid="feed-hide-sim" />
             {t('feed.hideSim')}
-          </label>
+          </label>}
           <span className="ml-auto font-data text-2xs text-t3 tabular-nums" aria-live="polite" data-testid="feed-count">
             {t('feed.count', { n: shown.length.toLocaleString('fr-FR') })}
           </span>
@@ -76,7 +78,11 @@ export default function LivePanel({ onNavigate }: { onNavigate: (v: ViewKey) => 
       <div className="flex-1 min-h-0 flex relative">
         <div className={`min-w-0 flex-1 ${selected ? 'hidden lg:block' : ''}`}>
           {!seeded ? <Skeleton rows={6} />
-            : shown.length === 0 ? <EmptyState title={t('feed.empty')}>{t('feed.empty.hint')}</EmptyState>
+            : shown.length === 0 ? (
+              events.length === 0 && !demo
+                ? <EmptyState title={t('feed.empty.real')}>{t('feed.empty.real.hint')}</EmptyState>
+                : <EmptyState title={t('feed.empty')}>{t('feed.empty.hint')}</EmptyState>
+            )
             : <IntelFeed events={shown} selectedId={selectedId} onSelect={select} compact={!!selected} />}
         </div>
         {selected ? (

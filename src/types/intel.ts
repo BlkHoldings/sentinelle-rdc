@@ -82,7 +82,9 @@ export type LayerKey =
   /* Strategic records that carry coordinates. */
   | 'dossiers'
   /* National and provincial outlines. */
-  | 'bounds';
+  | 'bounds'
+  /* Real-time satellite imagery and open-data overlays. */
+  | 'sat_true' | 'sat_rain' | 'sat_night' | 'eonet' | 'rivers';
 
 export interface LayerVisibility extends Record<LayerKey, boolean> {}
 

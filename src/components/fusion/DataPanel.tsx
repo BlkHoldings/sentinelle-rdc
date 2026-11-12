@@ -18,6 +18,9 @@
 
 import { useMemo, useState } from 'react';
 import { useLiveStore } from '@/store/useLiveStore';
+import { useOpenDataStore, OPEN_META } from '@/store/useOpenDataStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { RW_APPNAME_KEY, reliefWebAppname } from '@/lib/live/reliefweb';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useFeedStore } from '@/store/useFeedStore';
 import { useToastStore } from '@/store/useToastStore';
@@ -118,15 +121,16 @@ function ExportBar<T extends object>({ rows, name, geo = true }: {
 
 /* ── Source health row ──────────────────────────────────────────── */
 
-function SourceRow({ meta, result, onRefresh }: {
+function SourceRow({ meta, result, onRefresh, children }: {
   meta: { id: string; label: string; purpose: string; provider: string; docs: string; cadence: string; requiresKey: boolean };
   result: FetchResult<unknown>;
   onRefresh?: () => void;
+  children?: React.ReactNode;
 }) {
   const st = HEALTH_STYLE[result.health];
   const stale = stalenessHours(result);
   return (
-    <div className="border border-b3 bg-b1 p-2">
+    <div className="border border-b3 bg-b1 p-2" data-source={meta.id} data-health={result.health}>
       <div className="flex items-center gap-1.5 flex-wrap">
         <div className={`w-1.5 h-1.5 shrink-0 ${st.dot}`} />
         <span className="text-t1 text-2xs font-bold">{meta.label}</span>
@@ -170,10 +174,11 @@ function SourceRow({ meta, result, onRefresh }: {
       </div>
 
       {result.error && (
-        <div className="text-alert text-3xs mt-1 leading-tight break-words">
+        <div className={`${result.health === 'idle' ? 'text-amb' : 'text-alert'} text-3xs mt-1 leading-tight break-words`}>
           {result.error}
         </div>
       )}
+      {children}
       <a href={meta.docs} target="_blank" rel="noopener noreferrer"
         className="text-3xs text-blu hover:text-cyn mt-1 inline-block transition-colors">
         documentation ↗
@@ -182,10 +187,75 @@ function SourceRow({ meta, result, onRefresh }: {
   );
 }
 
+/* Sources that would add real precision and cannot be reached from a
+   static site without a credential. Listed so the gap is visible and
+   the route to closing it is one click away. */
+const NOT_CONNECTED = [
+  { name: 'ACLED', what: 'Événements de conflit géocodés, vérifiés par des chercheurs', needs: 'clé + e-mail (à saisir à la connexion)', url: 'https://acleddata.com/register/' },
+  { name: 'NASA FIRMS', what: 'Points chauds VIIRS/MODIS en quasi temps réel', needs: 'clé MAP_KEY (à saisir à la connexion)', url: 'https://firms.modaps.eosdis.nasa.gov/api/area/' },
+  { name: 'UCDP', what: 'Événements de violence organisée, université d’Uppsala', needs: 'jeton d’API', url: 'https://ucdp.uu.se/apidocs/' },
+  { name: 'OIM — DTM', what: 'Déplacements internes par zone de santé', needs: 'clé d’abonnement', url: 'https://dtm.iom.int/data-and-analysis/dtm-api' },
+  { name: 'HDX HAPI', what: 'Besoins humanitaires, IPC, déplacés par province', needs: 'identifiant lié à une adresse e-mail', url: 'https://hdx-hapi.readthedocs.io/' },
+  { name: 'OCHA FTS', what: 'Financement humanitaire : requis, financé, bailleurs', needs: 'relais serveur : l’API renvoie des en-têtes CORS invalides, refusés par les navigateurs', url: 'https://fts.unocha.org/countries/52/summary/2026' },
+  { name: 'Radio Okapi, Actualité.cd (flux RSS)', what: 'Presse congolaise en direct', needs: 'relais serveur : ces sites n’autorisent pas la lecture depuis un navigateur', url: 'https://www.radiookapi.net/' },
+];
+
+function ModeSwitch() {
+  const mode = useSettingsStore((s) => s.dataMode);
+  const setMode = useSettingsStore((s) => s.setDataMode);
+  const pick = (m: 'real' | 'demo') => {
+    if (m === mode) return;
+    setMode(m);
+    // The engine is seeded once per session; a clean reload is the only
+    // way to guarantee no simulated event survives a switch to real mode.
+    setTimeout(() => window.location.reload(), 150);
+  };
+  return (
+    <div className="border border-b3 bg-b1 p-2.5 flex flex-wrap items-center gap-x-4 gap-y-2" data-testid="mode-switch" data-mode={mode}>
+      <div className="min-w-0 flex-1">
+        <div className="text-t1 text-2xs font-bold">Origine des données</div>
+        <div className="text-t3 text-3xs leading-snug">
+          {mode === 'real'
+            ? 'Sources réelles uniquement : rien de simulé ni d’illustratif n’est affiché.'
+            : 'Démonstration : un flux simulé et des jeux de données illustratifs sont ajoutés, tous étiquetés.'}
+        </div>
+      </div>
+      <div className="flex">
+        {(['real', 'demo'] as const).map((m) => (
+          <button key={m} onClick={() => pick(m)} aria-pressed={mode === m} data-testid={`mode-${m}`}
+            className={`px-2 py-1 text-2xs border -ml-px first:ml-0 ${mode === m ? 'bg-b3 border-t3 text-t1' : 'border-b3 text-t3 hover:text-t1'}`}>
+            {m === 'real' ? 'SOURCES RÉELLES' : 'DÉMONSTRATION'}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReliefWebSetup({ onSaved }: { onSaved: () => void }) {
+  const [v, setV] = useState(() => reliefWebAppname());
+  const save = () => {
+    try {
+      if (v.trim()) window.localStorage.setItem(RW_APPNAME_KEY, v.trim());
+      else window.localStorage.removeItem(RW_APPNAME_KEY);
+    } catch { /* storage refused: the value lasts for this page only */ }
+    onSaved();
+  };
+  return (
+    <form className="mt-1.5 flex gap-1" onSubmit={(e) => { e.preventDefault(); save(); }}>
+      <input value={v} onChange={(e) => setV(e.target.value)} placeholder="appname approuvé par ReliefWeb"
+        aria-label="Appname ReliefWeb" data-testid="rw-appname"
+        className="flex-1 min-w-0 bg-b0 border border-b3 focus:border-blu px-1.5 py-0.5 text-3xs text-t1 placeholder:text-t3 focus:outline-none" />
+      <button type="submit" className="border border-b3 text-t2 hover:text-t1 px-1.5 text-3xs">ENREGISTRER</button>
+    </form>
+  );
+}
+
 /* ── Main ───────────────────────────────────────────────────────── */
 
 export default function DataPanel() {
   const live = useLiveStore();
+  const open = useOpenDataStore();
   const push = useToastStore((s) => s.push);
   const fusionEvents = useFusionStore((s) => s.events);
   const feedEvents = useFeedStore((s) => s.events);
@@ -264,13 +334,44 @@ export default function DataPanel() {
         {/* ── SOURCES ── */}
         {tab === 'sources' && (
           <>
+            <ModeSwitch />
+
+            <div className="mvn-label pt-1">PRESSE ET RAPPORTS — ALIMENTENT LE MOTEUR DE FUSION</div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-              <SourceRow meta={live.meta[0]} result={live.weather}   onRefresh={() => void live.refreshWeather()} />
+              <SourceRow meta={OPEN_META.gdelt} result={open.gdelt} onRefresh={() => void open.refreshGdelt()} />
+              <SourceRow meta={live.meta[2]} result={live.reliefweb} onRefresh={() => void live.refreshReliefWeb()}>
+                <ReliefWebSetup onSaved={() => void live.refreshReliefWeb()} />
+              </SourceRow>
+            </div>
+
+            <div className="mvn-label pt-1">INSTITUTIONS — CHIFFRES DE RÉFÉRENCE</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+              <SourceRow meta={OPEN_META.who} result={open.who} onRefresh={() => void open.refreshWho()} />
+              <SourceRow meta={OPEN_META.displacement} result={open.displacement} onRefresh={() => void open.refreshDisplacement()} />
+            </div>
+
+            <div className="mvn-label pt-1">ENVIRONNEMENT ET CAPTEURS</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+              <SourceRow meta={OPEN_META.eonet} result={open.eonet} onRefresh={() => void open.refreshEonet()} />
               <SourceRow meta={live.meta[1]} result={live.seismic}   onRefresh={() => void live.refreshSeismic()} />
-              <SourceRow meta={live.meta[2]} result={live.reliefweb} onRefresh={() => void live.refreshReliefWeb()} />
               <SourceRow meta={live.meta[3]} result={live.gdacs}     onRefresh={() => void live.refreshGdacs()} />
+              <SourceRow meta={live.meta[0]} result={live.weather}   onRefresh={() => void live.refreshWeather()} />
+              <SourceRow meta={OPEN_META.hydro} result={open.hydro} onRefresh={() => void open.refreshHydro()} />
               <SourceRow meta={live.meta[4]} result={live.osm} />
             </div>
+
+            <div className="mvn-label pt-1">NON CONNECTÉES — DEMANDENT UN ACCÈS QUE CE NAVIGATEUR N’A PAS</div>
+            <div className="border border-b3 bg-b1 divide-y divide-b3" data-testid="not-connected">
+              {NOT_CONNECTED.map((n) => (
+                <div key={n.name} className="px-2.5 py-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-3xs">
+                  <span className="text-t1 text-2xs font-bold w-44 shrink-0">{n.name}</span>
+                  <span className="text-t2 flex-1 min-w-[14rem]">{n.what}</span>
+                  <span className="text-amb">{n.needs}</span>
+                  <a href={n.url} target="_blank" rel="noopener noreferrer" className="text-blu hover:text-cyn">accès ↗</a>
+                </div>
+              ))}
+            </div>
+
             <div className="border border-b3 bg-b1 p-2.5 text-3xs text-t3 leading-relaxed">
               <span className="text-t2">Note de fiabilité.</span> Ces flux sont appelés
               directement depuis le navigateur : un échec peut venir du fournisseur, du

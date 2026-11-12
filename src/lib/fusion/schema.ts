@@ -39,7 +39,7 @@ export type SourceFamily =
 export type SourceType =
   | 'acled' | 'reliefweb' | 'ocha'
   | 'radio_okapi' | 'rtnc' | 'community_radio'
-  | 'actualite_cd' | '7sur7' | 'politico_cd'
+  | 'actualite_cd' | '7sur7' | 'politico_cd' | 'press_other'
   | 'twitter_verified' | 'twitter_unverified' | 'facebook'
   | 'telegram' | 'whatsapp'
   | 'ngo_field' | 'sms_gateway' | 'civil_society'

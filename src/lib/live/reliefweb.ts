@@ -26,9 +26,9 @@ export const RELIEFWEB_META: LiveSourceMeta = {
   label: 'ReliefWeb (OCHA)',
   purpose: 'Rapports humanitaires RDC — OCHA, ONG, clusters',
   provider: 'UN OCHA',
-  docs: 'https://apidoc.reliefweb.int/',
+  docs: 'https://apidoc.reliefweb.int/parameters#appname',
   cadence: 'Continu, plusieurs publications par jour',
-  requiresKey: false,
+  requiresKey: true,
 };
 
 export interface ReliefWebReport {
@@ -55,17 +55,36 @@ interface RwResponse {
   totalCount?: number;
 }
 
+/** localStorage key for the operator's ReliefWeb appname. */
+export const RW_APPNAME_KEY = 'nkoyi.reliefweb.appname';
+
+export function reliefWebAppname(): string {
+  try { return (typeof window !== 'undefined' && window.localStorage.getItem(RW_APPNAME_KEY)) || ''; }
+  catch { return ''; }
+}
+
 /**
- * Recent DRC reports.
+ * ReliefWeb reports for the DRC.
  *
- * `appname` is required by ReliefWeb's terms so they can attribute
- * traffic; it is not a credential and carries no access rights.
+ * API v1 was decommissioned (HTTP 410) and v2 only answers a
+ * pre-approved `appname`, requested free of charge from ReliefWeb. It is
+ * an identifier, not a secret, so it is safe in the browser — but it has
+ * to be the operator's own. Until one is entered under Source
+ * management this connector reports "configuration requise" and makes no
+ * request, rather than failing on every refresh.
  */
 export async function fetchReliefWeb(limit = 40): Promise<FetchResult<ReliefWebReport[]>> {
+  const appname = reliefWebAppname();
+  if (!appname) {
+    return {
+      ok: false, health: 'idle', data: null, count: 0, latencyMs: 0, fetchedAt: '',
+      error: 'Configuration requise : identifiant « appname » ReliefWeb (gratuit, sur demande).',
+    };
+  }
   const params = [
-    'appname=nkoyi',
+    `appname=${encodeURIComponent(appname)}`,
     `limit=${limit}`,
-    'sort[]=date.created:desc',
+    'preset=latest',
     'filter[field]=country.iso3',
     'filter[value]=cod',
     'fields[include][]=title',
@@ -76,7 +95,7 @@ export async function fetchReliefWeb(limit = 40): Promise<FetchResult<ReliefWebR
     'fields[include][]=url',
     'fields[include][]=theme.name',
   ].join('&');
-  const url = `https://api.reliefweb.int/v1/reports?${params}`;
+  const url = `https://api.reliefweb.int/v2/reports?${params}`;
 
   const res = await fetchJSON<RwResponse>(url, { timeoutMs: 20_000 });
   if (!res.ok || !res.data?.data) return { ...res, data: null, count: 0 };

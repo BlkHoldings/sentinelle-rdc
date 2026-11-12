@@ -100,6 +100,8 @@ Slots that exist in the interface and say they are not connected:
 |---|---|---|
 | AI synthesis | `IntelDetail` → “Synthèse par IA” | server-side model call returning text + cited source ids |
 | Assistant engine | `lib/strategic/synthesis.ts` → `buildBrief` | same contract, model-backed |
-| Official displacement series | `HumanitarianPanel` | IOM-DTM / UNHCR ingestion |
+| Humanitarian funding | `lib/live/opendata.ts` → `fetchFunding` | server relay for OCHA FTS (invalid CORS headers upstream) |
+| Sub-national displacement | `HumanitarianPanel` | IOM-DTM (subscription key) or HDX HAPI (identifier) |
+| Congolese press | `lib/fusion/sources.ts` → `fetchNewsFeeds` | server relay for RSS feeds |
 | Authentication | `useAuthStore.login` | real identity provider; roles server-side |
 | Persistence | `useStrategicStore` (`load` / `save`) | database behind the same actions |

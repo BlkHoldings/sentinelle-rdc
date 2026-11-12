@@ -14,7 +14,11 @@ export type ViewKey =
   /* Strategic records */
   | 'dossiers' | 'entites' | 'signaux' | 'atelier' | 'rapports' | 'journal';
 
-export interface NavItem { key: ViewKey; label: MsgKey; icon: IconName }
+export interface NavItem {
+  key: ViewKey; label: MsgKey; icon: IconName;
+  /** Built on the illustrative datasets; hidden unless demonstration mode is on. */
+  demoOnly?: boolean;
+}
 export interface NavGroup { id: string; label: MsgKey | null; items: NavItem[] }
 
 export const NAV: NavGroup[] = [
@@ -37,11 +41,11 @@ export const NAV: NavGroup[] = [
     items: [
       { key: 'triage',       label: 'nav.triage',       icon: 'scale' },
       { key: 'fusion',       label: 'nav.fusion',       icon: 'flow' },
-      { key: 'intelligence', label: 'nav.intelligence', icon: 'layers' },
-      { key: 'entities',     label: 'nav.entities',     icon: 'nodes' },
-      { key: 'effects',      label: 'nav.effects',      icon: 'spark' },
-      { key: 'logistics',    label: 'nav.logistics',    icon: 'route' },
-      { key: 'planning',     label: 'nav.planning',     icon: 'compass' },
+      { key: 'intelligence', label: 'nav.intelligence', icon: 'layers', demoOnly: true },
+      { key: 'entities',     label: 'nav.entities',     icon: 'nodes', demoOnly: true },
+      { key: 'effects',      label: 'nav.effects',      icon: 'spark', demoOnly: true },
+      { key: 'logistics',    label: 'nav.logistics',    icon: 'route', demoOnly: true },
+      { key: 'planning',     label: 'nav.planning',     icon: 'compass', demoOnly: true },
     ],
   },
   {

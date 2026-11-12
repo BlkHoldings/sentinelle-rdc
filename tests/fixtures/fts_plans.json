@@ -1,0 +1,313 @@
+{
+ "data": [
+  {
+   "id": 1187,
+   "planVersion": {
+    "id": 7422,
+    "planId": 1187,
+    "name": "République Démocratique du Congo Plan de Réponse Humanitaire 2024",
+    "shortName": "Democratic Republic of the Congo",
+    "subtitle": "Plan de Réponse Humanitaire",
+    "startDate": "2024-01-01",
+    "endDate": "2024-12-31",
+    "comments": null,
+    "isForHPCProjects": false,
+    "isPartOfGHO": true,
+    "code": "HCOD24",
+    "customLocationCode": null,
+    "currentReportingPeriodId": 3045,
+    "lastPublishedReportingPeriodId": 3045,
+    "clusterSelectionType": "multi",
+    "visibilityPreferences": {
+     "isForNewHPCProjects": false,
+     "isDisaggregationForCaseloads": true,
+     "isDisaggregationForIndicators": true
+    },
+    "pdfPublishDate": "2024-02-20",
+    "focusLocationId": 52,
+    "currentVersion": true,
+    "latestVersion": true,
+    "latestTaggedVersion": true,
+    "versionTags": [
+     "1.35"
+    ],
+    "createdAt": "2025-05-02T13:08:22.857Z",
+    "updatedAt": "2025-05-02T13:09:06.964Z",
+    "organizations": [
+     {
+      "id": 4396,
+      "name": "Office for the Coordination of Humanitarian Affairs",
+      "nativeName": "Bureau de la coordination des affaires humanitaires, Oficina de Naciones Unidas para la Coordinación de Asuntos Humanitarios, Escritório das Nações Unidas para a Coordenação de Assuntos Humanitários, مكتب الأمم المتحدة لتنسيق الشؤون الإنسانية",
+      "abbreviation": "OCHA",
+      "url": "https://www.unocha.org/",
+      "parentID": null,
+      "comments": "History of OCHA\nIn December 1991, the General Assembly adopted resolution 46/182. It was designed to strengthen the United Nations response to complex emergencies and natural disasters, while improving the overall effectiveness of humanitarian operations in the field. \n\nSoon after the resolution was adopted, the Secretary-General established the Department of Humanitarian Affairs (DHA). He also assigned the ERC the status of Under-Secretary-General for Humanitarian Affairs, with offices in New York and Geneva to provide institutional support.\n\nIn 1998, as part of the Secretary-General's programme of reform, DHA was reorganized into the Office for the Coordination of Humanitarian Affairs (OCHA). Its mandate was expanded to include the coordination of humanitarian response, policy development and humanitarian advocacy.\n\nOCHA carries out its coordination function primarily through the IASC, which is chaired by the ERC. Participants include all humanitarian partners, from United Nations agencies, funds and programmes, to the Red Cross movement and NGOs. The IASC ensures inter-agency decision-making in response to complex emergencies. These responses include needs assessments, consolidated appeals, field coordination arrangements and the development of humanitarian policies.",
+      "verified": true,
+      "notes": "Added another language, website and description (NL-31/1/2023)",
+      "active": true,
+      "collectiveInd": false,
+      "newOrganizationId": null,
+      "createdAt": "2017-01-14T00:54:02.279Z",
+      "updatedAt": "2023-01-31T11:26:36.697Z",
+      "deletedAt": null,
+      "planVersionOrganization": {
+       "planVersionId": 7422,
+       "organizationI": 4396,
+       "createdAt": "2025-05-02T13:08:22.994Z",
+       "updatedAt": "2025-05-02T13:08:22.994Z"
+      }
+     }
+    ]
+   },
+   "years": [
+    {
+     "id": 45,
+     "year": "2024",
+     "createdAt": "2016-02-23T15:03:30.953Z",
+     "updatedAt": "2016-02-23T15:03:30.953Z",
+     "planYear": {
+      "id": 963,
+      "planId": 1187,
+      "usageYearId": 45,
+      "currentVersion": true,
+      "latestVersion": true,
+      "latestTaggedVersion": true,
+      "versionTags": [
+       "0.1",
+       "1.0",
+       "1.1",
+       "1.2",
+       "1.3",
+       "1.4",
+       "1.5",
+       "1.6",
+       "1.7",
+       "1.8",
+       "1.9",
+       "1.10",
+       "1.11",
+       "1.12",
+       "1.13",
+       "1.14",
+       "1.15",
+       "1.16",
+       "1.17",
+       "1.18",
+       "1.19",
+       "1.20",
+       "1.21",
+       "1.22",
+       "1.23",
+       "1.24",
+       "1.25",
+       "1.26",
+       "1.27",
+       "1.28",
+       "1.29",
+       "1.30",
+       "1.31",
+       "1.32",
+       "1.33",
+       "1.34",
+       "1.35"
+      ],
+      "createdAt": "2023-10-16T10:50:09.176Z",
+      "updatedAt": "2025-05-02T13:08:44.501Z"
+     }
+    }
+   ],
+   "origRequirements": 2580627746,
+   "revisedRequirements": 2580627746
+  },
+  {
+   "id": 1261,
+   "planVersion": {
+    "id": 8913,
+    "planId": 1261,
+    "name": "République Démocratique du Congo Besoins Humanitaires et Plan de Réponse 2025",
+    "shortName": "Democratic Republic of the Congo",
+    "subtitle": "Besoins Humanitaires et Plan de Réponse",
+    "startDate": "2025-01-01",
+    "endDate": "2025-12-31",
+    "comments": null,
+    "isForHPCProjects": false,
+    "isPartOfGHO": true,
+    "code": "HCOD25",
+    "customLocationCode": null,
+    "currentReportingPeriodId": 3562,
+    "lastPublishedReportingPeriodId": 3562,
+    "clusterSelectionType": "multi",
+    "visibilityPreferences": {
+     "isForNewHPCProjects": false,
+     "isDisaggregationForCaseloads": true,
+     "isDisaggregationForIndicators": true
+    },
+    "pdfPublishDate": "2025-02-26",
+    "focusLocationId": 52,
+    "currentVersion": true,
+    "latestVersion": true,
+    "latestTaggedVersion": true,
+    "versionTags": [
+     "1.12"
+    ],
+    "createdAt": "2026-11-11T11:52:54.437Z",
+    "updatedAt": "2026-11-11T15:01:53.071Z",
+    "organizations": [
+     {
+      "id": 4396,
+      "name": "Office for the Coordination of Humanitarian Affairs",
+      "nativeName": "Bureau de la coordination des affaires humanitaires, Oficina de Naciones Unidas para la Coordinación de Asuntos Humanitarios, Escritório das Nações Unidas para a Coordenação de Assuntos Humanitários, مكتب الأمم المتحدة لتنسيق الشؤون الإنسانية",
+      "abbreviation": "OCHA",
+      "url": "https://www.unocha.org/",
+      "parentID": null,
+      "comments": "History of OCHA\nIn December 1991, the General Assembly adopted resolution 46/182. It was designed to strengthen the United Nations response to complex emergencies and natural disasters, while improving the overall effectiveness of humanitarian operations in the field. \n\nSoon after the resolution was adopted, the Secretary-General established the Department of Humanitarian Affairs (DHA). He also assigned the ERC the status of Under-Secretary-General for Humanitarian Affairs, with offices in New York and Geneva to provide institutional support.\n\nIn 1998, as part of the Secretary-General's programme of reform, DHA was reorganized into the Office for the Coordination of Humanitarian Affairs (OCHA). Its mandate was expanded to include the coordination of humanitarian response, policy development and humanitarian advocacy.\n\nOCHA carries out its coordination function primarily through the IASC, which is chaired by the ERC. Participants include all humanitarian partners, from United Nations agencies, funds and programmes, to the Red Cross movement and NGOs. The IASC ensures inter-agency decision-making in response to complex emergencies. These responses include needs assessments, consolidated appeals, field coordination arrangements and the development of humanitarian policies.",
+      "verified": true,
+      "notes": "Added another language, website and description (NL-31/1/2023)",
+      "active": true,
+      "collectiveInd": false,
+      "newOrganizationId": null,
+      "createdAt": "2017-01-14T00:54:02.279Z",
+      "updatedAt": "2023-01-31T11:26:36.697Z",
+      "deletedAt": null,
+      "planVersionOrganization": {
+       "planVersionId": 8913,
+       "organizationI": 4396,
+       "createdAt": "2026-11-11T11:52:54.437Z",
+       "updatedAt": "2026-11-11T11:52:54.437Z"
+      }
+     }
+    ]
+   },
+   "years": [
+    {
+     "id": 46,
+     "year": "2025",
+     "createdAt": "2016-02-23T15:03:30.955Z",
+     "updatedAt": "2016-02-23T15:03:30.955Z",
+     "planYear": {
+      "id": 1037,
+      "planId": 1261,
+      "usageYearId": 46,
+      "currentVersion": true,
+      "latestVersion": true,
+      "latestTaggedVersion": true,
+      "versionTags": [
+       "0.1",
+       "0.2",
+       "1.0",
+       "1.1",
+       "1.2",
+       "1.3",
+       "1.4",
+       "1.5",
+       "1.6",
+       "1.7",
+       "1.8",
+       "1.9",
+       "1.10",
+       "1.11",
+       "1.12"
+      ],
+      "createdAt": "2024-10-04T07:51:23.361Z",
+      "updatedAt": "2026-11-11T15:01:24.826Z"
+     }
+    }
+   ],
+   "origRequirements": 2538016151,
+   "revisedRequirements": 2538016151
+  },
+  {
+   "id": 1509,
+   "planVersion": {
+    "id": 8324,
+    "planId": 1509,
+    "name": "République Démocratique du Congo Besoins Humanitaires et Plan de Réponse 2026",
+    "shortName": "Democratic Republic of the Congo",
+    "subtitle": "Besoins Humanitaires et Plan de Réponse",
+    "startDate": "2026-01-01",
+    "endDate": "2026-12-31",
+    "comments": null,
+    "isForHPCProjects": false,
+    "isPartOfGHO": true,
+    "code": "HCOD26",
+    "customLocationCode": null,
+    "currentReportingPeriodId": 3951,
+    "lastPublishedReportingPeriodId": null,
+    "clusterSelectionType": "multi",
+    "visibilityPreferences": {
+     "isForNewHPCProjects": false,
+     "isDisaggregationForCaseloads": true,
+     "isDisaggregationForIndicators": true
+    },
+    "pdfPublishDate": "2026-01-26",
+    "focusLocationId": 52,
+    "currentVersion": true,
+    "latestVersion": true,
+    "latestTaggedVersion": true,
+    "versionTags": [
+     "1.0",
+     "1.1",
+     "1.2",
+     "2.0",
+     "2.1"
+    ],
+    "createdAt": "2026-01-28T13:24:56.256Z",
+    "updatedAt": "2026-07-22T13:25:40.973Z",
+    "organizations": [
+     {
+      "id": 4396,
+      "name": "Office for the Coordination of Humanitarian Affairs",
+      "nativeName": "Bureau de la coordination des affaires humanitaires, Oficina de Naciones Unidas para la Coordinación de Asuntos Humanitarios, Escritório das Nações Unidas para a Coordenação de Assuntos Humanitários, مكتب الأمم المتحدة لتنسيق الشؤون الإنسانية",
+      "abbreviation": "OCHA",
+      "url": "https://www.unocha.org/",
+      "parentID": null,
+      "comments": "History of OCHA\nIn December 1991, the General Assembly adopted resolution 46/182. It was designed to strengthen the United Nations response to complex emergencies and natural disasters, while improving the overall effectiveness of humanitarian operations in the field. \n\nSoon after the resolution was adopted, the Secretary-General established the Department of Humanitarian Affairs (DHA). He also assigned the ERC the status of Under-Secretary-General for Humanitarian Affairs, with offices in New York and Geneva to provide institutional support.\n\nIn 1998, as part of the Secretary-General's programme of reform, DHA was reorganized into the Office for the Coordination of Humanitarian Affairs (OCHA). Its mandate was expanded to include the coordination of humanitarian response, policy development and humanitarian advocacy.\n\nOCHA carries out its coordination function primarily through the IASC, which is chaired by the ERC. Participants include all humanitarian partners, from United Nations agencies, funds and programmes, to the Red Cross movement and NGOs. The IASC ensures inter-agency decision-making in response to complex emergencies. These responses include needs assessments, consolidated appeals, field coordination arrangements and the development of humanitarian policies.",
+      "verified": true,
+      "notes": "Added another language, website and description (NL-31/1/2023)",
+      "active": true,
+      "collectiveInd": false,
+      "newOrganizationId": null,
+      "createdAt": "2017-01-14T00:54:02.279Z",
+      "updatedAt": "2023-01-31T11:26:36.697Z",
+      "deletedAt": null,
+      "planVersionOrganization": {
+       "planVersionId": 8324,
+       "organizationI": 4396,
+       "createdAt": "2026-01-28T13:24:56.383Z",
+       "updatedAt": "2026-01-28T13:24:56.383Z"
+      }
+     }
+    ]
+   },
+   "years": [
+    {
+     "id": 47,
+     "year": "2026",
+     "createdAt": "2016-02-23T15:03:30.959Z",
+     "updatedAt": "2016-02-23T15:03:30.959Z",
+     "planYear": {
+      "id": 1286,
+      "planId": 1509,
+      "usageYearId": 47,
+      "currentVersion": true,
+      "latestVersion": true,
+      "latestTaggedVersion": true,
+      "versionTags": [
+       "0.1",
+       "0.2",
+       "1.0",
+       "1.1",
+       "1.2",
+       "2.0",
+       "2.1"
+      ],
+      "createdAt": "2025-11-13T13:45:07.251Z",
+      "updatedAt": "2026-07-22T13:25:41.015Z"
+     }
+    }
+   ],
+   "origRequirements": 1403721718,
+   "revisedRequirements": 2132641156
+  }
+ ]
+}

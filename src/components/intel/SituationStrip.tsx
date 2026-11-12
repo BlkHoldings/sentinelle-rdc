@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useFeedStore } from '@/store/useFeedStore';
-import { useLiveStore } from '@/store/useLiveStore';
+import { useFeedHealth } from '@/hooks/useFeedHealth';
 import { useT, type MsgKey } from '@/lib/i18n';
 import { situation, dailySeries, ago } from '@/lib/intel/derive';
 import { Spark } from '@/components/ui/charts';
@@ -41,11 +41,7 @@ export default function SituationStrip({ onNavigate }: { onNavigate: (v: ViewKey
   const seeded = useFusionStore((s) => s.seeded);
   const clusters = useFusionStore((s) => s.clusters);
   const range = useFeedStore((s) => s.timeRange);
-  const feeds = [
-    useLiveStore((s) => s.weather.health), useLiveStore((s) => s.seismic.health),
-    useLiveStore((s) => s.reliefweb.health), useLiveStore((s) => s.gdacs.health),
-  ];
-  const up = feeds.filter((h) => h === 'ok').length;
+  const { up, total } = useFeedHealth();
 
   const s = useMemo(() => situation(events, range), [events, range]);
   const spark = useMemo(() => dailySeries(events, 14).map((d) => d.total), [events]);
@@ -76,7 +72,7 @@ export default function SituationStrip({ onNavigate }: { onNavigate: (v: ViewKey
       <Tile label={t('kpi.alerts')} value={seeded ? String(significant) : dash}
         tone={significant ? 'text-amb' : undefined} onClick={() => onNavigate('anomalies')} />
       <Tile label={t('kpi.freshness')} value={s.freshest ? ago(s.freshest, lang) : dash}
-        sub={`${t('kpi.feeds')} ${up}/${feeds.length}`} tone={up ? undefined : 'text-amb'}
+        sub={`${t('kpi.feeds')} ${up}/${total}`} tone={up ? undefined : 'text-amb'}
         onClick={() => onNavigate('data')} testid="kpi-fresh" />
     </section>
   );
