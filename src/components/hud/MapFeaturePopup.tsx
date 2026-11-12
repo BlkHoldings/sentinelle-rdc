@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Map feature card
+   NKOYI — Map feature card
    ═══════════════════════════════════════════════════════════════════════
 
    One card for every clickable thing on the map. Until this existed only
@@ -18,7 +18,7 @@ import { toMGRSSync } from '@/lib/mgrs';
 /** Fired to ask the page to switch workspace. The card lives inside the
  *  map and has no route to the page's view state; an event keeps it that
  *  way instead of threading a callback through the map component. */
-export const VIEW_EVENT = 'sentinelle:view';
+export const VIEW_EVENT = 'nkoyi:view';
 
 export default function MapFeaturePopup({
   feature, onClose,

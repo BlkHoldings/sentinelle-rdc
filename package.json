@@ -1,5 +1,5 @@
 {
-  "name": "sentinelle-rdc",
+  "name": "nkoyi",
   "version": "2.0.0",
   "description": "C2 Intelligence Monitor — Eastern DRC — Next.js Edition",
   "private": true,
@@ -8,26 +8,28 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
+    "maplibre-gl": "^4.7.1",
+    "mgrs": "^2.1.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "maplibre-gl": "^4.7.1",
     "react-map-gl": "^7.1.7",
-    "zustand": "^5.0.2",
-    "mgrs": "^2.1.0"
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5",
-    "tailwindcss": "^3.4.17",
-    "postcss": "^8",
     "autoprefixer": "^10",
     "eslint": "^9",
-    "eslint-config-next": "^15.1.0"
+    "eslint-config-next": "^15.1.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

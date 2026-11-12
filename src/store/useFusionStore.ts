@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Fusion Store
+   NKOYI — Fusion Store
    ═══════════════════════════════════════════════════════════════════════
 
    Owns the pipeline instance and drives it from React. Deliberately thin:

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Geophysical Feeds (USGS · GDACS)
+   NKOYI — Geophysical Feeds (USGS · GDACS)
    ═══════════════════════════════════════════════════════════════════════
 
    Two reasons these belong in a conflict monitor rather than a separate

@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Live Source Store
+   NKOYI — Live Source Store
    ═══════════════════════════════════════════════════════════════════════
 
    Owns every keyless real-time feed and, just as importantly, their

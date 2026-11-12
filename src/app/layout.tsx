@@ -16,8 +16,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title:       'SENTINELLE-RDC | C2 Intelligence Monitor',
-  description: 'Command & Control intelligence dashboard — Eastern DRC conflict monitoring',
+  title:       'NKOYI | Intelligence stratégique',
+  description: 'NKOYI — espace d’analyse stratégique fondé sur les preuves : RDC et Grands Lacs',
   robots:      { index: false, follow: false },
 };
 

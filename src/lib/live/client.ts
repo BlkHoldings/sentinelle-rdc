@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Live Source Client
+   NKOYI — Live Source Client
    ═══════════════════════════════════════════════════════════════════════
 
    Every live source in this build is keyless and public, because the app

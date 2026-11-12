@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Entity & Attribute Extraction
+   NKOYI — Entity & Attribute Extraction
    ═══════════════════════════════════════════════════════════════════════
 
    Replaces `spacy.load("xx_ent_wiki_sm")` with a domain-tuned extractor:

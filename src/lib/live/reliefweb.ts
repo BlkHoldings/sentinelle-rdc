@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — ReliefWeb (UN OCHA)
+   NKOYI — ReliefWeb (UN OCHA)
    ═══════════════════════════════════════════════════════════════════════
 
    The most operationally useful keyless feed available for this theatre.
@@ -63,7 +63,7 @@ interface RwResponse {
  */
 export async function fetchReliefWeb(limit = 40): Promise<FetchResult<ReliefWebReport[]>> {
   const params = [
-    'appname=sentinelle-rdc',
+    'appname=nkoyi',
     `limit=${limit}`,
     'sort[]=date.created:desc',
     'filter[field]=country.iso3',

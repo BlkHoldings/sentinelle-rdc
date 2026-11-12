@@ -65,6 +65,7 @@ const DEFAULT_LAYERS: LayerVisibility = {
   /* The fused product leads. Raw ACLED stays on beside it because the
      two answer different questions — what was reported versus what the
      engine believes — and an analyst checks one against the other. */
+  dossiers: true,
   fusion: true,
   halo:   true,
   scan:   true,

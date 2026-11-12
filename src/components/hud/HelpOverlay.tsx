@@ -34,7 +34,7 @@ export default function HelpOverlay({ onClose }: { onClose: () => void }) {
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <div className="relative panel shadow-float w-full max-w-md max-h-[85vh] overflow-y-auto">
         <div className="panel-header px-3 py-2 flex items-center justify-between sticky top-0">
-          <span className="mvn-label">RACCOURCIS — SENTINELLE-RDC</span>
+          <span className="mvn-label">RACCOURCIS — NKOYI</span>
           <button onClick={onClose} className="text-t3 hover:text-t1 text-sm transition-colors">✕</button>
         </div>
 

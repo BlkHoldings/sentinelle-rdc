@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Layer manager
+   NKOYI — Layer manager
    ═══════════════════════════════════════════════════════════════════════
 
    Replaces a dropdown of eleven on/off rows. What that could not answer:

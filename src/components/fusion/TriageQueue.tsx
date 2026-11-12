@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Analyst Triage Queue
+   NKOYI — Analyst Triage Queue
    ═══════════════════════════════════════════════════════════════════════
 
    The human-in-the-loop surface. Its job is not to display events — the

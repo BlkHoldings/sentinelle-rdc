@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Screen-space point clustering
+   NKOYI — Screen-space point clustering
    ═══════════════════════════════════════════════════════════════════════
 
    At theatre zoom the Petit Nord puts forty incidents inside a dozen

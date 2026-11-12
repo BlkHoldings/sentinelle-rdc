@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Anomaly Detection
+   NKOYI — Anomaly Detection
    ═══════════════════════════════════════════════════════════════════════
 
    Three detectors, each matched to a different failure mode:

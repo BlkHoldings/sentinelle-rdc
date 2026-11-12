@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Meteorological Conditions (Open-Meteo)
+   NKOYI — Meteorological Conditions (Open-Meteo)
    ═══════════════════════════════════════════════════════════════════════
 
    Weather is not decoration on this map. In the Kivus it is a first-order

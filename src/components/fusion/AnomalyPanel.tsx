@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Anomaly Panel
+   NKOYI — Anomaly Panel
    ═══════════════════════════════════════════════════════════════════════
 
    Two detectors surfaced side by side:

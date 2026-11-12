@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Core Domain Types
+   NKOYI — Core Domain Types
    ═══════════════════════════════════════════════════════════ */
 
 export type EventSource = 'acled' | 'firms' | 'drone' | 'cop';
@@ -78,7 +78,9 @@ export type LayerKey =
      spatio-temporal clusters from the Kulldorff pass. */
   | 'fusion' | 'halo' | 'scan'
   /* Reference geography drawn from datasets already in the build. */
-  | 'air' | 'border';
+  | 'air' | 'border'
+  /* Strategic records that carry coordinates. */
+  | 'dossiers';
 
 export interface LayerVisibility extends Record<LayerKey, boolean> {}
 

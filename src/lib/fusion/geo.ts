@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Geospatial Enrichment
+   NKOYI — Geospatial Enrichment
    ═══════════════════════════════════════════════════════════════════════
 
    Adds administrative context, population exposure, infrastructure

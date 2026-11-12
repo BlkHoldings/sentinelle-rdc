@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useLiveStore } from '@/store/useLiveStore';
+import { useStrategicStore } from '@/store/useStrategicStore';
 import { PLACES } from '@/lib/fusion/gazetteer';
 import { AXES, AIRSTRIPS, BORDER_CROSSINGS } from '@/lib/fusion/infrastructure';
 import { MIL_POSITIONS } from '@/data/military';
@@ -31,6 +32,7 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
   const seismic     = useLiveStore((s) => s.seismic);
   const weather     = useLiveStore((s) => s.weather);
   const osm         = useLiveStore((s) => s.osm);
+  const strategic   = useStrategicStore((s) => s.records);
 
   return useMemo(() => {
     const visible = applyFilters(events, { query: searchQuery, timeRange, classFilter });
@@ -44,6 +46,7 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
       r.data ? r.data.length : null;
 
     return {
+      dossiers: strategic.filter((r) => r.lat != null && r.lon != null && r.status !== 'archived').length,
       fusion: seeded ? fused : null,
       halo:   seeded ? Math.min(400, fused) : null,
       scan:   seeded ? clusters.filter((c) => c.significant).length : null,
@@ -59,5 +62,5 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
       weather: live(weather),
       osm:     live(osm),
     };
-  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm]);
+  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic]);
 }

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Fusion Pipeline
+   NKOYI — Fusion Pipeline
    ═══════════════════════════════════════════════════════════════════════
 
    Topology (mirrors the reference Kafka Streams design):

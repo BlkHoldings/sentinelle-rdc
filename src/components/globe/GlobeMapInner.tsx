@@ -10,6 +10,8 @@ import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { useDrawStore, rectRing, circleRing } from '@/store/useDrawStore';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useLiveStore } from '@/store/useLiveStore';
+import { useStrategicStore } from '@/store/useStrategicStore';
+import { standingLabel } from '@/lib/strategic/model';
 import { OSM_CATEGORY_COLOR } from '@/lib/live/osm';
 import type { IsrAssessment } from '@/lib/live/weather';
 import { toMGRSSync, preloadMGRS } from '@/lib/mgrs';
@@ -134,6 +136,7 @@ export default function GlobeMapInner() {
   const setMapFeature = useMapStore((s) => s.setMapFeature);
   const setZoom       = useMapStore((s) => s.setZoom);
   const scanClusters  = useFusionStore((s) => s.clusters);
+  const strategic     = useStrategicStore((s) => s.records);
   /* One predicate for "is this layer drawn", so solo cannot be honoured
      by some layers and ignored by others. */
   const on = useCallback((k: LayerKey) => isShown({ layers, solo }, k), [layers, solo]);
@@ -1015,6 +1018,32 @@ export default function GlobeMapInner() {
                   style={{ opacity: op('routes') }}>
               {a.name.split(' ')[0]}
             </span>
+          </Marker>
+        );
+      })}
+
+      {/* Strategic records. Amber until a record is both the analyst's
+          own and sourced — the marker itself says how far to trust it. */}
+      {on('dossiers') && strategic.filter((r) => r.lat != null && r.lon != null && r.status !== 'archived').map((r) => {
+        const weak = r.illustrative || r.sources.length === 0;
+        const color = weak ? C.amb : '#3bd6c8';
+        return (
+          <Marker key={`rec-${r.id}`} longitude={r.lon!} latitude={r.lat!} anchor="center"
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setMapFeature({
+                layer: 'dossiers', title: r.title, color, lon: r.lon!, lat: r.lat!,
+                subtitle: `${r.sector} · ${r.country}${r.region ? ` / ${r.region}` : ''}`,
+                rows: [['ÉTAT', standingLabel(r)], ['NATURE', r.illustrative ? 'ILLUSTRATIF — inventé pour la démonstration' : 'Dossier d’analyste']],
+                body: r.summary,
+              });
+            }}
+          >
+            <button title={r.title}
+              className="w-3.5 h-3.5 border-2 bg-b0/85 flex items-center justify-center hover:scale-125 transition-transform"
+              style={{ borderColor: color, opacity: op('dossiers') }}>
+              <span className="w-1 h-1" style={{ background: color }} />
+            </button>
           </Marker>
         );
       })}

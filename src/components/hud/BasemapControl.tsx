@@ -1,7 +1,7 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Basemap & Terrain Control
+   NKOYI — Basemap & Terrain Control
    ═══════════════════════════════════════════════════════════════════════
 
    Collapsed to a single button by default. The map is the working

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Stream Bus
+   NKOYI — Stream Bus
    ═══════════════════════════════════════════════════════════════════════
 
    The reference architecture specified Kafka topics, a Kafka Streams

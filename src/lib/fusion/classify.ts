@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SENTINELLE-RDC — Event Type Classifier
+   NKOYI — Event Type Classifier
    ═══════════════════════════════════════════════════════════════════════
 
    A weighted-evidence classifier over trilingual cue phrases, with actor
