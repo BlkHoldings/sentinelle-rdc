@@ -27,10 +27,10 @@ export default function MapFeaturePopup({
   const selectFusion = useFusionStore((s) => s.select);
   const def = LAYER_BY_KEY[feature.layer];
 
-  const openInTriage = () => {
+  /* Selecting the event opens its full record beside the map. */
+  const openRecord = () => {
     if (!feature.fusionId) return;
     selectFusion(feature.fusionId);
-    window.dispatchEvent(new CustomEvent(VIEW_EVENT, { detail: 'triage' }));
     onClose();
   };
 
@@ -43,11 +43,11 @@ export default function MapFeaturePopup({
     >
       <div className="panel-header px-2 py-1 flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="text-t1 text-2xs font-mono font-bold tracking-wide leading-tight break-words">
+          <div className="text-t1 text-2xs font-bold tracking-wide leading-tight break-words">
             {feature.title}
           </div>
           {feature.subtitle && (
-            <div className="text-t2 text-3xs font-mono leading-tight mt-0.5 break-words">
+            <div className="text-t2 text-3xs leading-tight mt-0.5 break-words">
               {feature.subtitle}
             </div>
           )}
@@ -63,38 +63,38 @@ export default function MapFeaturePopup({
 
       <div className="px-2 py-1.5 space-y-0.5">
         {feature.rows.map(([k, v]) => (
-          <div key={k} className="flex gap-2 text-3xs font-mono leading-snug">
+          <div key={k} className="flex gap-2 text-3xs leading-snug">
             <span className="text-t3 w-[5.5rem] shrink-0 tracking-wider">{k}</span>
             <span className="text-t1 min-w-0 break-words">{v}</span>
           </div>
         ))}
-        <div className="flex gap-2 text-3xs font-mono leading-snug">
+        <div className="flex gap-2 text-3xs leading-snug">
           <span className="text-t3 w-[5.5rem] shrink-0 tracking-wider">MGRS</span>
           <span className="text-cyn">{toMGRSSync(feature.lat, feature.lon, precision)}</span>
         </div>
       </div>
 
       {feature.body && (
-        <div className="px-2 pb-1.5 text-3xs font-mono text-t2 leading-snug max-h-20 overflow-y-auto break-words">
+        <div className="px-2 pb-1.5 text-3xs text-t2 leading-snug max-h-20 overflow-y-auto break-words">
           {feature.body}
         </div>
       )}
 
       <div className="px-2 py-1 border-t border-b3 flex items-center gap-2">
         <span className="w-1.5 h-1.5 shrink-0" style={{ background: def.color }} />
-        <span className="text-3xs font-mono text-t3 tracking-wider truncate">{def.label}</span>
-        <span className="text-3xs font-mono ml-auto shrink-0" style={{ color: ORIGIN_COLOR[def.origin] }}>
+        <span className="text-3xs text-t3 tracking-wider truncate">{def.label}</span>
+        <span className="text-3xs ml-auto shrink-0" style={{ color: ORIGIN_COLOR[def.origin] }}>
           {ORIGIN_LABEL[def.origin]}
         </span>
       </div>
 
       {feature.fusionId && (
         <button
-          onClick={openInTriage}
-          className="w-full px-2 py-1 border-t border-b3 text-3xs font-mono font-bold tracking-wider
+          onClick={openRecord}
+          className="w-full px-2 py-1 border-t border-b3 text-3xs font-bold tracking-wider
                      text-cyn hover:bg-cyn/10 transition-colors text-left"
         >
-          ⚖ OUVRIR DANS LE TRIAGE — sources et calcul de confiance →
+          OUVRIR LA FICHE COMPLÈTE — sources, chronologie, confiance →
         </button>
       )}
     </div>

@@ -64,7 +64,7 @@ export default function LayerPanel({ onClose }: { onClose: () => void }) {
         {solo && (
           <button
             onClick={() => setSolo(null)}
-            className="text-3xs font-mono font-bold px-1 bg-amb text-b0 tracking-wider"
+            className="text-3xs font-bold px-1 bg-amb text-b0 tracking-wider"
             title="Quitter l’isolement"
           >
             SOLO ✕
@@ -72,7 +72,7 @@ export default function LayerPanel({ onClose }: { onClose: () => void }) {
         )}
         <button
           onClick={resetLayers}
-          className="ml-auto text-3xs font-mono text-t3 hover:text-t1 tracking-wider"
+          className="ml-auto text-3xs text-t3 hover:text-t1 tracking-wider"
           title="Rétablir les calques par défaut"
         >
           ↺ DÉFAUT
@@ -89,12 +89,12 @@ export default function LayerPanel({ onClose }: { onClose: () => void }) {
             <div className="flex items-center gap-2 px-2.5 pt-1.5 pb-1">
               <div className="min-w-0 flex-1">
                 <div className="mvn-label text-t2">{g.label}</div>
-                <div className="text-3xs font-mono text-t3 leading-tight truncate">{g.hint}</div>
+                <div className="text-3xs text-t3 leading-tight truncate">{g.hint}</div>
               </div>
-              <span className="text-3xs font-mono text-t3 shrink-0">{nOn}/{defs.length}</span>
+              <span className="text-3xs text-t3 shrink-0">{nOn}/{defs.length}</span>
               <button
                 onClick={() => setGroup(g.id, !allOn)}
-                className="text-3xs font-mono px-1 border border-b3 text-t3 hover:text-t1 hover:border-t3 shrink-0"
+                className="text-3xs px-1 border border-b3 text-t3 hover:text-t1 hover:border-t3 shrink-0"
                 title={allOn ? 'Tout masquer' : 'Tout afficher'}
               >
                 {allOn ? 'AUCUN' : 'TOUS'}
@@ -122,7 +122,7 @@ export default function LayerPanel({ onClose }: { onClose: () => void }) {
                   <button
                     onClick={loadOsm}
                     disabled={osm.health === 'loading'}
-                    className="text-3xs font-mono px-1 border border-grn/50 text-grn hover:bg-grn/10 disabled:opacity-40"
+                    className="text-3xs px-1 border border-grn/50 text-grn hover:bg-grn/10 disabled:opacity-40"
                   >
                     {osm.health === 'loading' ? '…' : '⤓ VUE'}
                   </button>
@@ -175,12 +175,12 @@ function LayerRow({
         >
           <span
             className="absolute top-px bottom-px w-2 transition-all"
-            style={{ left: enabled ? 'calc(100% - 9px)' : '1px', background: enabled ? def.color : '#445870' }}
+            style={{ left: enabled ? 'calc(100% - 9px)' : '1px', background: enabled ? def.color : '#7f8896' }}
           />
         </button>
 
         <button onClick={onToggle} className="min-w-0 flex-1 text-left" title={def.hint}>
-          <span className={`text-2xs font-mono tracking-wide ${enabled ? 'text-t1' : 'text-t3'}`}>
+          <span className={`text-2xs tracking-wide ${enabled ? 'text-t1' : 'text-t3'}`}>
             {def.label}
           </span>
         </button>
@@ -188,7 +188,7 @@ function LayerRow({
         {extra}
 
         <span
-          className={`text-2xs font-mono tabular-nums shrink-0 ${
+          className={`text-2xs font-data tabular-nums shrink-0 ${
             count === null ? 'text-t3' : count === 0 ? 'text-t3' : 'text-t2'
           }`}
           title={count === null ? 'Non chargé' : `${count} éléments`}
@@ -199,7 +199,7 @@ function LayerRow({
         <button
           onClick={onSolo}
           title={isSolo ? 'Quitter l’isolement' : 'Isoler ce calque'}
-          className={`text-3xs font-mono font-bold w-4 h-4 border shrink-0 leading-none transition-colors ${
+          className={`text-3xs font-bold w-4 h-4 border shrink-0 leading-none transition-colors ${
             isSolo ? 'bg-amb border-amb text-b0' : 'border-b3 text-t3 hover:text-t1 hover:border-t3'
           }`}
         >
@@ -208,10 +208,10 @@ function LayerRow({
       </div>
 
       <div className="flex items-center gap-1.5 mt-0.5 pl-[1.875rem]">
-        <span className="text-3xs font-mono shrink-0 tracking-wider" style={{ color: ORIGIN_COLOR[def.origin] }}>
+        <span className="text-3xs shrink-0 tracking-wider" style={{ color: ORIGIN_COLOR[def.origin] }}>
           {ORIGIN_LABEL[def.origin]}
         </span>
-        <span className="text-3xs font-mono text-t3 leading-tight truncate flex-1">{def.hint}</span>
+        <span className="text-3xs text-t3 leading-tight truncate flex-1">{def.hint}</span>
         {enabled && (
           <input
             type="range" min={10} max={100} step={5}
@@ -225,7 +225,7 @@ function LayerRow({
       </div>
 
       {note && (
-        <div className="pl-[1.875rem] text-3xs font-mono text-amb/90 leading-tight mt-0.5">▸ {note}</div>
+        <div className="pl-[1.875rem] text-3xs text-amb/90 leading-tight mt-0.5">▸ {note}</div>
       )}
     </div>
   );

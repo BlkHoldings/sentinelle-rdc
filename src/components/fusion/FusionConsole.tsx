@@ -62,8 +62,8 @@ function Stat({ label, value, sub, accent }: {
   return (
     <div className="border border-b3 bg-b1 px-2.5 py-1.5">
       <div className="mvn-label">{label}</div>
-      <div className={`text-base font-mono font-bold leading-tight ${accent ?? 'text-t1'}`}>{value}</div>
-      {sub && <div className="text-t3 text-3xs font-mono">{sub}</div>}
+      <div className={`text-base font-bold leading-tight ${accent ?? 'text-t1'}`}>{value}</div>
+      {sub && <div className="text-t3 text-3xs ">{sub}</div>}
     </div>
   );
 }
@@ -126,31 +126,31 @@ export default function FusionConsole() {
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1.5">
           <div className={`w-2 h-2 ${running ? 'bg-grn animate-pulse-slow' : 'bg-t3'}`} />
-          <span className="text-t1 text-2xs font-mono font-bold tracking-widest">
+          <span className="text-t1 text-2xs font-bold tracking-widest">
             PIPELINE {running ? 'EN COURS' : 'ARRÊTÉ'}
           </span>
         </div>
         <button
           onClick={() => (running ? stop() : start())}
-          className="border border-b3 text-t2 hover:text-t1 px-2 py-0.5 text-2xs font-mono transition-colors"
+          className="border border-b3 text-t2 hover:text-t1 px-2 py-0.5 text-2xs transition-colors"
         >
           {running ? '❚❚ SUSPENDRE' : '▶ REPRENDRE'}
         </button>
         <button
           onClick={handlePull}
           disabled={pulling}
-          className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs font-mono transition-colors disabled:opacity-50"
+          className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs transition-colors disabled:opacity-50"
         >
           {pulling ? '⟳ COLLECTE…' : '⟳ TIRER LES FLUX RSS'}
         </button>
         <button
           onClick={runScan}
-          className="border border-pur/40 text-pur hover:bg-pur/15 px-2 py-0.5 text-2xs font-mono transition-colors"
+          className="border border-pur/40 text-pur hover:bg-pur/15 px-2 py-0.5 text-2xs transition-colors"
         >
           ◈ RELANCER LE BALAYAGE
         </button>
         {lastScanMs > 0 && (
-          <span className="text-t3 text-3xs font-mono">balayage : {lastScanMs} ms</span>
+          <span className="text-t3 text-3xs ">balayage : {lastScanMs} ms</span>
         )}
       </div>
 
@@ -173,17 +173,17 @@ export default function FusionConsole() {
           {STAGES.map((stage, si) => (
             <div key={stage.title} className="flex items-stretch gap-1.5 flex-1 min-w-0">
               <div className="flex-1 min-w-0 border border-b3 bg-b0 p-2">
-                <div className="text-t1 text-2xs font-mono font-bold tracking-widest mb-0.5">
+                <div className="text-t1 text-2xs font-bold tracking-widest mb-0.5">
                   {stage.title}
                 </div>
-                <div className="text-t3 text-3xs font-mono leading-tight mb-1.5">{stage.note}</div>
+                <div className="text-t3 text-3xs leading-tight mb-1.5">{stage.note}</div>
                 <div className="space-y-1">
                   {stage.topics.map((tn) => {
                     const t = topics.find((x) => x.name === tn);
                     const rate = t?.rate ?? 0;
                     const lag = t?.maxLag ?? 0;
                     return (
-                      <div key={tn} className="font-mono">
+                      <div key={tn} className="">
                         <div className="flex items-baseline gap-1 text-3xs">
                           <span className="text-cyn truncate">{TOPIC_LABEL[tn]}</span>
                           <span className="text-t1 ml-auto shrink-0">{t?.totalProduced ?? 0}</span>
@@ -211,7 +211,7 @@ export default function FusionConsole() {
             </div>
           ))}
         </div>
-        <div className="text-t3 text-3xs font-mono mt-2 leading-tight">
+        <div className="text-t3 text-3xs mt-2 leading-tight">
           Journal append-only adressé par offset, groupes de consommateurs indépendants,
           décalage (lag) observable — même contrat qu&apos;un déploiement Kafka, exécuté
           dans l&apos;onglet. Profondeur totale : {totalDepth} messages · décalage max : {maxLag}.
@@ -223,9 +223,9 @@ export default function FusionConsole() {
         <div className="border border-b3 bg-b1 p-2.5">
           <div className="mvn-label mb-1.5">FLUX ENRICHI — DERNIERS MESSAGES</div>
           <div className="space-y-0.5 max-h-64 overflow-y-auto">
-            {!tail.length && <div className="text-t3 text-2xs font-mono">En attente…</div>}
+            {!tail.length && <div className="text-t3 text-2xs ">En attente…</div>}
             {tail.map((m, i) => (
-              <div key={`${m.key}-${i}`} className="flex items-baseline gap-2 text-3xs font-mono">
+              <div key={`${m.key}-${i}`} className="flex items-baseline gap-2 text-3xs ">
                 <span className="text-t3 shrink-0">
                   {new Date(m.at).toISOString().slice(11, 19)}
                 </span>
@@ -239,7 +239,7 @@ export default function FusionConsole() {
         {/* ── Source reliability posteriors ── */}
         <div className="border border-b3 bg-b1 p-2.5">
           <div className="mvn-label mb-1.5">FIABILITÉ DES SOURCES — LOI A POSTERIORI</div>
-          <div className="text-t3 text-3xs font-mono mb-1.5 leading-tight">
+          <div className="text-t3 text-3xs mb-1.5 leading-tight">
             Bêta–Bernoulli, décroissance exponentielle sur 90 j. Mise à jour à chaque
             adjudication d&apos;analyste.
           </div>
@@ -251,7 +251,7 @@ export default function FusionConsole() {
                 const grade = gradeFor(post.mean);
                 const drifted = grade !== p.baseGrade;
                 return (
-                  <div key={p.type} className="flex items-center gap-1.5 text-3xs font-mono">
+                  <div key={p.type} className="flex items-center gap-1.5 text-3xs ">
                     <span className="text-t2 w-32 truncate shrink-0">{p.label}</span>
                     <span
                       className={`w-5 text-center shrink-0 ${drifted ? 'text-amb font-bold' : 'text-t3'}`}
@@ -289,7 +289,7 @@ export default function FusionConsole() {
         <div className="border border-b3 bg-b1 p-2.5">
           <div className="mvn-label mb-1">SANTÉ DES FLUX EXTERNES</div>
           {feeds.map((f) => (
-            <div key={f.label} className="flex items-center gap-2 text-2xs font-mono">
+            <div key={f.label} className="flex items-center gap-2 text-2xs ">
               <div className={`w-1.5 h-1.5 ${f.ok ? 'bg-grn' : 'bg-alert'}`} />
               <span className="text-t2 w-28">{f.label}</span>
               <span className={f.ok ? 'text-grn' : 'text-alert'}>
@@ -297,7 +297,7 @@ export default function FusionConsole() {
               </span>
             </div>
           ))}
-          <div className="text-t3 text-3xs font-mono mt-1 leading-tight">
+          <div className="text-t3 text-3xs mt-1 leading-tight">
             Les flux passent par un relais CORS public : l&apos;échec est fréquent et attendu,
             le reste de la chaîne continue sans eux.
           </div>
@@ -307,7 +307,7 @@ export default function FusionConsole() {
       {/* ── Fusion effect ── */}
       <div className="border border-b3 bg-b1 p-2.5">
         <div className="mvn-label mb-1.5">EFFET DE LA FUSION</div>
-        <div className="text-2xs font-mono text-t2 leading-relaxed">
+        <div className="text-2xs text-t2 leading-relaxed">
           <span className="text-t1 font-bold">{stats.reports}</span> rapports retenus se sont
           résolus en <span className="text-cyn font-bold">{stats.clusters}</span> événements
           distincts — <span className="text-grn font-bold">{dedupRatio} %</span> du volume

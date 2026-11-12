@@ -66,7 +66,7 @@ export default function TacticalFeedPanel() {
         className="
           absolute top-16 right-0 z-panel
           flex items-center gap-1.5 px-2 py-1
-          panel border-l-0 text-t3 text-2xs font-mono
+          panel border-l-0 text-t3 text-2xs 
           hover:text-t2 transition-colors
         "
       >
@@ -99,7 +99,7 @@ export default function TacticalFeedPanel() {
             { label: 'KIA',   value: totalKIA,           color: 'text-alert' },
           ].map(({ label, value, color }) => (
             <div key={label} className="flex flex-col items-center py-2 gap-0.5 border-r border-b3 last:border-r-0">
-              <span className={`font-mono font-bold text-sm ${color}`}>{value}</span>
+              <span className={`font-bold text-sm ${color}`}>{value}</span>
               <span className="mvn-label">{label}</span>
             </div>
           ))}
@@ -112,7 +112,7 @@ export default function TacticalFeedPanel() {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`
-                flex-1 py-1.5 text-2xs font-mono font-medium transition-colors
+                flex-1 py-1.5 text-2xs font-medium transition-colors
                 ${activeTab === t.id
                   ? 'text-t1 border-b-2 border-blu bg-blu/[0.08]'
                   : 'text-t3 hover:text-t2 hover:bg-b1/40'}
@@ -126,7 +126,7 @@ export default function TacticalFeedPanel() {
         {/* Search */}
         <div className="px-2 py-1.5 border-b border-b3 shrink-0">
           <div className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-t3 text-xs pointer-events-none font-mono">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-t3 text-xs pointer-events-none ">
               ⌕
             </span>
             <input
@@ -136,7 +136,7 @@ export default function TacticalFeedPanel() {
               placeholder="SEARCH TRACKS…"
               className="
                 w-full bg-b0 border border-b3 focus:border-blu
-                pl-7 pr-2 py-1.5 text-t2 text-2xs font-mono
+                pl-7 pr-2 py-1.5 text-t2 text-2xs 
                 placeholder:text-t3
                 focus:outline-none transition-colors
               "
@@ -151,7 +151,7 @@ export default function TacticalFeedPanel() {
               key={p.id}
               onClick={() => setPill(p.id)}
               className={`
-                shrink-0 px-1.5 py-0.5 text-2xs font-mono border transition-colors
+                shrink-0 px-1.5 py-0.5 text-2xs border transition-colors
                 ${activePill === p.id
                   ? 'bg-blu/10 border-blu/50 text-blu'
                   : 'border-b3 text-t3 hover:border-t3 hover:text-t2'}
@@ -165,7 +165,7 @@ export default function TacticalFeedPanel() {
         {/* Track list */}
         <div className="flex-1 overflow-y-auto">
           {displayed.length === 0 ? (
-            <div className="text-t3 text-2xs font-mono text-center py-8">
+            <div className="text-t3 text-2xs text-center py-8">
               NO TRACKS MATCHING FILTER
             </div>
           ) : (
@@ -178,7 +178,7 @@ export default function TacticalFeedPanel() {
         {/* Footer */}
         <div className="panel-header px-2.5 py-1 flex items-center justify-between shrink-0">
           <span className="mvn-label">TRACKS</span>
-          <span className="text-t3 text-2xs font-mono">{displayed.length.toLocaleString()}</span>
+          <span className="text-t3 text-2xs ">{displayed.length.toLocaleString()}</span>
         </div>
       </div>
     </>

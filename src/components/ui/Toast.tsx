@@ -46,11 +46,11 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       <div className={`w-1 shrink-0 ${bar}`} />
       <div className="flex items-center gap-3 px-3 py-2 flex-1">
         <span className={`mvn-label shrink-0 ${label}`}>{LEVEL_LABEL[toast.type]}</span>
-        <span className="text-t1 text-2xs font-mono">{toast.msg}</span>
+        <span className="text-t1 text-2xs ">{toast.msg}</span>
       </div>
       <button
         onClick={onDismiss}
-        className="px-2 text-t3 hover:text-t1 text-xs font-mono transition-colors"
+        className="px-2 text-t3 hover:text-t1 text-xs transition-colors"
       >
         ✕
       </button>

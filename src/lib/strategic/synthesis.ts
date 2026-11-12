@@ -198,3 +198,49 @@ export function briefToMarkdown(b: Brief, titleOf: (id: string) => string): stri
   L.push('', '## Prochaines étapes', ...b.nextSteps.map((x, i) => `${i + 1}. ${x}`));
   return L.join('\n');
 }
+
+/* ── Fused-event context ─────────────────────────────────────────────
+   The assistant also looks at what the fusion engine currently holds, so
+   an answer about a place or an actor can point at the events behind it.
+   Same retrieval, same rule: matches are listed, never paraphrased. */
+
+import type { FusedEvent } from '@/lib/fusion/schema';
+import { EVENT_TYPE_LABEL } from '@/lib/fusion/schema';
+
+export interface EventContext {
+  /** Best matches, most relevant first. */
+  events: FusedEvent[];
+  /** Matching events in the trailing 7 days and in the 7 before that. */
+  recent: number;
+  previous: number;
+  total: number;
+}
+
+export function relatedEvents(question: string, events: FusedEvent[], now = Date.now(), limit = 5): EventContext {
+  const terms = tokenize(question);
+  const out: { e: FusedEvent; score: number }[] = [];
+  if (terms.length) {
+    for (const e of events) {
+      if (e.status === 'merged' || e.status === 'rejected') continue;
+      const place = fold(`${e.location?.place_name ?? ''} ${e.geo?.admin.province ?? ''} ${e.geo?.admin.territory ?? ''}`);
+      const who = fold(e.actors.join(' '));
+      const what = fold(`${EVENT_TYPE_LABEL[e.event_type]} ${e.description}`);
+      let score = 0;
+      for (const t of terms) {
+        if (place.includes(t)) score += 3;
+        if (who.includes(t)) score += 3;
+        if (what.includes(t)) score += 1;
+      }
+      if (score) out.push({ e, score });
+    }
+  }
+  const week = 7 * 86_400_000;
+  let recent = 0, previous = 0;
+  for (const { e } of out) {
+    const age = now - new Date(e.timestamp).getTime();
+    if (age <= week) recent++;
+    else if (age <= 2 * week) previous++;
+  }
+  out.sort((a, b) => b.score - a.score || b.e.timestamp.localeCompare(a.e.timestamp));
+  return { events: out.slice(0, limit).map((x) => x.e), recent, previous, total: out.length };
+}

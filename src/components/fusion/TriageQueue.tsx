@@ -20,6 +20,7 @@
      queue and abandoning it.
    ═══════════════════════════════════════════════════════════════════════ */
 
+import { needsTriage } from '@/lib/intel/triage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useMapStore } from '@/store/useMapStore';
@@ -32,27 +33,7 @@ import { profileOf } from '@/lib/fusion/reliability';
 import { SIDE_COLOR, actorByName } from '@/lib/fusion/actors';
 import { toMGRSSync } from '@/lib/mgrs';
 
-/**
- * What actually needs a human decision now — not everything the pipeline
- * has ever retained.
- *
- * An earlier revision routed every single-source event here, which put
- * the entire historical baseline (single-source by construction) into the
- * queue: 1 200 items, none of them actionable, burying the dozen that
- * were. A triage queue an analyst cannot clear is one they stop opening.
- *
- * Exported because the sidebar badge must count exactly what the queue
- * shows — two copies of this rule would drift apart within a week.
- */
-export function needsTriage(e: FusedEvent): boolean {
-  if (e.adjudications.length || e.status === 'merged') return false;
-  if (e.status === 'disputed') return true;
-  const ageH = (Date.now() - new Date(e.timestamp).getTime()) / 3_600_000;
-  if (ageH > 96) return false;
-  if (e.priority >= 45) return true;
-  return e.independent_sources === 1 &&
-    ((e.casualties.fatalities ?? 0) >= 3 || e.priority >= 30);
-}
+export { needsTriage };
 
 const STATUS_STYLE: Record<EventStatus, { label: string; cls: string }> = {
   unverified:   { label: 'NON VÉRIFIÉ', cls: 'text-t3 border-t3/40' },
@@ -102,7 +83,7 @@ function ConfidenceBreakdown({ e }: { e: FusedEvent }) {
         const pct = Math.min(100, (Math.abs(f.delta) / maxAbs) * 100);
         const pos = f.delta >= 0;
         return (
-          <div key={i} className="text-2xs font-mono">
+          <div key={i} className="text-2xs ">
             <div className="flex items-baseline gap-2">
               <span className={`w-12 shrink-0 text-right ${pos ? 'text-grn' : 'text-alert'}`}>
                 {pos ? '+' : ''}{f.delta.toFixed(2)}
@@ -119,7 +100,7 @@ function ConfidenceBreakdown({ e }: { e: FusedEvent }) {
           </div>
         );
       })}
-      <div className="flex items-baseline gap-2 text-2xs font-mono border-t border-b3 pt-1 mt-1">
+      <div className="flex items-baseline gap-2 text-2xs border-t border-b3 pt-1 mt-1">
         <span className="w-12 shrink-0 text-right text-t1">{total >= 0 ? '+' : ''}{total.toFixed(2)}</span>
         <span className="text-t3">log-cotes cumulées →</span>
         <span className={`font-bold ${confColor(e.confidence)}`}>{(e.confidence * 100).toFixed(0)} %</span>
@@ -144,7 +125,7 @@ function Provenance({ e }: { e: FusedEvent }) {
             p.agreement === 'partial' ? 'text-amb' : 'text-alert';
           return (
             <div key={i} className="border-l-2 border-b3 pl-2 py-0.5">
-              <div className="flex items-center gap-1.5 flex-wrap text-3xs font-mono">
+              <div className="flex items-center gap-1.5 flex-wrap text-3xs ">
                 <span className="text-t1 font-bold">{p.source.handle ?? prof.label}</span>
                 <span className="text-t3">{prof.label}</span>
                 <span
@@ -186,14 +167,14 @@ function QueueRow({
         <span className={`w-1.5 h-6 shrink-0 ${prioColor(e.priority)}`} title={`Priorité ${e.priority}`} />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-t1 text-2xs font-mono font-bold truncate">
+            <span className="text-t1 text-2xs font-bold truncate">
               {EVENT_TYPE_LABEL[e.event_type]}
             </span>
-            <span className={`text-2xs font-mono ml-auto shrink-0 ${confColor(e.confidence)}`}>
+            <span className={`text-2xs ml-auto shrink-0 ${confColor(e.confidence)}`}>
               {(e.confidence * 100).toFixed(0)}%
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5 text-3xs font-mono">
+          <div className="flex items-baseline gap-1.5 text-3xs ">
             <span className="text-t2 truncate">{e.location?.place_name ?? 'non localisé'}</span>
             <span className="text-t3 shrink-0">{dtg(e.timestamp)}</span>
             <span className={`shrink-0 border px-1 ml-auto ${st.cls}`}>{st.label}</span>
@@ -319,15 +300,15 @@ export default function TriageQueue() {
       <div className="flex flex-col w-full md:w-[320px] shrink-0 border-r border-b3 min-h-0">
         <div className="px-2 py-1.5 border-b border-b3 bg-b1 shrink-0">
           <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-t1 text-2xs font-mono font-bold tracking-widest">FILE DE TRIAGE</span>
-            <span className="text-t3 text-2xs font-mono ml-auto">{queue.length}</span>
+            <span className="text-t1 text-2xs font-bold tracking-widest">FILE DE TRIAGE</span>
+            <span className="text-t3 text-2xs ml-auto">{queue.length}</span>
           </div>
           <div className="flex flex-wrap gap-0.5">
             {FILTERS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}
-                className={`px-1.5 py-0.5 text-3xs font-mono border transition-colors ${
+                className={`px-1.5 py-0.5 text-3xs border transition-colors ${
                   filter === f.key
                     ? 'border-blu text-t1 bg-blu/15'
                     : 'border-b3 text-t3 hover:text-t2'
@@ -341,7 +322,7 @@ export default function TriageQueue() {
 
         <div ref={listRef} className="flex-1 overflow-y-auto min-h-0">
           {!queue.length && (
-            <div className="p-4 text-t3 text-2xs font-mono text-center">
+            <div className="p-4 text-t3 text-2xs text-center">
               File vide — aucun événement ne correspond à ce filtre.
             </div>
           )}
@@ -356,7 +337,7 @@ export default function TriageQueue() {
           ))}
         </div>
 
-        <div className="px-2 py-1 border-t border-b3 bg-b1 shrink-0 text-3xs font-mono text-t3">
+        <div className="px-2 py-1 border-t border-b3 bg-b1 shrink-0 text-3xs text-t3">
           <span className="text-t2">J/K</span> naviguer · <span className="text-grn">C</span> confirmer ·{' '}
           <span className="text-alert">X</span> rejeter · <span className="text-amb">E</span> escalader ·{' '}
           <span className="text-t2">D</span> différer
@@ -366,7 +347,7 @@ export default function TriageQueue() {
       {/* ── Detail ── */}
       <div className="flex-1 overflow-y-auto min-h-0 p-3 space-y-3">
         {!selected && (
-          <div className="text-t3 text-2xs font-mono">Aucun événement sélectionné.</div>
+          <div className="text-t3 text-2xs ">Aucun événement sélectionné.</div>
         )}
 
         {selected && (
@@ -375,28 +356,28 @@ export default function TriageQueue() {
             <div className="border border-b3 bg-b1 p-2.5">
               <div className="flex items-start gap-2 flex-wrap">
                 <div className="min-w-0">
-                  <div className="text-t1 text-sm font-mono font-bold">
+                  <div className="text-t1 text-sm font-bold">
                     {EVENT_TYPE_LABEL[selected.event_type]}
                   </div>
-                  <div className="text-t2 text-2xs font-mono">
+                  <div className="text-t2 text-2xs ">
                     {selected.location?.place_name ?? 'Localisation indéterminée'}
                     {selected.geo?.admin.territory && ` · ${selected.geo.admin.territory}`}
                     {selected.geo?.admin.province && `, ${selected.geo.admin.province}`}
                   </div>
                 </div>
                 <div className="ml-auto text-right">
-                  <div className={`text-lg font-mono font-bold leading-none ${confColor(selected.confidence)}`}>
+                  <div className={`text-lg font-bold leading-none ${confColor(selected.confidence)}`}>
                     {(selected.confidence * 100).toFixed(0)}%
                   </div>
-                  <div className="text-t3 text-3xs font-mono">CONFIANCE</div>
+                  <div className="text-t3 text-3xs ">CONFIANCE</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-t1 text-lg font-mono font-bold leading-none">{selected.priority}</div>
-                  <div className="text-t3 text-3xs font-mono">PRIORITÉ</div>
+                  <div className="text-t1 text-lg font-bold leading-none">{selected.priority}</div>
+                  <div className="text-t3 text-3xs ">PRIORITÉ</div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-1.5 mt-2 text-3xs font-mono">
+              <div className="flex flex-wrap items-center gap-1.5 mt-2 text-3xs ">
                 <span className={`border px-1 ${STATUS_STYLE[selected.status].cls}`}>
                   {STATUS_STYLE[selected.status].label}
                 </span>
@@ -432,7 +413,7 @@ export default function TriageQueue() {
                     return (
                       <span
                         key={a}
-                        className={`text-3xs font-mono border border-b3 px-1 ${actor ? SIDE_COLOR[actor.side] : 'text-t2'}`}
+                        className={`text-3xs border border-b3 px-1 ${actor ? SIDE_COLOR[actor.side] : 'text-t2'}`}
                       >
                         {a}
                       </span>
@@ -445,7 +426,7 @@ export default function TriageQueue() {
               {(selected.casualties.fatalities != null ||
                 selected.casualties.displaced != null ||
                 selected.casualties.abducted != null) && (
-                <div className="flex flex-wrap gap-3 mt-2 text-2xs font-mono">
+                <div className="flex flex-wrap gap-3 mt-2 text-2xs ">
                   {selected.casualties.fatalities != null && (
                     <span className="text-alert">
                       {selected.casualties.fatalities} tués
@@ -473,7 +454,7 @@ export default function TriageQueue() {
                 <div className="mvn-label mb-1">CLASSIFICATIONS ALTERNATIVES</div>
                 <div className="flex flex-wrap gap-1">
                   {selected.event_type_alts.map((a) => (
-                    <span key={a.type} className="text-3xs font-mono border border-b3 text-t2 px-1.5 py-0.5">
+                    <span key={a.type} className="text-3xs border border-b3 text-t2 px-1.5 py-0.5">
                       {EVENT_TYPE_LABEL[a.type]} <span className="text-t3">{(a.score * 100).toFixed(0)}%</span>
                     </span>
                   ))}
@@ -490,7 +471,7 @@ export default function TriageQueue() {
             {selected.geo && (
               <div className="border border-b3 bg-b1 p-2.5">
                 <div className="mvn-label mb-1">ENRICHISSEMENT GÉOSPATIAL</div>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-2xs font-mono">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-2xs ">
                   <Field label="Population exposée" value={selected.geo.population_at_risk?.toLocaleString('fr-FR')} note="modélisée" />
                   <Field label="Densité" value={selected.geo.population_density && `${selected.geo.population_density} hab/km²`} note="modélisée" />
                   <Field label="Hôpital le plus proche" value={fmtKm(selected.geo.nearest_hospital_km)} />
@@ -501,7 +482,7 @@ export default function TriageQueue() {
                   <Field label="Terrain" value={selected.geo.terrain} />
                 </div>
                 {selected.geo.axis && (
-                  <div className="text-2xs font-mono text-cyn mt-1">◈ Sur axe : {selected.geo.axis}</div>
+                  <div className="text-2xs text-cyn mt-1">◈ Sur axe : {selected.geo.axis}</div>
                 )}
               </div>
             )}
@@ -511,12 +492,12 @@ export default function TriageQueue() {
               <Provenance e={selected} />
               <button
                 onClick={() => setShowRaw((v) => !v)}
-                className="text-3xs font-mono text-t3 hover:text-t1 mt-1.5 transition-colors"
+                className="text-3xs text-t3 hover:text-t1 mt-1.5 transition-colors"
               >
                 {showRaw ? '▾' : '▸'} texte source intégral
               </button>
               {showRaw && (
-                <pre className="text-3xs font-mono text-t2 whitespace-pre-wrap mt-1 border-l-2 border-b3 pl-2">
+                <pre className="text-3xs text-t2 whitespace-pre-wrap mt-1 border-l-2 border-b3 pl-2">
                   {selected.raw_text}
                 </pre>
               )}
@@ -527,7 +508,7 @@ export default function TriageQueue() {
               <div className="border border-b3 bg-b1 p-2.5">
                 <div className="mvn-label mb-1">HISTORIQUE D&apos;ADJUDICATION</div>
                 {selected.adjudications.map((a, i) => (
-                  <div key={i} className="text-2xs font-mono text-t2">
+                  <div key={i} className="text-2xs text-t2">
                     <span className="text-t1">{a.action.toUpperCase()}</span> · {a.analyst} ·{' '}
                     <span className="text-t3">{dtg(a.at)}</span>
                     {a.notes && <div className="text-t3 text-3xs pl-2">{a.notes}</div>}
@@ -543,7 +524,7 @@ export default function TriageQueue() {
                 value={notes}
                 onChange={(ev) => setNotes(ev.target.value)}
                 placeholder="Note d'analyste (optionnelle)…"
-                className="w-full bg-b0 border border-b3 px-2 py-1 text-2xs font-mono text-t1 placeholder:text-t3 focus:border-blu outline-none"
+                className="w-full bg-b0 border border-b3 px-2 py-1 text-2xs text-t1 placeholder:text-t3 focus:border-blu outline-none"
               />
               <div className="flex flex-wrap gap-1.5">
                 <ActionBtn label="CONFIRMER" hint="C" cls="border-grn/50 text-grn hover:bg-grn/15" onClick={() => act('confirm')} />
@@ -551,7 +532,7 @@ export default function TriageQueue() {
                 <ActionBtn label="ESCALADER" hint="E" cls="border-amb/50 text-amb hover:bg-amb/15" onClick={() => act('escalate')} />
                 <ActionBtn label="DIFFÉRER" hint="D" cls="border-b3 text-t2 hover:bg-b2" onClick={() => act('defer')} />
               </div>
-              <div className="text-3xs font-mono text-t3 leading-tight">
+              <div className="text-3xs text-t3 leading-tight">
                 Confirmer ou rejeter met à jour la loi a posteriori de fiabilité de chaque
                 source contributrice — y compris, en sens inverse, celle des sources qui
                 avaient contredit le consensus.
@@ -566,13 +547,13 @@ export default function TriageQueue() {
             <div className="mvn-label mb-1 text-amb">
               DOUBLONS PROBABLES — {reviewPairs.length} PAIRE(S) À ARBITRER
             </div>
-            <div className="text-3xs font-mono text-t3 mb-1.5 leading-tight">
+            <div className="text-3xs text-t3 mb-1.5 leading-tight">
               Score entre le seuil de revue et le seuil de fusion automatique, ou fusion
               refusée par les limites d&apos;étendue d&apos;un incident.
             </div>
             <div className="space-y-1 max-h-40 overflow-y-auto">
               {reviewPairs.slice(0, 12).map((p, i) => (
-                <div key={i} className="flex items-center gap-2 text-3xs font-mono">
+                <div key={i} className="flex items-center gap-2 text-3xs ">
                   <span className="text-amb w-10 shrink-0">{(p.score * 100).toFixed(0)}%</span>
                   <span className="text-t3 truncate flex-1">
                     {Object.entries(p.breakdown).map(([k, v]) => `${k} ${v}`).join(' · ')}
@@ -623,7 +604,7 @@ function ActionBtn({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 border px-2 py-1 text-2xs font-mono font-bold transition-colors ${cls}`}
+      className={`flex items-center gap-1.5 border px-2 py-1 text-2xs font-bold transition-colors ${cls}`}
     >
       {label}
       <span className="text-3xs opacity-60 border border-current px-0.5">{hint}</span>

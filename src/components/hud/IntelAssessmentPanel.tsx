@@ -65,7 +65,7 @@ export default function IntelAssessmentPanel({ onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="text-t3 hover:text-t1 text-xs font-mono transition-colors ml-2 shrink-0"
+            className="text-t3 hover:text-t1 text-xs transition-colors ml-2 shrink-0"
           >
             ✕
           </button>
@@ -74,15 +74,15 @@ export default function IntelAssessmentPanel({ onClose }: Props) {
         {/* Quick stats */}
         <div className="grid grid-cols-3 border-b border-b3">
           <div className="flex flex-col items-center py-1.5 border-r border-b3">
-            <span className="text-alert font-mono font-bold text-sm">{acledN}</span>
+            <span className="text-alert font-bold text-sm">{acledN}</span>
             <span className="mvn-label">EVENTS</span>
           </div>
           <div className="flex flex-col items-center py-1.5 border-r border-b3">
-            <span className="text-mag font-mono font-bold text-sm">{strikes}</span>
+            <span className="text-mag font-bold text-sm">{strikes}</span>
             <span className="mvn-label">STRIKES</span>
           </div>
           <div className="flex flex-col items-center py-1.5">
-            <span className="text-alert font-mono font-bold text-sm">{totalKIA}</span>
+            <span className="text-alert font-bold text-sm">{totalKIA}</span>
             <span className="mvn-label">KIA</span>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function IntelAssessmentPanel({ onClose }: Props) {
                 <div className={`w-1 h-1 shrink-0 ${dot}`} />
                 <span className={`mvn-label ${color}`}>{label}</span>
               </div>
-              <p className="text-t2 text-2xs font-mono leading-relaxed">{text}</p>
+              <p className="text-t2 text-2xs leading-relaxed">{text}</p>
             </div>
           ))}
         </div>
@@ -103,7 +103,7 @@ export default function IntelAssessmentPanel({ onClose }: Props) {
         {/* Footer */}
         <div className="panel-header px-3 py-1 flex items-center justify-between">
           <span className="mvn-label text-t3">SOURCES: ACLED · MONUSCO · GoE · OSINT SAR</span>
-          <span className="text-t3 text-2xs font-mono">NKOYI</span>
+          <span className="text-t3 text-2xs ">NKOYI</span>
         </div>
       </div>
     </div>

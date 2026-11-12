@@ -77,6 +77,9 @@ const ESRI_IMAGERY =
 const CARTO_LABELS =
   'https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}@2x.png';
 
+const CARTO_DARK =
+  'https://basemaps.cartocdn.com/rastertiles/dark_nolabels/{z}/{x}/{y}@2x.png';
+
 const ESRI_ATTRIB = 'Imagery © Esri, Maxar, Earthstar Geographics';
 
 /** Builds a raster-only style. Keeps the DEM attached so terrain and
@@ -87,7 +90,7 @@ function rasterStyle(
 ): StyleSpecification {
   const sources: StyleSpecification['sources'] = { dem: DEM_SOURCE };
   const styleLayers: StyleSpecification['layers'] = [
-    { id: 'bg', type: 'background', paint: { 'background-color': '#090d13' } },
+    { id: 'bg', type: 'background', paint: { 'background-color': '#0d1014' } },
   ];
 
   for (const l of layers) {
@@ -112,13 +115,26 @@ function rasterStyle(
 export const BASEMAPS: BasemapDef[] = [
   {
     id: 'dark',
-    label: 'TACTIQUE',
-    hint: 'Vecteur sombre — lisibilité maximale des calques tactiques',
+    label: 'SOMBRE',
+    hint: 'Fond graphite — les incidents restent la figure, pas le terrain',
     maxZoom: 18,
     overlayContrast: 'onDark',
-    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    /* Raster tiles inside an inline style, not CARTO's hosted vector
+       style. A hosted style is a single point of failure for the whole
+       map: if that one JSON request is blocked, MapLibre never finishes
+       loading and no overlay is drawn at all. With an inline style the
+       map always loads; unreachable tiles cost the backdrop and nothing
+       else, and the build's own boundaries and place names still frame
+       the data. */
+    style: rasterStyle(
+      [
+        { id: 'carto-dark', tiles: [CARTO_DARK], maxzoom: 20 },
+        { id: 'carto-dark-labels', tiles: [CARTO_LABELS], maxzoom: 20, opacity: 0.75 },
+      ],
+      '© OpenStreetMap, © CARTO',
+    ),
     attribution: '© OpenStreetMap, © CARTO',
-    probe: { kind: 'json', url: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' },
+    probe: { kind: 'image', url: `https://basemaps.cartocdn.com/rastertiles/dark_nolabels/${PROBE_Z}/${PROBE_X}/${PROBE_Y}@2x.png` },
   },
   {
     id: 'satellite',
@@ -181,7 +197,7 @@ export const BASEMAPS: BasemapDef[] = [
             'hillshade-exaggeration': 0.8,
             'hillshade-shadow-color': '#000000',
             'hillshade-highlight-color': '#4a6a8a',
-            'hillshade-accent-color': '#1a2e42',
+            'hillshade-accent-color': '#242a34',
           },
         },
       ],
@@ -214,7 +230,10 @@ export function probeBasemap(def: BasemapDef, timeoutMs = 12_000): Promise<boole
   });
 }
 
-export const DEFAULT_BASEMAP: BasemapId = 'hybrid';
+/* The dark vector style leads: it is the theme the overlays were tuned
+   against, and it keeps the incidents — not the terrain — as the figure.
+   Imagery is one click away. */
+export const DEFAULT_BASEMAP: BasemapId = 'dark';
 
 export function basemapById(id: BasemapId): BasemapDef {
   return BASEMAPS.find((b) => b.id === id) ?? BASEMAPS[0];

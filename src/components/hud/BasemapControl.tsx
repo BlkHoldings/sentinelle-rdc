@@ -38,7 +38,7 @@ export default function BasemapControl() {
       <button
         onClick={() => setOpen((v) => !v)}
         title="Fond de carte, relief et précision"
-        className={`flex items-center gap-1.5 px-2 py-1 border text-2xs font-mono transition-colors ${
+        className={`flex items-center gap-1.5 px-2 py-1 border text-2xs transition-colors ${
           open ? 'bg-blu/20 border-blu text-t1' : 'bg-b2/90 border-b3 text-t2 hover:text-t1 hover:border-t3'
         }`}
       >
@@ -65,10 +65,10 @@ export default function BasemapControl() {
                 }`}
               >
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xs font-mono font-bold tracking-wider">{b.label}</span>
-                  <span className="text-3xs font-mono text-t3 ml-auto">z≤{b.maxZoom}</span>
+                  <span className="text-2xs font-bold tracking-wider">{b.label}</span>
+                  <span className="text-3xs text-t3 ml-auto">z≤{b.maxZoom}</span>
                 </div>
-                <div className="text-3xs font-mono text-t3 leading-tight">{b.hint}</div>
+                <div className="text-3xs text-t3 leading-tight">{b.hint}</div>
               </button>
             ))}
           </div>
@@ -83,7 +83,7 @@ export default function BasemapControl() {
                 <button
                   key={m}
                   onClick={() => setTerrain(m)}
-                  className={`flex-1 py-0.5 text-3xs font-mono border transition-colors ${
+                  className={`flex-1 py-0.5 text-3xs border transition-colors ${
                     terrain === m
                       ? 'border-cyn text-cyn bg-cyn/15'
                       : 'border-b3 text-t3 hover:text-t2'
@@ -98,9 +98,9 @@ export default function BasemapControl() {
                 type="checkbox" checked={hillshade} onChange={toggleHillshade}
                 className="accent-cyn w-3 h-3"
               />
-              <span className="text-2xs font-mono text-t2">Ombrage du relief</span>
+              <span className="text-2xs text-t2">Ombrage du relief</span>
             </label>
-            <div className="text-3xs font-mono text-t3 leading-tight">
+            <div className="text-3xs text-t3 leading-tight">
               Exagération verticale — aide à la lecture, ne reflète pas la pente réelle.
               MNT Mapzen/AWS, ~30 m.
             </div>
@@ -112,12 +112,12 @@ export default function BasemapControl() {
           </div>
           <div className="p-1.5 space-y-1.5">
             <div className="flex items-center gap-1">
-              <span className="text-3xs font-mono text-t3 w-10">MGRS</span>
+              <span className="text-3xs text-t3 w-10">MGRS</span>
               {([3, 4, 5] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPrecision(p)}
-                  className={`flex-1 py-0.5 text-3xs font-mono border transition-colors ${
+                  className={`flex-1 py-0.5 text-3xs border transition-colors ${
                     precision === p
                       ? 'border-cyn text-cyn bg-cyn/15'
                       : 'border-b3 text-t3 hover:text-t2'
@@ -130,7 +130,7 @@ export default function BasemapControl() {
           </div>
 
           <div className="px-2.5 py-1 border-t border-b3">
-            <div className="text-3xs font-mono text-t3 leading-tight">{active.attribution}</div>
+            <div className="text-3xs text-t3 leading-tight">{active.attribution}</div>
           </div>
         </div>
       )}

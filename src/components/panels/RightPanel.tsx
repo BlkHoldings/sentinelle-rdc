@@ -6,13 +6,15 @@ import { useFeedStore, applyFilters } from '@/store/useFeedStore';
 import { DRONE_ISR } from '@/data/drones';
 import { toMGRSSync } from '@/lib/mgrs';
 import { SECTIONS } from '@/components/hud/IntelAssessmentPanel';
-import type { ViewKey } from '@/components/layout/Sidebar';
+import type { ViewKey } from '@/lib/views';
 import type { IntelEvent } from '@/types/intel';
 
 interface Props {
   activeView:     ViewKey;
   /** On phones the panel fills the content area when its tab is active */
   mobileVisible?: boolean;
+  /** Rendered inside another column: fill it instead of setting a width. */
+  embedded?: boolean;
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -23,10 +25,10 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 const DONUT_COLOR: Record<string, string> = {
-  'Battles':                    '#e03030',
-  'Explosions/Remote violence': '#c83048',
-  'Violence against civilians': '#d09820',
-  'Strategic developments':     '#20c880',
+  'Battles':                    '#e5484d',
+  'Explosions/Remote violence': '#d6577a',
+  'Violence against civilians': '#e2a336',
+  'Strategic developments':     '#3fb984',
 };
 
 function priorityOf(e: IntelEvent): 'HIGH' | 'MED' | 'LOW' {
@@ -67,23 +69,23 @@ function SparkLine({ data, trend }: { data: number[]; trend: number }) {
     <div>
       <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
         {/* Fill area */}
-        <polygon points={fillPoly} fill="rgba(224,48,48,0.12)" />
+        <polygon points={fillPoly} fill="rgba(229,72,77,0.12)" />
         {/* Glow line */}
-        <polyline fill="none" stroke="rgba(224,48,48,0.3)" strokeWidth="5" points={linePts} strokeLinejoin="round" />
+        <polyline fill="none" stroke="rgba(229,72,77,0.3)" strokeWidth="5" points={linePts} strokeLinejoin="round" />
         {/* Main line */}
-        <polyline fill="none" stroke="#e03030" strokeWidth="1.5" points={linePts} strokeLinejoin="round" />
+        <polyline fill="none" stroke="#e5484d" strokeWidth="1.5" points={linePts} strokeLinejoin="round" />
         {/* Dots */}
         {pts.map((p, i) =>
-          data[i] > 0 ? <circle key={i} cx={p.x} cy={p.y} r="2.5" fill="#e03030" /> : null,
+          data[i] > 0 ? <circle key={i} cx={p.x} cy={p.y} r="2.5" fill="#e5484d" /> : null,
         )}
       </svg>
       <div className="flex items-center justify-between mt-0.5">
         <div className="flex gap-1">
           {['J-6','J-4','J-2','AUJ'].map((l) => (
-            <span key={l} className="text-t3 text-2xs font-mono">{l}</span>
+            <span key={l} className="text-t3 text-2xs ">{l}</span>
           ))}
         </div>
-        <span className={`text-2xs font-mono font-bold ${trendPos ? 'text-alert' : 'text-grn'}`}>
+        <span className={`text-2xs font-bold ${trendPos ? 'text-alert' : 'text-grn'}`}>
           {trendStr} vs J-7
         </span>
       </div>
@@ -104,7 +106,7 @@ function DonutChart({ segments, total }: { segments: DonutSegment[]; total: numb
       <svg width="76" height="76" viewBox="0 0 80 80" className="shrink-0">
         <g transform="rotate(-90 40 40)">
           {/* Base ring */}
-          <circle cx="40" cy="40" r={r} fill="none" stroke="#1a2e42" strokeWidth="11" />
+          <circle cx="40" cy="40" r={r} fill="none" stroke="#242a34" strokeWidth="11" />
           {/* Segments */}
           {segments.map((seg, i) => {
             const dash     = (seg.pct / 100) * circ;
@@ -124,10 +126,10 @@ function DonutChart({ segments, total }: { segments: DonutSegment[]; total: numb
           })}
         </g>
         {/* Center label */}
-        <text x="40" y="37" textAnchor="middle" fill="#c8d8e8" fontSize="12" fontFamily="monospace" fontWeight="700">
+        <text x="40" y="37" textAnchor="middle" fill="#e6e9ee" fontSize="12" fontFamily="monospace" fontWeight="700">
           {total}
         </text>
-        <text x="40" y="48" textAnchor="middle" fill="#445870" fontSize="6.5" fontFamily="monospace">
+        <text x="40" y="48" textAnchor="middle" fill="#7f8896" fontSize="6.5" fontFamily="monospace">
           EVENTS
         </text>
       </svg>
@@ -137,8 +139,8 @@ function DonutChart({ segments, total }: { segments: DonutSegment[]; total: numb
         {segments.map((seg) => (
           <div key={seg.label} className="flex items-center gap-1.5">
             <div className="w-2 h-2 shrink-0" style={{ background: seg.color }} />
-            <span className="text-t3 text-2xs font-mono flex-1 truncate">{seg.label}</span>
-            <span className="text-t1 text-2xs font-mono font-bold">{seg.pct}%</span>
+            <span className="text-t3 text-2xs flex-1 truncate">{seg.label}</span>
+            <span className="text-t1 text-2xs font-bold">{seg.pct}%</span>
           </div>
         ))}
       </div>
@@ -149,14 +151,14 @@ function DonutChart({ segments, total }: { segments: DonutSegment[]; total: numb
 /* ── Entity network SVG ── */
 function EntityNetwork() {
   const nodes = [
-    { x: 75,  y: 55,  r: 9,  color: '#e03030', label: 'M23'     },
-    { x: 160, y: 38,  r: 7,  color: '#c83048', label: 'RDF'     },
-    { x: 225, y: 75,  r: 5,  color: '#c83048', label: 'ADF'     },
-    { x: 45,  y: 108, r: 7,  color: '#1e70f0', label: 'FARDC'   },
-    { x: 130, y: 120, r: 5,  color: '#1e70f0', label: 'WAZA'    },
-    { x: 195, y: 140, r: 4,  color: '#20c880', label: 'MONUSCO' },
-    { x: 255, y: 55,  r: 4,  color: '#d09820', label: 'CODECO'  },
-    { x: 88,  y: 158, r: 3,  color: '#18c8e0', label: 'ISR'     },
+    { x: 75,  y: 55,  r: 9,  color: '#e5484d', label: 'M23'     },
+    { x: 160, y: 38,  r: 7,  color: '#d6577a', label: 'RDF'     },
+    { x: 225, y: 75,  r: 5,  color: '#d6577a', label: 'ADF'     },
+    { x: 45,  y: 108, r: 7,  color: '#6f9bff', label: 'FARDC'   },
+    { x: 130, y: 120, r: 5,  color: '#6f9bff', label: 'WAZA'    },
+    { x: 195, y: 140, r: 4,  color: '#3fb984', label: 'MONUSCO' },
+    { x: 255, y: 55,  r: 4,  color: '#e2a336', label: 'CODECO'  },
+    { x: 88,  y: 158, r: 3,  color: '#58c4dc', label: 'ISR'     },
   ];
   const edges = [[0,1],[0,2],[0,4],[1,0],[2,6],[3,4],[3,7],[4,5],[5,7],[6,2]];
 
@@ -164,14 +166,14 @@ function EntityNetwork() {
     <svg width="100%" height="170" viewBox="0 0 280 170" className="bg-b0 border border-b3">
       {edges.map(([a, b], i) => (
         <line key={i} x1={nodes[a].x} y1={nodes[a].y} x2={nodes[b].x} y2={nodes[b].y}
-          stroke="#1a2e42" strokeWidth="1" />
+          stroke="#242a34" strokeWidth="1" />
       ))}
       {nodes.map((n, i) => (
         <g key={i}>
           <circle cx={n.x} cy={n.y} r={n.r + 5} fill={n.color} fillOpacity="0.10" />
           <circle cx={n.x} cy={n.y} r={n.r}     fill={n.color} fillOpacity="0.85" />
           <text x={n.x} y={n.y + n.r + 9} textAnchor="middle"
-            fill="#445870" fontSize="6.5" fontFamily="monospace" fontWeight="700">
+            fill="#7f8896" fontSize="6.5" fontFamily="monospace" fontWeight="700">
             {n.label}
           </text>
         </g>
@@ -181,7 +183,7 @@ function EntityNetwork() {
 }
 
 /* ── Main component ── */
-export default function RightPanel({ activeView, mobileVisible = false }: Props) {
+export default function RightPanel({ activeView, mobileVisible = false, embedded = false }: Props) {
   const feat          = useMapStore((s) => s.selectedFeature);
   const selectFeature = useMapStore((s) => s.selectFeature);
   const events        = useFeedStore((s) => s.events);
@@ -209,9 +211,9 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
     const segs: DonutSegment[] = sorted.map(([type, count]) => ({
       label: type.replace(' against civilians', ' / Civ').replace('Explosions/', ''),
       pct:   Math.round((count / total) * 100),
-      color: DONUT_COLOR[type] ?? '#445870',
+      color: DONUT_COLOR[type] ?? '#7f8896',
     }));
-    if (otherPct > 0) segs.push({ label: 'Autres', pct: otherPct, color: '#445870' });
+    if (otherPct > 0) segs.push({ label: 'Autres', pct: otherPct, color: '#7f8896' });
     return segs;
   }, [acledEvents]);
 
@@ -239,7 +241,9 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
 
   return (
     <div
-      className={`${mobileVisible ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-[300px] shrink-0 bg-b1 md:border-l border-b3 overflow-y-auto`}
+      className={embedded
+        ? 'flex flex-col w-full bg-b1 overflow-y-auto'
+        : `${mobileVisible ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-[300px] shrink-0 bg-b1 md:border-l border-b3 overflow-y-auto`}
     >
 
       {/* ── INCIDENT / OVERVIEW ── */}
@@ -248,10 +252,10 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
           <div className="panel-header px-3 py-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <span className="mvn-label text-t3 shrink-0">INCIDENT</span>
-              <span className="text-t2 text-2xs font-mono font-bold truncate">{incidentId(feat)}</span>
+              <span className="text-t2 text-2xs font-bold truncate">{incidentId(feat)}</span>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className={`text-2xs font-mono font-bold px-1.5 py-0.5 border ${ps.bg} ${ps.border} ${ps.color}`}>
+              <span className={`text-2xs font-bold px-1.5 py-0.5 border ${ps.bg} ${ps.border} ${ps.color}`}>
                 {ps.label}
               </span>
               <button onClick={() => selectFeature(null)} className="text-t3 hover:text-t1 text-sm ml-1 transition-colors">✕</button>
@@ -259,66 +263,66 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
           </div>
 
           <div className="px-3 py-3 space-y-2">
-            <div className={`text-xs font-mono font-bold ${TYPE_COLOR[feat.type] ?? 'text-t1'}`}>
+            <div className={`text-xs font-bold ${TYPE_COLOR[feat.type] ?? 'text-t1'}`}>
               {feat.type.toUpperCase()}
             </div>
-            {mgrs && <div className="text-t3 text-2xs font-mono">GRID: {mgrs}</div>}
-            <div className="text-t3 text-2xs font-mono">SOURCE: {feat.src.toUpperCase()}</div>
+            {mgrs && <div className="text-t3 text-2xs ">GRID: {mgrs}</div>}
+            <div className="text-t3 text-2xs ">SOURCE: {feat.src.toUpperCase()}</div>
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-1">
               {feat.actor1 && (
                 <>
                   <div>
                     <div className="mvn-label mb-0.5">THREAT TYPE</div>
-                    <div className="text-t2 text-2xs font-mono">{feat.type}</div>
+                    <div className="text-t2 text-2xs ">{feat.type}</div>
                   </div>
                   <div>
                     <div className="mvn-label mb-0.5">AFFILIATION</div>
-                    <div className="text-t2 text-2xs font-mono">{feat.actor1}</div>
+                    <div className="text-t2 text-2xs ">{feat.actor1}</div>
                   </div>
                 </>
               )}
               {feat.platform && (
                 <div>
                   <div className="mvn-label mb-0.5">PLATEFORME</div>
-                  <div className="text-cyn text-2xs font-mono">{feat.platform}</div>
+                  <div className="text-cyn text-2xs ">{feat.platform}</div>
                 </div>
               )}
               {feat.status && (
                 <div>
                   <div className="mvn-label mb-0.5">STATUT</div>
-                  <div className="text-t2 text-2xs font-mono">{feat.status}</div>
+                  <div className="text-t2 text-2xs ">{feat.status}</div>
                 </div>
               )}
               <div>
                 <div className="mvn-label mb-0.5">DATE</div>
-                <div className="text-t2 text-2xs font-mono">{feat.date || feat.time || '—'}</div>
+                <div className="text-t2 text-2xs ">{feat.date || feat.time || '—'}</div>
               </div>
               <div>
                 <div className="mvn-label mb-0.5">LIEU</div>
-                <div className="text-t2 text-2xs font-mono truncate">{feat.location ?? feat.admin1 ?? '—'}</div>
+                <div className="text-t2 text-2xs truncate">{feat.location ?? feat.admin1 ?? '—'}</div>
               </div>
               {(feat.fatalities ?? 0) > 0 && (
                 <div>
                   <div className="mvn-label mb-0.5">PERTES</div>
-                  <div className="text-alert text-xs font-mono font-bold">▲ {feat.fatalities} KIA</div>
+                  <div className="text-alert text-xs font-bold">▲ {feat.fatalities} KIA</div>
                 </div>
               )}
               {feat.actor2 && (
                 <div>
                   <div className="mvn-label mb-0.5">CONTRE</div>
-                  <div className="text-t2 text-2xs font-mono">{feat.actor2}</div>
+                  <div className="text-t2 text-2xs ">{feat.actor2}</div>
                 </div>
               )}
             </div>
 
             {(feat.desc ?? feat.notes) && (
               <div className="p-2 bg-b0 border border-b3 mt-1">
-                <p className="text-t2 text-2xs font-mono leading-relaxed">{feat.desc ?? feat.notes}</p>
+                <p className="text-t2 text-2xs leading-relaxed">{feat.desc ?? feat.notes}</p>
               </div>
             )}
 
-            <button className="w-full py-1.5 border border-blu/40 text-blu text-2xs font-mono hover:bg-blu/10 hover:border-blu transition-colors">
+            <button className="w-full py-1.5 border border-blu/40 text-blu text-2xs hover:bg-blu/10 hover:border-blu transition-colors">
               VIEW INCIDENT
             </button>
           </div>
@@ -336,7 +340,7 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
               { label: 'KIA',     val: totalKIA,            color: 'text-alert' },
             ].map(({ label, val, color }) => (
               <div key={label} className="flex flex-col items-center py-2 gap-0.5 border-r border-b3 last:border-r-0">
-                <span className={`font-mono font-bold text-base ${color}`}>{val}</span>
+                <span className={`font-bold text-base ${color}`}>{val}</span>
                 <span className="mvn-label">{label}</span>
               </div>
             ))}
@@ -349,7 +353,7 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
                     <div className={`w-1 h-1 shrink-0 ${dot}`} />
                     <span className={`mvn-label ${color}`}>{label}</span>
                   </div>
-                  <p className="text-t2 text-2xs font-mono leading-relaxed">{text}</p>
+                  <p className="text-t2 text-2xs leading-relaxed">{text}</p>
                 </div>
               ))}
             </div>
@@ -367,8 +371,8 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
           <div className="flex items-end justify-between mb-1">
             <span className="mvn-label">PAST 72H</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-alert font-mono font-bold text-lg">{acledEvents.length}</span>
-              <span className="text-t3 text-2xs font-mono">TOTAL THREATS</span>
+              <span className="text-alert font-bold text-lg">{acledEvents.length}</span>
+              <span className="text-t3 text-2xs ">TOTAL THREATS</span>
             </div>
           </div>
           <SparkLine data={sparkData} trend={trend} />
@@ -382,7 +386,7 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
         </div>
         <div className="px-3 py-2">
           {donutSegments.length === 0 ? (
-            <div className="text-t3 text-2xs font-mono">AUCUN ÉVÉNEMENT</div>
+            <div className="text-t3 text-2xs ">AUCUN ÉVÉNEMENT</div>
           ) : (
             <DonutChart segments={donutSegments} total={acledEvents.length} />
           )}
@@ -394,7 +398,7 @@ export default function RightPanel({ activeView, mobileVisible = false }: Props)
         <div className="panel-header px-3 py-1.5 flex items-center justify-between">
           <span className="mvn-label">ENTITY NETWORK</span>
           <div className="flex items-center gap-2">
-            <span className="text-t3 text-2xs font-mono">LINK ANALYSIS</span>
+            <span className="text-t3 text-2xs ">LINK ANALYSIS</span>
             <button className="text-t3 hover:text-t2 text-xs transition-colors">⤢</button>
           </div>
         </div>

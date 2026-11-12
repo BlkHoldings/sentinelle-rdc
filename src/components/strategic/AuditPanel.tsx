@@ -8,17 +8,17 @@ import { useToastStore } from '@/store/useToastStore';
 import { Frame, Btn, Empty, inputCls, useActor, downloadText } from './ui';
 
 const ACTION: Record<AuditAction, { label: string; color: string }> = {
-  'record.create':  { label: 'DOSSIER CRÉÉ',      color: '#20c880' },
-  'record.update':  { label: 'DOSSIER MODIFIÉ',   color: '#18c8e0' },
-  'record.status':  { label: 'STATUT CHANGÉ',     color: '#18c8e0' },
-  'record.archive': { label: 'DOSSIER ARCHIVÉ',   color: '#d09820' },
-  'report.create':  { label: 'RAPPORT CRÉÉ',      color: '#20c880' },
-  'report.version': { label: 'NOUVELLE VERSION',  color: '#18c8e0' },
-  'report.submit':  { label: 'SOUMIS EN REVUE',   color: '#8060d8' },
-  'report.approve': { label: 'RAPPORT APPROUVÉ',  color: '#20c880' },
-  'report.return':  { label: 'RAPPORT RENVOYÉ',   color: '#d09820' },
-  'export':         { label: 'EXPORT',            color: '#e06020' },
-  'workspace.reset':{ label: 'RÉINITIALISATION',  color: '#e03030' },
+  'record.create':  { label: 'DOSSIER CRÉÉ',      color: '#3fb984' },
+  'record.update':  { label: 'DOSSIER MODIFIÉ',   color: '#58c4dc' },
+  'record.status':  { label: 'STATUT CHANGÉ',     color: '#58c4dc' },
+  'record.archive': { label: 'DOSSIER ARCHIVÉ',   color: '#e2a336' },
+  'report.create':  { label: 'RAPPORT CRÉÉ',      color: '#3fb984' },
+  'report.version': { label: 'NOUVELLE VERSION',  color: '#58c4dc' },
+  'report.submit':  { label: 'SOUMIS EN REVUE',   color: '#9d8cff' },
+  'report.approve': { label: 'RAPPORT APPROUVÉ',  color: '#3fb984' },
+  'report.return':  { label: 'RAPPORT RENVOYÉ',   color: '#e2a336' },
+  'export':         { label: 'EXPORT',            color: '#f0803c' },
+  'workspace.reset':{ label: 'RÉINITIALISATION',  color: '#e5484d' },
 };
 
 export default function AuditPanel() {
@@ -63,11 +63,11 @@ export default function AuditPanel() {
         <ul className="divide-y divide-b3" data-testid="audit-list">
           {rows.map((e) => (
             <li key={e.id} className="px-3 md:px-4 py-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5" data-testid="audit-row">
-              <span className="text-t3 text-3xs font-mono tabular-nums w-[8.5rem] shrink-0">{e.at.slice(0, 19).replace('T', ' ')}Z</span>
-              <span className="text-3xs font-mono font-bold tracking-wider w-36 shrink-0" style={{ color: ACTION[e.action].color }}>{ACTION[e.action].label}</span>
-              <span className="text-t1 text-2xs font-mono min-w-0 flex-1 break-words">{e.label}</span>
-              <span className="text-t3 text-3xs font-mono">{e.detail}</span>
-              <span className="text-t2 text-3xs font-mono">{e.actor}</span>
+              <span className="text-t3 text-3xs font-data tabular-nums w-[8.5rem] shrink-0">{e.at.slice(0, 19).replace('T', ' ')}Z</span>
+              <span className="text-3xs font-bold tracking-wider w-36 shrink-0" style={{ color: ACTION[e.action].color }}>{ACTION[e.action].label}</span>
+              <span className="text-t1 text-2xs min-w-0 flex-1 break-words">{e.label}</span>
+              <span className="text-t3 text-3xs ">{e.detail}</span>
+              <span className="text-t2 text-3xs ">{e.actor}</span>
             </li>
           ))}
         </ul>

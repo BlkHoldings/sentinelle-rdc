@@ -80,7 +80,7 @@ export default function SitrepPanel() {
       {/* ── Controls ── */}
       <div className="shrink-0 border-b border-b3 bg-b1 p-2.5 space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-t1 text-2xs font-mono font-bold tracking-widest">
+          <span className="text-t1 text-2xs font-bold tracking-widest">
             RAPPORT DE SITUATION
           </span>
 
@@ -89,7 +89,7 @@ export default function SitrepPanel() {
               <button
                 key={p.h}
                 onClick={() => setPeriodH(p.h)}
-                className={`px-1.5 py-0.5 text-3xs font-mono border transition-colors ${
+                className={`px-1.5 py-0.5 text-3xs border transition-colors ${
                   periodH === p.h ? 'border-blu text-t1 bg-blu/15' : 'border-b3 text-t3 hover:text-t2'
                 }`}
               >
@@ -101,7 +101,7 @@ export default function SitrepPanel() {
           <select
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className="bg-b0 border border-b3 text-t2 text-3xs font-mono px-1.5 py-0.5 outline-none focus:border-blu"
+            className="bg-b0 border border-b3 text-t2 text-3xs px-1.5 py-0.5 outline-none focus:border-blu"
           >
             <option value="">Toute la zone d&apos;opérations</option>
             {MONITORED_PROVINCES.map((p) => (
@@ -109,7 +109,7 @@ export default function SitrepPanel() {
             ))}
           </select>
 
-          <label className="flex items-center gap-1.5 text-3xs font-mono text-t3">
+          <label className="flex items-center gap-1.5 text-3xs text-t3">
             seuil de confiance
             <input
               type="range" min={0} max={0.9} step={0.05}
@@ -123,19 +123,19 @@ export default function SitrepPanel() {
           <div className="flex gap-1 ml-auto">
             <button
               onClick={copy}
-              className="border border-b3 text-t2 hover:text-t1 px-2 py-0.5 text-2xs font-mono transition-colors"
+              className="border border-b3 text-t2 hover:text-t1 px-2 py-0.5 text-2xs transition-colors"
             >
               ⧉ COPIER
             </button>
             <button
               onClick={() => download('txt')}
-              className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs font-mono transition-colors"
+              className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs transition-colors"
             >
               ↓ .TXT
             </button>
             <button
               onClick={() => download('json')}
-              className="border border-pur/40 text-pur hover:bg-pur/15 px-2 py-0.5 text-2xs font-mono transition-colors"
+              className="border border-pur/40 text-pur hover:bg-pur/15 px-2 py-0.5 text-2xs transition-colors"
             >
               ↓ .JSON
             </button>
@@ -143,7 +143,7 @@ export default function SitrepPanel() {
         </div>
 
         {/* Summary chips */}
-        <div className="flex flex-wrap gap-1.5 text-3xs font-mono">
+        <div className="flex flex-wrap gap-1.5 text-3xs ">
           <Chip label="ÉVÉNEMENTS" value={sitrep.counts.total} />
           <Chip label="CONFIRMÉS" value={sitrep.counts.confirmed} cls="text-grn" />
           <Chip label="CORROBORÉS" value={sitrep.counts.corroborated} cls="text-cyn" />
@@ -172,7 +172,7 @@ export default function SitrepPanel() {
 
       {/* ── Rendered report ── */}
       <div className="flex-1 overflow-auto min-h-0 p-3">
-        <pre className="text-t2 text-2xs font-mono leading-relaxed whitespace-pre-wrap">
+        <pre className="text-t2 text-2xs leading-relaxed whitespace-pre-wrap">
           {sitrep.text}
         </pre>
       </div>

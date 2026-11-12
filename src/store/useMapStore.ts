@@ -37,6 +37,10 @@ interface MapState {
   mapFeature:      MapFeatureInfo | null;
   /** Current map zoom, mirrored for "zoom in to see this layer" notes. */
   zoom:            number;
+  /** Provinces loaded from the boundary file; null until it arrives,
+   *  -1 if it could not be fetched. */
+  boundsLoaded:    number | null;
+  setBoundsLoaded: (n: number) => void;
 
   basemap:         BasemapId;
   terrain:         TerrainMode;
@@ -72,9 +76,12 @@ const DEFAULT_LAYERS: LayerVisibility = {
   acled:  true,
   firms:  true,
   heat:   false,
-  drone:  true,
-  mil:    true,
+  /* Positions and airborne-sensor records are off unless asked for. They
+     are illustrative, and a default view should not lead with them. */
+  drone:  false,
+  mil:    false,
   zone:   true,
+  bounds: true,
   ref:    true,
   routes: true,
   air:    false,
@@ -100,6 +107,8 @@ export const useMapStore = create<MapState>((set) => ({
   popupCoords:     null,
   mapFeature:      null,
   zoom:            4.7,
+  boundsLoaded:    null,
+  setBoundsLoaded(n)    { set({ boundsLoaded: n }); },
 
   basemap:         DEFAULT_BASEMAP,
   terrain:         'off',

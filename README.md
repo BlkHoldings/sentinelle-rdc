@@ -13,14 +13,17 @@ Espace d'analyse stratégique fondé sur les preuves — RDC et Grands Lacs.
 
 | Espace | Contenu |
 |---|---|
-| **Carte** | Fonds haute résolution, relief 3D, 17 calques avec compteurs, opacité et isolement ; chaque symbole est cliquable |
-| **Fusion** | Corrélation de rapports multi-sources, confiance bayésienne, file de triage, détection d'anomalies, SITREP |
-| **Données** | État de chaque source temps réel (météo, sismicité, ReliefWeb, GDACS, OSM) avec export |
-| **Dossiers** | Bibliothèque de dossiers stratégiques — énergie, mines, infrastructure, commerce, politique publique — chacun rattaché à ses sources |
-| **Entités / Signaux** | Vues dérivées des dossiers : entités co-citées, indice d'attention décomposé |
-| **Atelier** | Question → brief structuré citant les dossiers utilisés et signalant les lacunes |
-| **Rapports** | Versions, soumission, approbation par un second relecteur |
-| **Journal** | Trace en ajout seul des créations, modifications, relectures et exports |
+| **Vue d'ensemble** | Indicateurs de la période, carte, derniers développements, fiche d'événement en tiroir |
+| **Renseignement en direct** | Flux chronologique des événements fusionnés, filtrable ; fiche complète : sources, chronologie, contradictions, historique, notes, calcul de confiance |
+| **Carte interactive** | Fonds sombre / satellite / topo, relief 3D, frontière et 26 provinces, 18 calques avec compteurs, opacité et isolement |
+| **Analyse régionale** | Tendances jour / semaine, provinces, types, statuts, familles de sources, fiabilité — chaque graphique a son tableau |
+| **Situation humanitaire** | Faits humanitaires, déplacés rapportés, publications ReliefWeb, alertes GDACS |
+| **Alerte précoce · Triage · Chaîne de fusion · SITREP** | Détection d'anomalies, file de décision, pipeline, rapport de situation |
+| **Gestion des sources** | État de chaque flux temps réel, avec export |
+| **Dossiers stratégiques** | Bibliothèque, entités, signaux, assistant d'analyse, rapports approuvés, journal d'audit |
+| **Paramètres** | Langue (français / anglais), taille du texte |
+
+Référence de conception : [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Ce qu'elle ne fait pas
 
@@ -31,6 +34,9 @@ ne soit découverte par surprise.
   navigateur : rien n'est partagé entre utilisateurs, et vider les données du site efface tout.
 - **Pas de contrôle d'accès.** Les identifiants de démonstration et les rôles sont
   vérifiés côté client. Ils rendent le flux de relecture cohérent ; ils ne protègent rien.
+- **Le flux d'événements est en grande partie simulé.** Chaque événement et chaque source
+  issus du flux de démonstration portent l'étiquette « Simulé » ; les noms de médias qui y
+  figurent sont fictifs dans ce contexte.
 - **Pas de modèle d'IA.** L'atelier fait une recherche par mots-clés et assemble le
   brief par règles. Il le dit dans chaque brief.
 - **Pas d'interception.** Le panneau « communications » est une démonstration sonore
@@ -68,6 +74,8 @@ Les clés NASA FIRMS et ACLED sont facultatives et se saisissent à la connexion
 src/
 ├── app/                    pages (connexion, console)
 ├── components/
+│   ├── layout/ ui/         coque (navigation, barre), kit d'interface, graphiques, icônes
+│   ├── intel/              flux, fiche d'événement, analyses, paramètres
 │   ├── globe/ hud/         carte, calques, légende, fiche d'entité
 │   ├── fusion/             triage, pipeline, anomalies, données, SITREP
 │   └── strategic/          dossiers, entités, signaux, atelier, rapports, journal
@@ -75,6 +83,8 @@ src/
 │   ├── fusion/             moteur de fusion (pur, sans React)
 │   ├── live/               clients des sources temps réel
 │   ├── strategic/          modèle de dossier, validation, filtrage, brief (pur)
+│   ├── intel/              dérivations sur les événements fusionnés (pur)
+│   ├── i18n/               dictionnaires français / anglais
 │   ├── layers.ts           registre unique des calques
 │   └── cluster.ts          regroupement en espace écran
 ├── store/                  états Zustand ; useStrategicStore = couche d'accès aux données

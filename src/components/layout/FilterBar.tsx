@@ -151,28 +151,8 @@ export default function FilterBar() {
   return (
     <div
       ref={barRef}
-      className="relative flex flex-wrap md:flex-nowrap items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-0 h-auto md:h-11 bg-b2 border-b border-b3 shrink-0 z-header"
+      className="relative flex flex-wrap md:flex-nowrap items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-0 h-auto md:h-10 bg-b1 border-b border-b3 shrink-0 z-header"
     >
-
-      {/* TIME RANGE */}
-      <Dropdown
-        open={openMenu === 'time'}
-        onToggle={() => toggle('time')}
-        tag="TIME"
-        value={timeLabel}
-      >
-        {TIME_OPTS.map((o) => (
-          <DropItem
-            key={o.value}
-            active={timeRange === o.value}
-            onClick={() => { setTimeRange(o.value); setOpenMenu(null); }}
-          >
-            {o.label}
-          </DropItem>
-        ))}
-      </Dropdown>
-
-      <Sep />
 
       {/* AREA OF INTEREST */}
       <Dropdown
@@ -195,7 +175,7 @@ export default function FilterBar() {
         <button
           onClick={() => toggle('layers')}
           data-testid="layers-button"
-          className={`flex items-center gap-1.5 px-2 py-1 border text-2xs font-mono transition-colors ${
+          className={`flex items-center gap-1.5 px-2 py-1 border text-2xs transition-colors ${
             openMenu === 'layers'
               ? 'border-blu text-t1 bg-blu/10'
               : solo ? 'border-amb text-amb' : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
@@ -229,7 +209,7 @@ export default function FilterBar() {
       </Dropdown>
 
       {/* ── Global search — full row on phones ── */}
-      <div className="order-last md:order-none basis-full md:basis-auto md:flex-1 md:mx-2 md:max-w-sm">
+      <div className="order-last basis-full md:hidden">
         <div className="relative">
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-t3 text-xs pointer-events-none">⌕</span>
           <input
@@ -240,7 +220,7 @@ export default function FilterBar() {
             onBlur={() => setSearch(searchVal)}
             placeholder="Rechercher événements, entités, lieux…"
             className={`
-              w-full bg-b0 border pl-8 pr-3 py-1 text-t2 text-2xs font-mono
+              w-full bg-b0 border pl-8 pr-3 py-1 text-t2 text-2xs 
               placeholder:text-t3 focus:outline-none transition-colors
               ${searchQuery ? 'border-blu text-t1' : 'border-b3 focus:border-t3'}
             `}
@@ -256,20 +236,12 @@ export default function FilterBar() {
         </div>
       </div>
 
-      {/* Live refresh status */}
-      <RefreshStatus />
-
-      <Sep />
-
-      {/* UTC clock */}
-      <UtcClock />
-
-      <Sep />
+      <div className="hidden md:block flex-1" />
 
       {/* More actions */}
       <div className="relative shrink-0">
         <button
-          className={`flex items-center gap-1 px-2 py-1 border text-2xs font-mono transition-colors ${
+          className={`flex items-center gap-1 px-2 py-1 border text-2xs transition-colors ${
             openMenu === 'more'
               ? 'border-blu text-t1 bg-blu/10'
               : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
@@ -311,7 +283,7 @@ function Dropdown({ open, onToggle, tag, value, wide, children }: DropdownProps)
     <div className="relative shrink-0">
       <button
         onClick={onToggle}
-        className={`flex items-center gap-1.5 px-2 py-1 border text-2xs font-mono transition-colors ${
+        className={`flex items-center gap-1.5 px-2 py-1 border text-2xs transition-colors ${
           open
             ? 'border-blu text-t1 bg-blu/10'
             : 'border-b3 text-t3 hover:border-t3 hover:text-t2'
@@ -344,7 +316,7 @@ function DropItem({ active, onClick, children }: DropItemProps) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-3 py-1.5 text-2xs font-mono transition-colors ${
+      className={`w-full text-left px-3 py-1.5 text-2xs transition-colors ${
         active ? 'text-t1 bg-blu/10' : 'text-t3 hover:text-t2 hover:bg-b2'
       }`}
     >
@@ -380,15 +352,15 @@ function RefreshStatus() {
         className="flex items-center gap-1.5 px-2 py-1 border border-b3 hover:border-grn/60 transition-colors group"
       >
         <span className={`w-1.5 h-1.5 rounded-full ${up ? 'bg-grn animate-pulse-slow' : 'bg-amb'}`} />
-        <span className={`text-2xs font-mono font-bold tracking-wider ${up ? 'text-grn' : 'text-amb'}`}>
+        <span className={`text-2xs font-bold tracking-wider ${up ? 'text-grn' : 'text-amb'}`}>
           FLUX {up}/{feeds.length}
         </span>
-        <span className="text-t3 text-2xs font-mono group-hover:text-t2">↻</span>
+        <span className="text-t3 text-2xs group-hover:text-t2">↻</span>
       </button>
       <button
         onClick={() => setAuto(!auto)}
         title={auto ? 'Désactiver le rafraîchissement auto' : 'Activer le rafraîchissement auto'}
-        className={`px-1.5 py-1 border text-2xs font-mono tracking-wider transition-colors ${
+        className={`px-1.5 py-1 border text-2xs tracking-wider transition-colors ${
           auto ? 'border-blu/50 text-blu' : 'border-b3 text-t3 hover:text-t2'
         }`}
       >
@@ -419,9 +391,9 @@ function UtcClock() {
 
   return (
     <div className="hidden md:flex items-center gap-2 shrink-0">
-      <span className="text-grn text-2xs font-mono font-bold tracking-widest">{utc}</span>
-      <span className="text-t3 text-2xs font-mono">|</span>
-      <span className="text-amb text-2xs font-mono">{goma}</span>
+      <span className="text-grn text-2xs font-bold tracking-widest">{utc}</span>
+      <span className="text-t3 text-2xs ">|</span>
+      <span className="text-amb text-2xs ">{goma}</span>
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { registerFlyTo, registerGetBounds } from '@/lib/mapController';
 import { basemapById, probeBasemap, DEM_SOURCE, TERRAIN_EXAGGERATION } from '@/lib/basemaps';
 import { clusterPoints, dominant, CLUSTER_MAX_ZOOM } from '@/lib/cluster';
 import { C } from '@/lib/layers';
+import { asset } from '@/lib/asset';
 import { PLACES, type Place } from '@/lib/fusion/gazetteer';
 import { AXES, AIRSTRIPS, BORDER_CROSSINGS } from '@/lib/fusion/infrastructure';
 import { EVENT_TYPE_LABEL } from '@/lib/fusion/schema';
@@ -38,25 +39,25 @@ const INITIAL_VIEW = {
 };
 
 const MIL_DOT_COLOR: Record<string, string> = {
-  hq:   '#c83048',
-  arty: '#8060d8',
-  cp:   '#d09820',
-  log:  '#d09820',
-  camp: '#d09820',
-  nav:  '#1e70f0',
-  idp:  '#20c880',
+  hq:   '#d6577a',
+  arty: '#9d8cff',
+  cp:   '#e2a336',
+  log:  '#e2a336',
+  camp: '#e2a336',
+  nav:  '#6f9bff',
+  idp:  '#3fb984',
 };
 
 const DRONE_DOT_COLOR: Record<string, string> = {
-  strike:       '#e03030',
-  strike_bda:   '#d09820',
-  installation: '#8060d8',
-  naval:        '#1e70f0',
-  logistics:    '#d09820',
-  camp:         '#d09820',
-  artillery:    '#8060d8',
-  humanitarian: '#20c880',
-  movement:     '#18c8e0',
+  strike:       '#e5484d',
+  strike_bda:   '#e2a336',
+  installation: '#9d8cff',
+  naval:        '#6f9bff',
+  logistics:    '#e2a336',
+  camp:         '#e2a336',
+  artillery:    '#9d8cff',
+  humanitarian: '#3fb984',
+  movement:     '#58c4dc',
 };
 
 /* Map-marker colours for the ISR verdict — separate from the panel's
@@ -124,8 +125,8 @@ function placeVisibleAt(p: Place, zoom: number): boolean {
   return true;
 }
 
-const ZONE_FILL: Record<string, string> = { hostile: '#e03030', contested: '#d09820', watch: '#18c8e0' };
-const ZONE_LINE: Record<string, string> = { hostile: '#e03030', contested: '#d09820', watch: '#18c8e0' };
+const ZONE_FILL: Record<string, string> = { hostile: '#e5484d', contested: '#e2a336', watch: '#58c4dc' };
+const ZONE_LINE: Record<string, string> = { hostile: '#e5484d', contested: '#e2a336', watch: '#58c4dc' };
 
 export default function GlobeMapInner() {
   const mapRef = useRef<MapRef>(null);
@@ -146,6 +147,40 @@ export default function GlobeMapInner() {
      clustering and label selection only change at that granularity, and
      re-binning every point on each animation frame of a fly-to is waste. */
   const [view, setView] = useState({ zoom: INITIAL_VIEW.zoom, w: 20, s: -8, e: 32, n: 5 });
+  /* ── Administrative boundaries ───────────────────────────────
+     Fetched once from the build's own static files. A failure is
+     recorded on the store so the layer manager can say the outlines are
+     missing, rather than the map simply having none. */
+  const setBoundsLoaded = useMapStore((s) => s.setBoundsLoaded);
+  const [bounds, setBounds] = useState<{ adm0: GeoJSON.FeatureCollection; adm1: GeoJSON.FeatureCollection } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetch(asset('/geo/cod-adm0.json')).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }),
+      fetch(asset('/geo/cod-adm1.json')).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }),
+    ]).then(([adm0, adm1]) => {
+      if (cancelled) return;
+      setBounds({ adm0, adm1 });
+      setBoundsLoaded(adm1.features.length);
+    }).catch(() => { if (!cancelled) setBoundsLoaded(-1); });
+    return () => { cancelled = true; };
+  }, [setBoundsLoaded]);
+
+  /* Everything outside the country, as one polygon with the country cut
+     out of it. Dimming it keeps neighbouring detail available while
+     making the DRC the figure on the page. */
+  const maskGeoJSON = useMemo(() => {
+    if (!bounds) return null;
+    const holes: number[][][] = [];
+    for (const f of bounds.adm0.features) {
+      for (const poly of (f.geometry as GeoJSON.MultiPolygon).coordinates) holes.push(poly[0]);
+    }
+    return {
+      type: 'Feature' as const, properties: {},
+      geometry: { type: 'Polygon' as const, coordinates: [[[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]], ...holes] },
+    };
+  }, [bounds]);
+
   const [hover, setHover] = useState<{ x: number; y: number; title: string; color: string } | null>(null);
   const basemapId       = useMapStore((s) => s.basemap);
   const terrainMode     = useMapStore((s) => s.terrain);
@@ -236,7 +271,7 @@ export default function GlobeMapInner() {
       (map as any).setSky?.({
         'sky-color': '#0a1830',
         'horizon-color': '#16273d',
-        'fog-color': '#090d13',
+        'fog-color': '#0b0d10',
         'fog-ground-blend': 0.6,
         'horizon-fog-blend': 0.4,
       });
@@ -745,10 +780,10 @@ export default function GlobeMapInner() {
       {tileError && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-hud
                         border border-amb/50 bg-b1/95 px-3 py-2 max-w-sm text-center shadow-float">
-          <div className="text-amb text-2xs font-mono font-bold tracking-wider">
+          <div className="text-amb text-2xs font-bold tracking-wider">
             FOND DE CARTE INACCESSIBLE
           </div>
-          <div className="text-t2 text-3xs font-mono leading-snug mt-1">
+          <div className="text-t2 text-3xs leading-snug mt-1">
             Les tuiles de « {basemap.label} » ne se chargent pas — réseau, proxy ou
             filtrage. Les calques tactiques restent valides ; seul le fond manque.
             Essayez un autre fond de carte.
@@ -760,7 +795,7 @@ export default function GlobeMapInner() {
       {hover && (
         <div
           className="absolute z-hud pointer-events-none bg-b1/95 border border-b3 px-1.5 py-0.5
-                     text-2xs font-mono text-t1 whitespace-nowrap max-w-[240px] truncate shadow-float"
+                     text-2xs text-t1 whitespace-nowrap max-w-[240px] truncate shadow-float"
           style={{ left: hover.x + 12, top: hover.y + 12, borderLeftColor: hover.color, borderLeftWidth: 2 }}
         >
           {hover.title}
@@ -770,6 +805,27 @@ export default function GlobeMapInner() {
       {/* ══ Draw order, bottom to top: areas → lines → uncertainty →
              raw points → fused points → DOM markers. Areas first so no
              polygon ever covers the point it contains. ══ */}
+
+      {/* Administrative outlines and the outside-country dim */}
+      {on('bounds') && bounds && maskGeoJSON && (
+        <>
+          <Source id="mask-src" type="geojson" data={maskGeoJSON}>
+            <Layer id="mask-fill" type="fill" paint={{ 'fill-color': '#06080b', 'fill-opacity': 0.42 * op('bounds') }} />
+          </Source>
+          <Source id="adm1-src" type="geojson" data={bounds.adm1}>
+            <Layer id="adm1-line" type="line" paint={{
+              'line-color': C.t3, 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 8, 1],
+              'line-opacity': 0.55 * op('bounds'), 'line-dasharray': [3, 2],
+            }} />
+          </Source>
+          <Source id="adm0-src" type="geojson" data={bounds.adm0}>
+            <Layer id="adm0-line" type="line" paint={{
+              'line-color': C.t1, 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 1, 8, 1.8],
+              'line-opacity': 0.7 * op('bounds'),
+            }} />
+          </Source>
+        </>
+      )}
 
       {/* Terrain control */}
       {on('zone') && (
@@ -856,8 +912,8 @@ export default function GlobeMapInner() {
               'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 10, 2.5],
               'heatmap-color': [
                 'interpolate', ['linear'], ['heatmap-density'],
-                0, 'rgba(224,96,32,0)', 0.3, 'rgba(224,96,32,0.3)',
-                0.7, 'rgba(224,96,32,0.7)', 1, '#e06020',
+                0, 'rgba(240,128,60,0)', 0.3, 'rgba(240,128,60,0.3)',
+                0.7, 'rgba(240,128,60,0.7)', 1, '#f0803c',
               ],
               'heatmap-radius':  ['interpolate', ['linear'], ['zoom'], 4, 14, 10, 30],
               'heatmap-opacity': 0.75 * op('heat'),
@@ -969,13 +1025,30 @@ export default function GlobeMapInner() {
 
       {/* ══ DOM markers ══ */}
 
+      {/* Province names, while there is room for them */}
+      {on('bounds') && bounds && view.zoom < 7 && bounds.adm1.features
+        // Small provinces are packed together; naming them all at country
+        // scale stacks the labels on top of one another.
+        .filter((f) => view.zoom >= 5.5 || (f.properties!.area as number) >= 4)
+        .map((f) => {
+        const [lon, lat] = f.properties!.label as [number, number];
+        return (
+          <Marker key={`prov-${f.properties!.iso}`} longitude={lon} latitude={lat} anchor="center">
+            <span className="pointer-events-none select-none text-3xs font-medium uppercase tracking-[0.12em] text-t3 whitespace-nowrap"
+              style={{ opacity: 0.85 * op('bounds'), textShadow: '0 0 3px #0b0d10, 0 0 6px #0b0d10' }}>
+              {f.properties!.name}
+            </span>
+          </Marker>
+        );
+      })}
+
       {/* Cluster counts */}
       {on('acled') && acledGeoJSON.groups.features.map((f, i) => {
         const [lon, lat] = (f.geometry as GeoJSON.Point).coordinates;
         return (
           <Marker key={`cl-${i}-${lon.toFixed(3)}`} longitude={lon} latitude={lat} anchor="center">
             <span
-              className="pointer-events-none select-none text-2xs font-mono font-bold text-t1"
+              className="pointer-events-none select-none text-2xs font-bold text-t1"
               style={{ opacity: op('acled'), textShadow: '0 0 3px #000, 0 0 3px #000' }}
             >
               {f.properties!.count}
@@ -998,7 +1071,7 @@ export default function GlobeMapInner() {
         return (
           <Marker key={`pl-${p.name}`} longitude={p.lon} latitude={p.lat} anchor="left" offset={[6, 0]}>
             <span
-              className={`pointer-events-none select-none font-mono whitespace-nowrap ${
+              className={`pointer-events-none select-none whitespace-nowrap ${
                 big ? 'text-2xs font-bold text-t1 tracking-wider uppercase' : 'text-3xs text-t1/80'
               }`}
               style={{ opacity: op('ref'), textShadow: '0 0 2px #000, 0 0 4px #000, 0 0 6px #000' }}
@@ -1014,7 +1087,7 @@ export default function GlobeMapInner() {
         const mid = a.points[Math.floor(a.points.length / 2)];
         return (
           <Marker key={`ax-${a.name}`} longitude={mid[0]} latitude={mid[1]} anchor="center">
-            <span className="pointer-events-none select-none bg-amb text-b0 text-3xs font-mono font-bold px-1 leading-tight"
+            <span className="pointer-events-none select-none bg-amb text-b0 text-3xs font-bold px-1 leading-tight"
                   style={{ opacity: op('routes') }}>
               {a.name.split(' ')[0]}
             </span>
@@ -1026,7 +1099,7 @@ export default function GlobeMapInner() {
           own and sourced — the marker itself says how far to trust it. */}
       {on('dossiers') && strategic.filter((r) => r.lat != null && r.lon != null && r.status !== 'archived').map((r) => {
         const weak = r.illustrative || r.sources.length === 0;
-        const color = weak ? C.amb : '#3bd6c8';
+        const color = weak ? C.amb : '#58c4dc';
         return (
           <Marker key={`rec-${r.id}`} longitude={r.lon!} latitude={r.lat!} anchor="center"
             onClick={(e) => {
@@ -1110,7 +1183,7 @@ export default function GlobeMapInner() {
           }}
         >
           <button className="select-none flex flex-col items-center cursor-pointer" style={{ opacity: op('weather') }}>
-            <div className="bg-b1/95 border border-b3 hover:border-t3 px-1 py-0.5 text-3xs font-mono whitespace-nowrap">
+            <div className="bg-b1/95 border border-b3 hover:border-t3 px-1 py-0.5 text-3xs whitespace-nowrap">
               <span className={ISR_MAP_COLOR[w.isr]}>◈{w.isr.slice(0, 4)}</span>
               {w.rain_24h_mm != null && w.rain_24h_mm > 0 && (
                 <span className="text-blu ml-1">{w.rain_24h_mm}mm</span>
@@ -1124,9 +1197,9 @@ export default function GlobeMapInner() {
       {/* Operator-drawn shapes */}
       {shapes.length > 0 && (
         <Source id="draw-shapes" type="geojson" data={drawGeoJSON}>
-          <Layer id="draw-fill" type="fill" paint={{ 'fill-color': '#18c8e0', 'fill-opacity': 0.08 }} />
+          <Layer id="draw-fill" type="fill" paint={{ 'fill-color': '#58c4dc', 'fill-opacity': 0.08 }} />
           <Layer id="draw-line" type="line" paint={{
-            'line-color': '#18c8e0', 'line-width': 1.5, 'line-opacity': 0.8, 'line-dasharray': [3, 2],
+            'line-color': '#58c4dc', 'line-width': 1.5, 'line-opacity': 0.8, 'line-dasharray': [3, 2],
           }} />
         </Source>
       )}
@@ -1135,7 +1208,7 @@ export default function GlobeMapInner() {
       {pending.length >= 2 && (
         <Source id="draw-pending" type="geojson" data={pendingGeoJSON}>
           <Layer id="draw-pending-line" type="line" paint={{
-            'line-color': '#c8d8e8', 'line-width': 1, 'line-dasharray': [2, 2],
+            'line-color': '#e6e9ee', 'line-width': 1, 'line-dasharray': [2, 2],
           }} />
         </Source>
       )}
@@ -1149,7 +1222,7 @@ export default function GlobeMapInner() {
       {notes.map((n) => (
         <Marker key={n.id} longitude={n.lon} latitude={n.lat} anchor="bottom">
           <div className="flex flex-col items-center pointer-events-none select-none">
-            <div className="bg-b1/95 border border-cyn/60 px-1.5 py-0.5 text-cyn text-2xs font-mono whitespace-nowrap max-w-[180px] truncate">
+            <div className="bg-b1/95 border border-cyn/60 px-1.5 py-0.5 text-cyn text-2xs whitespace-nowrap max-w-[180px] truncate">
               {n.text}
             </div>
             <div className="w-px h-2 bg-cyn/60" />
@@ -1165,7 +1238,7 @@ export default function GlobeMapInner() {
           <button
             className="flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-150 select-none cursor-pointer"
             style={{
-              color: MIL_DOT_COLOR[pos.t] ?? '#7890a8', fontSize: pos.t === 'hq' ? 17 : 13,
+              color: MIL_DOT_COLOR[pos.t] ?? '#9aa3b0', fontSize: pos.t === 'hq' ? 17 : 13,
               opacity: op('mil'), textShadow: '0 0 3px #000, 0 0 5px #000',
             }}
             title={pos.n}
@@ -1178,7 +1251,7 @@ export default function GlobeMapInner() {
       {/* Drone / UAV records */}
       {secretVisible && on('drone') && DRONE_ISR.map((rec) => {
         const isStrike = rec.classification === 'strike' || rec.classification === 'strike_bda';
-        const color    = DRONE_DOT_COLOR[rec.classification] ?? '#18d8f0';
+        const color    = DRONE_DOT_COLOR[rec.classification] ?? '#6fd3e6';
         return (
           <Marker key={rec.id} longitude={rec.lon} latitude={rec.lat} anchor="center"
             onClick={(e) => { e.originalEvent.stopPropagation(); handleDroneClick(rec); }}

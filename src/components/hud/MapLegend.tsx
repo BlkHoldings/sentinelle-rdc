@@ -26,7 +26,7 @@ function Swatch({ color, shape = 'dot' }: LegendEntry) {
 }
 
 export default function MapLegend() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const layers = useMapStore((s) => s.layers);
   const solo   = useMapStore((s) => s.solo);
   const counts = useLayerCounts();
@@ -41,20 +41,20 @@ export default function MapLegend() {
           className="panel-header w-full px-2.5 py-1 flex items-center justify-between hover:bg-b3/40 transition-colors"
         >
           <span className="mvn-label">LÉGENDE</span>
-          <span className="text-t3 text-2xs font-mono">
+          <span className="text-t3 text-2xs ">
             {active.length} calque{active.length > 1 ? 's' : ''} {open ? '▾' : '▸'}
           </span>
         </button>
         {open && (
           <div className="px-2.5 py-1.5 space-y-2 max-h-[32vh] overflow-y-auto">
             {active.length === 0 && (
-              <div className="text-3xs font-mono text-t3">Aucun calque symbolisé n’est affiché.</div>
+              <div className="text-3xs text-t3">Aucun calque symbolisé n’est affiché.</div>
             )}
             {active.map((l) => (
               <div key={l.key} data-legend={l.key}>
                 <div className="flex items-baseline gap-1 mb-0.5">
                   <span className="mvn-label truncate">{l.label}</span>
-                  <span className="text-3xs font-mono text-t3 ml-auto tabular-nums shrink-0">
+                  <span className="text-3xs text-t3 ml-auto font-data tabular-nums shrink-0">
                     {counts[l.key] ?? '—'}
                   </span>
                 </div>
@@ -62,7 +62,7 @@ export default function MapLegend() {
                   {l.legend!.map((e) => (
                     <div key={e.label} className="flex items-center gap-2">
                       <Swatch {...e} />
-                      <span className="text-t2 text-3xs font-mono leading-tight">{e.label}</span>
+                      <span className="text-t2 text-3xs leading-tight">{e.label}</span>
                     </div>
                   ))}
                 </div>

@@ -97,18 +97,18 @@ function ExportBar<T extends object>({ rows, name, geo = true }: {
   };
   return (
     <div className="flex items-center gap-1">
-      <span className="text-3xs font-mono text-t3 mr-1">{rows.length} enr.</span>
+      <span className="text-3xs text-t3 mr-1">{rows.length} enr.</span>
       <button onClick={() => go('csv', toCSV(plain), 'text/csv')}
-        className="border border-b3 text-t2 hover:text-t1 px-1.5 py-0.5 text-3xs font-mono transition-colors">
+        className="border border-b3 text-t2 hover:text-t1 px-1.5 py-0.5 text-3xs transition-colors">
         ↓ CSV
       </button>
       <button onClick={() => go('json', JSON.stringify(rows, null, 2), 'application/json')}
-        className="border border-b3 text-t2 hover:text-t1 px-1.5 py-0.5 text-3xs font-mono transition-colors">
+        className="border border-b3 text-t2 hover:text-t1 px-1.5 py-0.5 text-3xs transition-colors">
         ↓ JSON
       </button>
       {geo && (
         <button onClick={() => go('geojson', toGeoJSON(plain), 'application/geo+json')}
-          className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-1.5 py-0.5 text-3xs font-mono transition-colors">
+          className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-1.5 py-0.5 text-3xs transition-colors">
           ↓ GEOJSON
         </button>
       )}
@@ -129,22 +129,22 @@ function SourceRow({ meta, result, onRefresh }: {
     <div className="border border-b3 bg-b1 p-2">
       <div className="flex items-center gap-1.5 flex-wrap">
         <div className={`w-1.5 h-1.5 shrink-0 ${st.dot}`} />
-        <span className="text-t1 text-2xs font-mono font-bold">{meta.label}</span>
-        <span className={`text-3xs font-mono border px-1 ${st.text} border-current/40`}>{st.label}</span>
+        <span className="text-t1 text-2xs font-bold">{meta.label}</span>
+        <span className={`text-3xs border px-1 ${st.text} border-current/40`}>{st.label}</span>
         {!meta.requiresKey && (
-          <span className="text-3xs font-mono text-grn/70 border border-grn/30 px-1">SANS CLÉ</span>
+          <span className="text-3xs text-grn/70 border border-grn/30 px-1">SANS CLÉ</span>
         )}
         {onRefresh && (
           <button onClick={onRefresh}
-            className="ml-auto border border-b3 text-t3 hover:text-t1 px-1.5 py-0.5 text-3xs font-mono transition-colors">
+            className="ml-auto border border-b3 text-t3 hover:text-t1 px-1.5 py-0.5 text-3xs transition-colors">
             ⟳
           </button>
         )}
       </div>
 
-      <div className="text-t2 text-3xs font-mono leading-tight mt-1">{meta.purpose}</div>
+      <div className="text-t2 text-3xs leading-tight mt-1">{meta.purpose}</div>
 
-      <div className="grid grid-cols-2 gap-x-3 mt-1 text-3xs font-mono">
+      <div className="grid grid-cols-2 gap-x-3 mt-1 text-3xs ">
         <span className="text-t3">Fournisseur</span>
         <span className="text-t2 truncate">{meta.provider}</span>
         <span className="text-t3">Cadence</span>
@@ -170,12 +170,12 @@ function SourceRow({ meta, result, onRefresh }: {
       </div>
 
       {result.error && (
-        <div className="text-alert text-3xs font-mono mt-1 leading-tight break-words">
+        <div className="text-alert text-3xs mt-1 leading-tight break-words">
           {result.error}
         </div>
       )}
       <a href={meta.docs} target="_blank" rel="noopener noreferrer"
-        className="text-3xs font-mono text-blu hover:text-cyn mt-1 inline-block transition-colors">
+        className="text-3xs text-blu hover:text-cyn mt-1 inline-block transition-colors">
         documentation ↗
       </a>
     </div>
@@ -223,23 +223,23 @@ export default function DataPanel() {
       {/* Controls */}
       <div className="shrink-0 border-b border-b3 bg-b1 p-2 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-t1 text-2xs font-mono font-bold tracking-widest">ACCÈS AUX DONNÉES</span>
+          <span className="text-t1 text-2xs font-bold tracking-widest">ACCÈS AUX DONNÉES</span>
           <button
             onClick={() => { void live.refreshAll(); }}
             disabled={live.busy}
-            className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs font-mono transition-colors disabled:opacity-50"
+            className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs transition-colors disabled:opacity-50"
           >
             {live.busy ? '⟳ COLLECTE…' : '⟳ TOUT ACTUALISER'}
           </button>
           <button
             onClick={() => (live.autoRefresh ? live.stopAuto() : live.startAuto())}
-            className={`border px-2 py-0.5 text-2xs font-mono transition-colors ${
+            className={`border px-2 py-0.5 text-2xs transition-colors ${
               live.autoRefresh ? 'border-grn/50 text-grn bg-grn/10' : 'border-b3 text-t3 hover:text-t2'
             }`}
           >
             {live.autoRefresh ? '● AUTO ACTIF' : '○ AUTO INACTIF'}
           </button>
-          <span className="text-3xs font-mono text-t3 ml-auto">
+          <span className="text-3xs text-t3 ml-auto">
             toutes les sources sont publiques et sans clé
           </span>
         </div>
@@ -249,7 +249,7 @@ export default function DataPanel() {
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-1.5 py-0.5 text-3xs font-mono border transition-colors ${
+              className={`px-1.5 py-0.5 text-3xs border transition-colors ${
                 tab === t.key ? 'border-blu text-t1 bg-blu/15' : 'border-b3 text-t3 hover:text-t2'
               }`}
             >
@@ -271,7 +271,7 @@ export default function DataPanel() {
               <SourceRow meta={live.meta[3]} result={live.gdacs}     onRefresh={() => void live.refreshGdacs()} />
               <SourceRow meta={live.meta[4]} result={live.osm} />
             </div>
-            <div className="border border-b3 bg-b1 p-2.5 text-3xs font-mono text-t3 leading-relaxed">
+            <div className="border border-b3 bg-b1 p-2.5 text-3xs text-t3 leading-relaxed">
               <span className="text-t2">Note de fiabilité.</span> Ces flux sont appelés
               directement depuis le navigateur : un échec peut venir du fournisseur, du
               réseau local, ou d&apos;une politique CORS côté fournisseur. Un flux en échec
@@ -290,7 +290,7 @@ export default function DataPanel() {
               <div className="ml-auto"><ExportBar rows={weather} name="meteo" /></div>
             </div>
             {!weather.length && (
-              <div className="text-t3 text-2xs font-mono">
+              <div className="text-t3 text-2xs ">
                 Aucune donnée — lancez une actualisation.
               </div>
             )}
@@ -300,16 +300,16 @@ export default function DataPanel() {
                   onClick={() => flyTo({ longitude: w.lon, latitude: w.lat, zoom: 10 })}
                   className="border border-b3 bg-b1 p-2 text-left hover:border-t3 transition-colors">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-t1 text-2xs font-mono font-bold">{w.name}</span>
-                    <span className="text-t3 text-3xs font-mono ml-auto">
+                    <span className="text-t1 text-2xs font-bold">{w.name}</span>
+                    <span className="text-t3 text-3xs ml-auto">
                       {w.temperature_c != null ? `${w.temperature_c.toFixed(1)} °C` : '—'}
                     </span>
                   </div>
-                  <div className="flex gap-2 mt-1 text-3xs font-mono">
+                  <div className="flex gap-2 mt-1 text-3xs ">
                     <span className={ISR_COLOR[w.isr]}>ISR {w.isr}</span>
                     <span className={MOBILITY_COLOR[w.mobility]}>AXES {w.mobility}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-x-2 mt-1 text-3xs font-mono">
+                  <div className="grid grid-cols-2 gap-x-2 mt-1 text-3xs ">
                     <span className="text-t3">Plafond</span>
                     <span className="text-t2">{w.cloud_base_m != null ? `${Math.round(w.cloud_base_m)} m` : '—'}</span>
                     <span className="text-t3">Visibilité</span>
@@ -327,7 +327,7 @@ export default function DataPanel() {
                 </button>
               ))}
             </div>
-            <div className="text-3xs font-mono text-t3 leading-tight">
+            <div className="text-3xs text-t3 leading-tight">
               ISR et praticabilité sont des évaluations dérivées de seuils explicites
               (plafond &lt; 600 m ou visibilité &lt; 3 km → défavorable ; pluie 24 h &gt; 40 mm
               ou 72 h &gt; 90 mm → impraticable), pas des sorties de modèle.
@@ -344,10 +344,10 @@ export default function DataPanel() {
             </div>
             {volcanic.length > 0 && (
               <div className="border border-amb/40 bg-amb/[0.06] p-2">
-                <div className="text-amb text-2xs font-mono font-bold">
+                <div className="text-amb text-2xs font-bold">
                   ◬ {volcanic.length} événement(s) compatible(s) avec une activité volcano-tectonique
                 </div>
-                <div className="text-t3 text-3xs font-mono leading-tight mt-0.5">
+                <div className="text-t3 text-3xs leading-tight mt-0.5">
                   Moins de 60 km du Nyiragongo et moins de 25 km de profondeur. Indicatif :
                   la discrimination volcano-tectonique exige un réseau local (OVG), pas un
                   catalogue téléséismique.
@@ -355,12 +355,12 @@ export default function DataPanel() {
               </div>
             )}
             <div className="border border-b3 bg-b1 divide-y divide-b3/40">
-              {!seismic.length && <div className="p-2 text-t3 text-2xs font-mono">Aucune donnée.</div>}
+              {!seismic.length && <div className="p-2 text-t3 text-2xs ">Aucune donnée.</div>}
               {seismic.slice(0, 60).map((e) => (
                 <button key={e.id}
                   onClick={() => flyTo({ longitude: e.lon, latitude: e.lat, zoom: 9 })}
                   className="w-full text-left p-1.5 hover:bg-b2/60 transition-colors">
-                  <div className="flex items-baseline gap-2 text-2xs font-mono">
+                  <div className="flex items-baseline gap-2 text-2xs ">
                     <span className={`font-bold ${e.magnitude >= 4.5 ? 'text-alert' : e.magnitude >= 3.5 ? 'text-amb' : 'text-t2'}`}>
                       M{e.magnitude.toFixed(1)}
                     </span>
@@ -385,7 +385,7 @@ export default function DataPanel() {
               <span className="mvn-label">RAPPORTS RELIEFWEB — RDC</span>
               <div className="ml-auto"><ExportBar rows={reports} name="reliefweb" geo={false} /></div>
             </div>
-            <div className="text-3xs font-mono text-t3 leading-tight">
+            <div className="text-3xs text-t3 leading-tight">
               Ces rapports alimentent aussi la chaîne de fusion comme source de famille
               « terrain », dont la décote de corrélation est la plus faible du modèle —
               une corroboration ReliefWeb pèse donc lourd sur la confiance.
@@ -394,7 +394,7 @@ export default function DataPanel() {
               <div className="border border-b3 bg-b1 p-2">
                 <div className="mvn-label mb-1">ALERTES GDACS</div>
                 {alerts.slice(0, 8).map((a) => (
-                  <div key={a.id} className="text-3xs font-mono flex items-baseline gap-1.5">
+                  <div key={a.id} className="text-3xs flex items-baseline gap-1.5">
                     <span className={
                       a.level === 'Red' ? 'text-alert' : a.level === 'Orange' ? 'text-amb' : 'text-grn'
                     }>{a.level || '—'}</span>
@@ -405,21 +405,21 @@ export default function DataPanel() {
               </div>
             )}
             <div className="border border-b3 bg-b1 divide-y divide-b3/40">
-              {!reports.length && <div className="p-2 text-t3 text-2xs font-mono">Aucune donnée.</div>}
+              {!reports.length && <div className="p-2 text-t3 text-2xs ">Aucune donnée.</div>}
               {reports.slice(0, 40).map((r) => (
                 <div key={r.id} className="p-2">
                   <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className="text-cyn text-3xs font-mono">{r.source}</span>
-                    <span className="text-t3 text-3xs font-mono">
+                    <span className="text-cyn text-3xs ">{r.source}</span>
+                    <span className="text-t3 text-3xs ">
                       {new Date(r.date).toISOString().slice(0, 10)}
                     </span>
                     <a href={r.url} target="_blank" rel="noopener noreferrer"
-                      className="text-3xs font-mono text-blu hover:text-cyn ml-auto transition-colors">
+                      className="text-3xs text-blu hover:text-cyn ml-auto transition-colors">
                       source ↗
                     </a>
                   </div>
-                  <div className="text-t1 text-2xs font-mono font-bold leading-snug mt-0.5">{r.title}</div>
-                  <div className="text-t2 text-3xs font-mono leading-snug mt-0.5">
+                  <div className="text-t1 text-2xs font-bold leading-snug mt-0.5">{r.title}</div>
+                  <div className="text-t2 text-3xs leading-snug mt-0.5">
                     {r.body.slice(0, 260)}{r.body.length > 260 ? '…' : ''}
                   </div>
                 </div>
@@ -443,28 +443,28 @@ export default function DataPanel() {
                   if (!b) { push('Carte non chargée — ouvrez la vue CARTE d\'abord', 'warn'); return; }
                   void live.queryOsm(b);
                 }}
-                className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs font-mono transition-colors"
+                className="border border-cyn/40 text-cyn hover:bg-cyn/15 px-2 py-0.5 text-2xs transition-colors"
               >
                 ⌖ INTERROGER LA VUE
               </button>
               <div className="ml-auto"><ExportBar rows={osm} name="osm" /></div>
             </div>
-            <div className="text-3xs font-mono text-t3 leading-tight">
+            <div className="text-3xs text-t3 leading-tight">
               Requête à la demande (quota d&apos;usage équitable Overpass). La couverture OSM
               est inégale dans l&apos;est de la RDC : dense à Goma et Bukavu, ténue en milieu
               rural. <span className="text-amb">L&apos;absence d&apos;un objet ici n&apos;est pas
               une preuve de son absence sur le terrain.</span>
             </div>
             {live.osm.error && (
-              <div className="text-alert text-2xs font-mono">{live.osm.error}</div>
+              <div className="text-alert text-2xs ">{live.osm.error}</div>
             )}
             <div className="border border-b3 bg-b1 divide-y divide-b3/40">
-              {!osm.length && <div className="p-2 text-t3 text-2xs font-mono">Aucun résultat.</div>}
+              {!osm.length && <div className="p-2 text-t3 text-2xs ">Aucun résultat.</div>}
               {osm.slice(0, 200).map((f) => (
                 <button key={f.id}
                   onClick={() => flyTo({ longitude: f.lon, latitude: f.lat, zoom: 16 })}
                   className="w-full text-left p-1.5 hover:bg-b2/60 transition-colors">
-                  <div className="flex items-baseline gap-2 text-2xs font-mono">
+                  <div className="flex items-baseline gap-2 text-2xs ">
                     <span className="w-1.5 h-1.5 shrink-0"
                       style={{ background: OSM_CATEGORY_COLOR[f.category] }} />
                     <span className="text-t1 truncate flex-1">{f.name}</span>
@@ -486,12 +486,12 @@ export default function DataPanel() {
               <span className="mvn-label">ÉVÉNEMENTS FUSIONNÉS — TABLE BRUTE</span>
               <div className="ml-auto"><ExportBar rows={eventRows} name="evenements" /></div>
             </div>
-            <div className="text-3xs font-mono text-t3">
+            <div className="text-3xs text-t3">
               {fusionEvents.length} événements fusionnés · {feedEvents.length} enregistrements
               de collecte bruts (ACLED / FIRMS / UAS)
             </div>
             <div className="overflow-x-auto border border-b3 bg-b1">
-              <table className="w-full text-3xs font-mono">
+              <table className="w-full text-3xs ">
                 <thead className="bg-b2 text-t3">
                   <tr>
                     {['DTG', 'TYPE', 'LIEU', '±KM', 'ACTEURS', 'TUÉS', 'CONF', 'SRC', 'ÉTAT'].map((h) => (
