@@ -177,14 +177,6 @@ export function classifyEvent(text: string, ex?: Extraction): Classification {
     }
   }
 
-  /* Off-topic collapse. Only when there is no hard conflict signal:
-     real violence against a stadium crowd must still classify. */
-  const hardSignal = [...cuedTypes].some((t) => VIOLENT.includes(t))
-    || !!(ex && (ex.casualties.fatalities || ex.casualties.abducted
-      || ex.actors.some((a) => actorByName(a.actor.name)?.side && actorByName(a.actor.name)?.side !== 'civilian')));
-  if (!hardSignal && OFF_TOPIC.some((c) => f.includes(c))) {
-    for (const t of VIOLENT) scores.delete(t);
-  }
 
   if (ex) {
     /* Actor prior — a group's known repertoire tilts ambiguous text.
@@ -218,6 +210,19 @@ export function classifyEvent(text: string, ex?: Extraction): Classification {
       if (armed.length <= 1) bump('massacre', 1.9);
       else bump('armed_clash', 0.7);
     }
+  }
+
+  /* Off-topic collapse — applied after every score is in, including the
+     actor-repertoire bump. The Congolese press runs sport and culture in
+     volume, and those names collide with armed groups: "TP Mazembe" the
+     football club matches "Mai-Mai Mazembe" the militia, "Don Bosco" a
+     parish team. So a stadium headline must not inherit a clash from a
+     name alone. It still classifies when the text carries an explicit
+     violence cue or a real casualty count. */
+  const hardSignal = [...cuedTypes].some((t) => VIOLENT.includes(t))
+    || !!(ex && (ex.casualties.fatalities || ex.casualties.abducted));
+  if (!hardSignal && OFF_TOPIC.some((c) => f.includes(c))) {
+    for (const t of VIOLENT) scores.delete(t);
   }
 
   if (!scores.size) {
