@@ -38,6 +38,7 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
   const boundsLoaded = useMapStore((s) => s.boundsLoaded);
   const eonet = useOpenDataStore((s) => s.eonet);
   const hydro = useOpenDataStore((s) => s.hydro);
+  const aircraft = useOpenDataStore((s) => s.aircraft);
 
   return useMemo(() => {
     const visible = applyFilters(events, { query: searchQuery, timeRange, classFilter });
@@ -69,8 +70,9 @@ export function useLayerCounts(): Record<LayerKey, number | null> {
       osm:     live(osm),
       eonet:   live(eonet),
       rivers:  live(hydro),
+      aircraft: aircraft.data ? aircraft.data.aircraft.length : null,
       // Imagery has no feature count.
       sat_true: null, sat_rain: null, sat_night: null,
     };
-  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic, boundsLoaded, eonet, hydro]);
+  }, [events, searchQuery, timeRange, classFilter, fusion, seeded, clusters, seismic, weather, osm, strategic, boundsLoaded, eonet, hydro, aircraft]);
 }

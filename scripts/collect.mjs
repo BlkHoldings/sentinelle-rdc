@@ -96,11 +96,33 @@ async function main() {
     }
   }
 
+  // OpenSky — public ADS-B aircraft over the AOR. Server-only (its CORS
+  // header is restricted to its own domain, so a browser cannot read it).
+  // Anonymous access is heavily rate-limited; a failure is non-fatal.
+  let aircraft = [];
+  {
+    const r = await get('https://opensky-network.org/api/states/all?lamin=-14&lomin=12&lamax=6&lomax=32', { json: true, timeoutMs: 25_000, retries: 1 });
+    if (r.ok && Array.isArray(r.body?.states)) {
+      aircraft = r.body.states.map((st) => ({
+        icao: st[0], callsign: (st[1] || '').trim(), country: st[2],
+        lon: st[5], lat: st[6], alt: st[7], onGround: st[8],
+        velocity: st[9], heading: st[10],
+      })).filter((a) => Number.isFinite(a.lat) && Number.isFinite(a.lon));
+      sources.push({ id: 'opensky', name: 'OpenSky (ADS-B)', ok: true, count: aircraft.length, ms: r.ms });
+    } else {
+      sources.push({ id: 'opensky', name: 'OpenSky (ADS-B)', ok: false, count: 0, ms: r.ms, error: r.error || 'format inattendu' });
+    }
+  }
+
   const wire = buildWire(lists);
   const okSources = sources.filter((s) => s.ok).length;
 
   mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(join(OUT_DIR, 'wire.json'), JSON.stringify(wire));
+  writeFileSync(join(OUT_DIR, 'aircraft.json'), JSON.stringify({
+    generatedAt: new Date().toISOString(), total: aircraft.length, aircraft,
+    note: 'Aviation publique (ADS-B) au-dessus de la zone. Données de sécurité aérienne, pas de surveillance d’individus.',
+  }));
   writeFileSync(join(OUT_DIR, 'manifest.json'), JSON.stringify({
     generatedAt: new Date().toISOString(),
     startedAt: started,

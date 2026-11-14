@@ -60,6 +60,16 @@ Vérifiées dans un navigateur réel le 12 novembre 2026. Aucune ne demande de c
 | **UCDP**, **OIM-DTM**, **HDX HAPI** | Violence organisée ; déplacements par zone ; besoins | — | Demandent un jeton ou un identifiant |
 | **Radio Okapi, Actualité.cd (RSS)** | Presse congolaise | — | Demandent un relais serveur (lecture inter-domaines refusée) |
 
+**Réseau et imagerie (sans clé, navigateur) :**
+
+| Source | Apport |
+|---|---|
+| **IODA** (Georgia Tech / CAIDA) | Détection de coupures internet en RDC (BGP, sondage actif, télescope) — un arrêt est en soi un signal. Remplace la télémétrie simulée. |
+| **Sentinel-2** (Earth Search, sans clé) | Dernière scène optique sur la zone est : date, couverture nuageuse, vignette. Pas besoin de compte Copernicus. |
+| **OpenSky (ADS-B)** | Aéronefs au-dessus de la zone (aviation publique), **collectée côté serveur** (CORS restreint au domaine OpenSky). Données de sécurité aérienne — jamais de personnes. |
+
+Sources écartées, et pourquoi : **N2YO** (passage satellite) et **Azure Maps** (trafic) demandent une clé pour un intérêt faible ou nul en RDC ; **Cloudflare Radar** demande un jeton (IODA couvre le même besoin gratuitement) ; **Copernicus OData** demande une authentification — le catalogue Sentinel-2 passe par Earth Search à la place.
+
 Fonds de carte : ESRI ArcGIS Online (sans clé). Limites administratives : geoBoundaries / OpenStreetMap (ODbL).
 
 Les analyseurs sont testés contre des réponses réelles enregistrées (`tests/fixtures`) :

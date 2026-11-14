@@ -23,13 +23,19 @@ import {
 } from '@/lib/live/opendata';
 import { useFusionStore } from '@/store/useFusionStore';
 import { fetchSnapshot, SNAPSHOT_META, type Snapshot } from '@/lib/live/snapshot';
+import { fetchConnectivity, CONNECTIVITY_META, type Connectivity } from '@/lib/live/connectivity';
+import { fetchImagery, IMAGERY_META, type ImageryResult } from '@/lib/live/imagery';
+import { fetchAircraft, type AircraftSnapshot } from '@/lib/live/snapshot';
 import { asset } from '@/lib/asset';
 
 const MIN = 60_000;
-const CADENCE = { snapshot: 10 * MIN, gdelt: 15 * MIN, eonet: 60 * MIN, hydro: 180 * MIN, who: 180 * MIN } as const;
+const CADENCE = { snapshot: 10 * MIN, connectivity: 10 * MIN, gdelt: 15 * MIN, eonet: 60 * MIN, imagery: 180 * MIN, hydro: 180 * MIN, who: 180 * MIN } as const;
 
 export interface OpenDataState {
   snapshot: FetchResult<Snapshot>;
+  connectivity: FetchResult<Connectivity>;
+  imagery: FetchResult<ImageryResult>;
+  aircraft: FetchResult<AircraftSnapshot>;
   gdelt: FetchResult<GdeltArticle[]>;
   who: FetchResult<OutbreakNotice[]>;
   displacement: FetchResult<DisplacementYear[]>;
@@ -41,6 +47,9 @@ export interface OpenDataState {
   started: boolean;
 
   refreshSnapshot: () => Promise<void>;
+  refreshConnectivity: () => Promise<void>;
+  refreshImagery: () => Promise<void>;
+  refreshAircraft: () => Promise<void>;
   refreshGdelt: () => Promise<void>;
   refreshWho: () => Promise<void>;
   refreshDisplacement: () => Promise<void>;
@@ -51,8 +60,10 @@ export interface OpenDataState {
   stopAuto: () => void;
 }
 
-export const OPEN_META: Record<'snapshot' | 'gdelt' | 'who' | 'displacement' | 'eonet' | 'hydro', LiveSourceMeta> = {
+export const OPEN_META: Record<'snapshot' | 'connectivity' | 'imagery' | 'gdelt' | 'who' | 'displacement' | 'eonet' | 'hydro', LiveSourceMeta> = {
   snapshot: SNAPSHOT_META,
+  connectivity: CONNECTIVITY_META,
+  imagery: IMAGERY_META,
   gdelt: GDELT_META, who: WHO_META, displacement: DISPLACEMENT_META,
   eonet: EONET_META, hydro: HYDRO_META,
 };
@@ -80,6 +91,9 @@ const settle = <T,>(prev: FetchResult<T>, next: FetchResult<T>): FetchResult<T> 
 
 export const useOpenDataStore = create<OpenDataState>((set, get) => ({
   snapshot: emptyResult<Snapshot>(),
+  connectivity: emptyResult<Connectivity>(),
+  imagery: emptyResult<ImageryResult>(),
+  aircraft: emptyResult<AircraftSnapshot>(),
   gdelt: emptyResult<GdeltArticle[]>(),
   who: emptyResult<OutbreakNotice[]>(),
   displacement: emptyResult<DisplacementYear[]>(),
@@ -104,6 +118,23 @@ export const useOpenDataStore = create<OpenDataState>((set, get) => ({
     const next = new Set(seen);
     for (const r of fresh) next.add(r.source_id);
     set({ snapIngested: next });
+  },
+
+  async refreshConnectivity() {
+    set((s) => ({ connectivity: loading(s.connectivity) }));
+    const res = await fetchConnectivity();
+    set((s) => ({ connectivity: settle(s.connectivity, res) }));
+  },
+  async refreshImagery() {
+    set((s) => ({ imagery: loading(s.imagery) }));
+    const res = await fetchImagery();
+    set((s) => ({ imagery: settle(s.imagery, res) }));
+  },
+
+  async refreshAircraft() {
+    set((s) => ({ aircraft: loading(s.aircraft) }));
+    const res = await fetchAircraft();
+    set((s) => ({ aircraft: settle(s.aircraft, res) }));
   },
 
   async refreshGdelt() {
@@ -143,7 +174,8 @@ export const useOpenDataStore = create<OpenDataState>((set, get) => ({
   async refreshAll() {
     const s = get();
     await Promise.allSettled([
-      s.refreshSnapshot(), s.refreshGdelt(), s.refreshWho(), s.refreshDisplacement(),
+      s.refreshSnapshot(), s.refreshConnectivity(), s.refreshImagery(), s.refreshAircraft(),
+      s.refreshGdelt(), s.refreshWho(), s.refreshDisplacement(),
       s.refreshEonet(), s.refreshHydro(),
     ]);
   },
@@ -153,6 +185,9 @@ export const useOpenDataStore = create<OpenDataState>((set, get) => ({
     const s = get();
     timers = [
       setInterval(() => void s.refreshSnapshot(), CADENCE.snapshot),
+      setInterval(() => void s.refreshConnectivity(), CADENCE.connectivity),
+      setInterval(() => void s.refreshImagery(), CADENCE.imagery),
+      setInterval(() => void s.refreshAircraft(), CADENCE.snapshot),
       setInterval(() => void s.refreshGdelt(), CADENCE.gdelt),
       setInterval(() => void s.refreshEonet(), CADENCE.eonet),
       setInterval(() => void s.refreshHydro(), CADENCE.hydro),

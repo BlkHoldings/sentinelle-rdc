@@ -21,6 +21,7 @@ import { useLiveStore } from '@/store/useLiveStore';
 import { useOpenDataStore, OPEN_META } from '@/store/useOpenDataStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { RW_APPNAME_KEY, reliefWebAppname } from '@/lib/live/reliefweb';
+import { AIRCRAFT_META } from '@/lib/live/snapshot';
 import { useFusionStore } from '@/store/useFusionStore';
 import { useFeedStore } from '@/store/useFeedStore';
 import { useToastStore } from '@/store/useToastStore';
@@ -187,6 +188,59 @@ function SourceRow({ meta, result, onRefresh, children }: {
   );
 }
 
+const CONN_STYLE: Record<string, { label: string; color: string }> = {
+  up:       { label: 'OPÉRATIONNEL', color: '#3fb984' },
+  degraded: { label: 'DÉGRADÉ',      color: '#e2a336' },
+  outage:   { label: 'COUPURE',      color: '#e5484d' },
+  unknown:  { label: 'INDÉTERMINÉ',  color: '#7f8896' },
+};
+
+function ConnectivityDetail({ result }: { result: { data: { status?: string; summary?: string; alerts?: { datasource: string; level: string; at: string }[] } | null } }) {
+  const c = result.data;
+  if (!c?.status) return null;
+  const st = CONN_STYLE[c.status] ?? CONN_STYLE.unknown;
+  return (
+    <div className="mt-1.5 border-t border-b3 pt-1.5">
+      <div className="flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5" style={{ background: st.color }} />
+        <span className="text-2xs font-bold" style={{ color: st.color }}>{st.label}</span>
+      </div>
+      <div className="text-3xs text-t2 leading-snug mt-0.5">{c.summary}</div>
+      {!!c.alerts?.length && (
+        <div className="mt-1 space-y-0.5 max-h-20 overflow-y-auto">
+          {c.alerts.slice(0, 4).map((a, i) => (
+            <div key={i} className="flex items-center gap-1.5 text-3xs">
+              <span className={a.level === 'critical' ? 'text-alert' : a.level === 'warning' ? 'text-amb' : 'text-t3'}>{a.level === 'normal' ? '●' : '▲'}</span>
+              <span className="text-t2 flex-1 truncate">{a.datasource}</span>
+              <span className="font-data text-t3">{a.at.slice(5, 16).replace('T', ' ')}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ImageryDetail({ result }: { result: { data: { scenes?: { datetime: string; cloudCover: number | null; thumbnail: string | null; platform: string }[]; freshestClear?: { datetime: string; cloudCover: number | null } | null } | null } }) {
+  const d = result.data;
+  const newest = d?.scenes?.[0];
+  if (!newest) return null;
+  const age = Math.round((Date.now() - new Date(newest.datetime).getTime()) / 86_400_000);
+  return (
+    <div className="mt-1.5 border-t border-b3 pt-1.5 flex gap-2">
+      {newest.thumbnail && (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img src={newest.thumbnail} alt="Aperçu Sentinel-2" className="w-12 h-12 object-cover border border-b3 shrink-0" loading="lazy" />
+      )}
+      <div className="min-w-0 text-3xs leading-snug">
+        <div className="text-t1">Dernière scène : <span className="font-data">{newest.datetime.slice(0, 10)}</span> <span className="text-t3">(il y a {age} j)</span></div>
+        <div className="text-t2">Nuages {newest.cloudCover == null ? '—' : Math.round(newest.cloudCover) + ' %'} · {newest.platform}</div>
+        <div className="text-t3">{d?.freshestClear ? `Dernière scène claire : ${d.freshestClear.datetime.slice(0, 10)} (${Math.round(d.freshestClear.cloudCover ?? 0)} %)` : 'Aucune scène claire (< 40 %) sur 30 j'}</div>
+      </div>
+    </div>
+  );
+}
+
 function SnapshotDetail({ result }: { result: { data: { manifest?: { sources?: { id: string; name: string; ok: boolean; count: number }[]; generatedAt?: string } } | null } }) {
   const man = result.data?.manifest;
   if (!man?.sources?.length) return null;
@@ -216,6 +270,8 @@ const NOT_CONNECTED = [
   { name: 'OIM — DTM', what: 'Déplacements internes par zone de santé', needs: 'clé d’abonnement', url: 'https://dtm.iom.int/data-and-analysis/dtm-api' },
   { name: 'HDX HAPI', what: 'Besoins humanitaires, IPC, déplacés par province', needs: 'identifiant lié à une adresse e-mail', url: 'https://hdx-hapi.readthedocs.io/' },
   { name: 'OCHA FTS', what: 'Financement humanitaire : requis, financé, bailleurs', needs: 'relais serveur : l’API renvoie des en-têtes CORS invalides, refusés par les navigateurs', url: 'https://fts.unocha.org/countries/52/summary/2026' },
+  { name: 'OpenSky (ADS-B avions)', what: 'Positions d’aéronefs au-dessus de la zone (aviation publique)', needs: 'collectée côté serveur — CORS restreint au domaine OpenSky', url: 'https://opensky-network.org/' },
+  { name: 'N2YO (passage de satellites)', what: 'Prévision de survol satellite pour la planification de collecte', needs: 'clé d’API ; intérêt limité', url: 'https://www.n2yo.com/api/' },
   { name: 'Radio Okapi, Actualité.cd (flux RSS)', what: 'Presse congolaise en direct', needs: 'relais serveur : ces sites n’autorisent pas la lecture depuis un navigateur', url: 'https://www.radiookapi.net/' },
 ];
 
@@ -364,6 +420,17 @@ export default function DataPanel() {
               <SourceRow meta={live.meta[2]} result={live.reliefweb} onRefresh={() => void live.refreshReliefWeb()}>
                 <ReliefWebSetup onSaved={() => void live.refreshReliefWeb()} />
               </SourceRow>
+            </div>
+
+            <div className="mvn-label pt-1">RÉSEAU ET IMAGERIE</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+              <SourceRow meta={OPEN_META.connectivity} result={open.connectivity} onRefresh={() => void open.refreshConnectivity()}>
+                <ConnectivityDetail result={open.connectivity} />
+              </SourceRow>
+              <SourceRow meta={OPEN_META.imagery} result={open.imagery} onRefresh={() => void open.refreshImagery()}>
+                <ImageryDetail result={open.imagery} />
+              </SourceRow>
+              <SourceRow meta={AIRCRAFT_META} result={open.aircraft} onRefresh={() => void open.refreshAircraft()} />
             </div>
 
             <div className="mvn-label pt-1">INSTITUTIONS — CHIFFRES DE RÉFÉRENCE</div>

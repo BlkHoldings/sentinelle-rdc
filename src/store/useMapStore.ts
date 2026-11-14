@@ -94,6 +94,7 @@ const DEFAULT_LAYERS: LayerVisibility = {
   osm:     false,
   eonet:   true,
   rivers:  false,
+  aircraft: false,
   sat_true: false,
   sat_rain: false,
   sat_night: false,

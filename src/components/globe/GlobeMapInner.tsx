@@ -142,6 +142,7 @@ export default function GlobeMapInner() {
   const strategic     = useStrategicStore((s) => s.records);
   const eonet         = useOpenDataStore((s) => s.eonet.data);
   const rivers        = useOpenDataStore((s) => s.hydro.data);
+  const aircraft      = useOpenDataStore((s) => s.aircraft.data);
   /* One predicate for "is this layer drawn", so solo cannot be honoured
      by some layers and ignored by others. */
   const on = useCallback((k: LayerKey) => isShown({ layers, solo }, k), [layers, solo]);
@@ -1151,6 +1152,34 @@ export default function GlobeMapInner() {
           <button title={ev.title}
             className="w-3 h-3 rotate-45 border bg-b0/80 hover:scale-125 transition-transform"
             style={{ borderColor: C.fire, opacity: (ev.closed ? 0.5 : 1) * op('eonet') }} />
+        </Marker>
+      ))}
+
+      {/* Aircraft (ADS-B). Public aviation data collected server-side; a
+          triangle pointing along the track. Not person tracking. */}
+      {on('aircraft') && (aircraft?.aircraft ?? []).filter((a) => !a.onGround).slice(0, 400).map((a) => (
+        <Marker key={`ac-${a.icao}`} longitude={a.lon} latitude={a.lat} anchor="center"
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            setMapFeature({
+                layer: 'aircraft', title: a.callsign || a.icao, color: C.cyn, lon: a.lon, lat: a.lat,
+                subtitle: a.country,
+                rows: [
+                  ['ALTITUDE', a.alt == null ? '—' : `${Math.round(a.alt)} m`],
+                  ['VITESSE', a.velocity == null ? '—' : `${Math.round(a.velocity * 3.6)} km/h`],
+                  ['CAP', a.heading == null ? '—' : `${Math.round(a.heading)}°`],
+                  ['OACI 24-BIT', a.icao],
+                ],
+                body: 'Transpondeur ADS-B public (sécurité aérienne). Aucune identification de personne.',
+              });
+          }}
+        >
+          <button className="select-none cursor-pointer" style={{ opacity: op('aircraft') }}
+            title={`${a.callsign || a.icao} · ${a.country}`}>
+            <svg width="12" height="12" viewBox="0 0 12 12" style={{ transform: `rotate(${a.heading ?? 0}deg)` }} aria-hidden="true">
+              <path d="M6 1 L9.5 10 L6 7.5 L2.5 10 Z" fill={C.cyn} stroke="#04070b" strokeWidth="0.5" />
+            </svg>
+          </button>
         </Marker>
       ))}
 
