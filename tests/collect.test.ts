@@ -113,3 +113,10 @@ describe('wire assembly', () => {
     expect(buildWire([many], { now, cap: 20 })).toHaveLength(20);
   });
 });
+import { stripHtml } from '../scripts/collect-lib.mjs';
+import { describe as d2, it as i2, expect as e2 } from 'vitest';
+d2('stripHtml double-encoding', () => {
+  i2('removes tags that were HTML-entity-encoded in the feed', () => {
+    e2(stripHtml('Fait. &lt;span property="x"&gt;bruit&lt;/span&gt; &lt;div&gt;Image media&lt;/div&gt; suite')).toBe('Fait. bruit Image media suite');
+  });
+});
