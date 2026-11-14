@@ -60,9 +60,8 @@ function gdeltUrl() {
 
 /* The press and institutional feeds. All public, all readable by a server. */
 const FEEDS = [
-  { id: 'radio_okapi', name: 'Radio Okapi',   url: 'https://www.radiookapi.net/rss.xml',  filter: false },
+  { id: 'radio_okapi', name: 'Radio Okapi',   url: 'https://www.radiookapi.net/feed',     filter: false },
   { id: 'actualite',   name: 'Actualité.cd',  url: 'https://actualite.cd/feed',           filter: false },
-  { id: '7sur7',       name: '7sur7.cd',      url: 'https://7sur7.cd/rss.xml',            filter: false },
   { id: 'reliefweb',   name: 'ReliefWeb RDC', url: 'https://reliefweb.int/country/cod/rss.xml', filter: false },
   { id: 'un_news',     name: 'UN News',       url: 'https://news.un.org/feed/subscribe/en/news/region/africa/feed/rss.xml', filter: true },
 ];
