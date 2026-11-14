@@ -125,6 +125,25 @@ const SUPPRESSORS: { type: EventType; cues: string[] }[] = [
   { type: 'displacement', cues: ['retour des deplaces', 'sont rentres', 'retour volontaire'] },
 ];
 
+/* Headlines the Congolese press runs in volume that share a verb with
+   conflict reporting but are not security incidents: sport ("fait
+   tomber", "bat"), culture, markets. When one of these fires and the
+   report carries no casualty or armed-actor signal, every violent-type
+   score is collapsed so the item classifies as `unknown` rather than
+   being dressed up as a clash. This matters now that live press feeds
+   the engine: a football result must not enter the map as an offensive. */
+const OFF_TOPIC = [
+  'ligue 1', 'ligue 2', 'linafoot', 'vodacom ligue', 'championnat', 'football', 'footballeur',
+  ' stade ', 'coupe du congo', 'can 2', 'leopards', 'mazembe', 'don bosco', 'lupopo', 'daring',
+  'basketball', 'handball', 'athletisme', 'sportif', 'selection nationale',
+  'concert', 'festival', 'musique', 'artiste', 'cinema', 'miss ', 'rumba', 'album',
+  'championne', 'champion ', 'match ', 'buteur', 'victoire face',
+];
+const VIOLENT: EventType[] = [
+  'armed_clash', 'shelling', 'airstrike', 'drone_strike', 'ied', 'abduction', 'massacre',
+  'sexual_violence', 'looting', 'arson', 'troop_movement',
+];
+
 export interface Classification {
   type: EventType;
   score: number;
@@ -139,11 +158,13 @@ export function classifyEvent(text: string, ex?: Extraction): Classification {
   const evidence: string[] = [];
 
   const bump = (t: EventType, w: number) => scores.set(t, (scores.get(t) ?? 0) + w);
+  const cuedTypes = new Set<EventType>();
 
   for (const rule of RULES) {
     for (const cue of rule.cues) {
       if (f.includes(cue)) {
         bump(rule.type, rule.w);
+        cuedTypes.add(rule.type);
         evidence.push(cue);
         break; // one hit per rule — don't let synonym stuffing inflate
       }
@@ -154,6 +175,15 @@ export function classifyEvent(text: string, ex?: Extraction): Classification {
     if (s.cues.some((c) => f.includes(c))) {
       scores.set(s.type, (scores.get(s.type) ?? 0) * 0.25);
     }
+  }
+
+  /* Off-topic collapse. Only when there is no hard conflict signal:
+     real violence against a stadium crowd must still classify. */
+  const hardSignal = [...cuedTypes].some((t) => VIOLENT.includes(t))
+    || !!(ex && (ex.casualties.fatalities || ex.casualties.abducted
+      || ex.actors.some((a) => actorByName(a.actor.name)?.side && actorByName(a.actor.name)?.side !== 'civilian')));
+  if (!hardSignal && OFF_TOPIC.some((c) => f.includes(c))) {
+    for (const t of VIOLENT) scores.delete(t);
   }
 
   if (ex) {

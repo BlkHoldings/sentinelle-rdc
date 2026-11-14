@@ -45,15 +45,19 @@ export function parseSeenDate(s) {
   return m ? `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z` : '';
 }
 
+const decodeEntities = (x) => (x ?? '')
+  .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .replace(/&#0?39;|&apos;|&rsquo;|&#8217;/g, "'").replace(/&quot;|&ldquo;|&rdquo;/g, '"')
+  .replace(/&nbsp;/g, ' ').replace(/&#(\d+);/g, (_, n) => { try { return String.fromCodePoint(+n); } catch { return ' '; } });
+
 export function stripHtml(s) {
-  return (s ?? '')
-    .replace(/<!\[CDATA\[|\]\]>/g, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ')
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n))
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Decode first, so a double-encoded feed (&lt;span&gt;) becomes a real
+  // <span> that the tag strip then removes; strip; decode any remainder.
+  let t = (s ?? '').replace(/<!\[CDATA\[|\]\]>/g, '');
+  t = decodeEntities(t);
+  t = t.replace(/<[^>]*>/g, ' ');
+  t = decodeEntities(t).replace(/<[^>]*>/g, ' ');
+  return t.replace(/\s+/g, ' ').trim();
 }
 
 function tag(block, name) {
