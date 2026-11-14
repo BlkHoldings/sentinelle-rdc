@@ -85,3 +85,28 @@ export async function fetchSnapshot(): Promise<FetchResult<Snapshot>> {
     newestRecordAt: man.data.newestRecordAt ?? undefined,
   };
 }
+
+/* ── Aircraft (ADS-B), collected server-side ──────────────────────── */
+
+export interface Aircraft {
+  icao: string; callsign: string; country: string;
+  lon: number; lat: number; alt: number | null; onGround: boolean;
+  velocity: number | null; heading: number | null;
+}
+export interface AircraftSnapshot { generatedAt: string; total: number; aircraft: Aircraft[] }
+
+export async function fetchAircraft(): Promise<FetchResult<AircraftSnapshot>> {
+  const res = await fetchJSON<AircraftSnapshot>(bust(`${RAW}/aircraft.json`), { timeoutMs: 15_000 });
+  if (!res.ok || !res.data) return { ...res, data: null, count: 0, health: res.health === 'error' ? 'idle' : res.health };
+  return { ...res, count: res.data.aircraft?.length ?? 0, newestRecordAt: res.data.generatedAt };
+}
+
+export const AIRCRAFT_META: LiveSourceMeta = {
+  id: 'aircraft',
+  label: 'Aéronefs ADS-B (OpenSky)',
+  purpose: 'Aviation publique au-dessus de la zone, collectée côté serveur. Données de sécurité aérienne — pas de surveillance d’individus.',
+  provider: 'OpenSky Network',
+  docs: 'https://opensky-network.org/',
+  cadence: '30 min',
+  requiresKey: false,
+};

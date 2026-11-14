@@ -287,6 +287,12 @@ export const LAYERS: LayerDef[] = [
     legend: [{ color: C.fire, label: 'Événement naturel', shape: 'square' }],
   },
   {
+    key: 'aircraft', label: 'AÉRONEFS ADS-B', group: 'live',
+    color: C.cyn, origin: 'live',
+    hint: 'Aviation publique au-dessus de la zone (OpenSky), collectée côté serveur',
+    legend: [{ color: C.cyn, label: 'Aéronef en vol', shape: 'square' }],
+  },
+  {
     key: 'rivers', label: 'DÉBIT DES COURS D’EAU', group: 'live',
     color: C.blu, origin: 'live',
     hint: 'GloFAS — débit modélisé du jour et tendance, sept points du bassin',

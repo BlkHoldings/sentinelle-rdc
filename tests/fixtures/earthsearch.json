@@ -1,0 +1,61 @@
+{
+ "features": [
+  {
+   "id": "S2B_35MPT_20261112_0_L2A",
+   "bbox": [
+    28.010843,
+    -2.802207,
+    28.887309,
+    -1.808299
+   ],
+   "properties": {
+    "datetime": "2026-11-12T08:30:55.260000Z",
+    "eo:cloud_cover": 99.791729,
+    "platform": "sentinel-2b"
+   },
+   "assets": {
+    "thumbnail": {
+     "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/PT/2026/11/S2B_35MPT_20261112_0_L2A/preview.jpg"
+    }
+   }
+  },
+  {
+   "id": "S2B_35MQT_20261112_0_L2A",
+   "bbox": [
+    28.797592,
+    -2.801257,
+    29.785929,
+    -1.807136
+   ],
+   "properties": {
+    "datetime": "2026-11-12T08:30:52.035000Z",
+    "eo:cloud_cover": 93.016881,
+    "platform": "sentinel-2b"
+   },
+   "assets": {
+    "thumbnail": {
+     "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/QT/2026/11/S2B_35MQT_20261112_0_L2A/preview.jpg"
+    }
+   }
+  },
+  {
+   "id": "S2B_35MPU_20261112_0_L2A",
+   "bbox": [
+    28.211837,
+    -1.897322,
+    28.886095,
+    -0.903885
+   ],
+   "properties": {
+    "datetime": "2026-11-12T08:30:40.433000Z",
+    "eo:cloud_cover": 99.986911,
+    "platform": "sentinel-2b"
+   },
+   "assets": {
+    "thumbnail": {
+     "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/PU/2026/11/S2B_35MPU_20261112_0_L2A/preview.jpg"
+    }
+   }
+  }
+ ]
+}

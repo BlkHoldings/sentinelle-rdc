@@ -73,15 +73,16 @@ export function emptyResult<T>(): FetchResult<T> {
  */
 export async function fetchJSON<T>(
   url: string,
-  opts: { timeoutMs?: number; retries?: number; headers?: Record<string, string> } = {},
+  opts: { timeoutMs?: number; retries?: number; headers?: Record<string, string>; method?: string; body?: string } = {},
 ): Promise<FetchResult<T>> {
-  const { timeoutMs = 15_000, retries = 1, headers } = opts;
+  const { timeoutMs = 15_000, retries = 1, headers, method, body } = opts;
   const started = performance.now();
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const res = await fetch(url, {
         signal: AbortSignal.timeout(timeoutMs),
+        method, body,
         headers: { Accept: 'application/json', ...headers },
       });
       const latencyMs = Math.round(performance.now() - started);
