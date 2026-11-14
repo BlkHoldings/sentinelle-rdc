@@ -50,7 +50,7 @@ export interface Snapshot {
 export const SNAPSHOT_META: LiveSourceMeta = {
   id: 'snapshot',
   label: 'Collecteur 24h/24 (presse + GDELT)',
-  purpose: 'Instantané collecté côté serveur toutes les 30 min : presse congolaise (Radio Okapi, Actualité.cd, 7sur7), ReliefWeb, GDELT. Alimente le moteur de fusion même navigateur fermé.',
+  purpose: 'Instantané collecté côté serveur toutes les 30 min : presse congolaise (Radio Okapi, Actualité.cd), ReliefWeb, UN News, GDELT. Alimente le moteur de fusion même navigateur fermé.',
   provider: 'GitHub Actions → branche data',
   docs: 'https://github.com/BlkHoldings/sentinelle-rdc/tree/data',
   cadence: '30 min',

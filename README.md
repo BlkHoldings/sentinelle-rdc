@@ -29,8 +29,7 @@ Le site lit cette branche via `raw.githubusercontent.com` (CORS ouvert, cache co
 **données présentes en permanence, sans reconstruction ni serveur dédié.** Si cet hôte
 est bloqué sur un réseau, l'application retombe sur les collectes navigateur.
 
-Sources du collecteur : Radio Okapi, Actualité.cd, 7sur7.cd, ReliefWeb (RDC), UN News,
-GDELT. Toutes alimentent le moteur de fusion comme rapports de presse, gradés bas tant
+Sources du collecteur : Radio Okapi, Actualité.cd, ReliefWeb (RDC), UN News, GDELT. Toutes alimentent le moteur de fusion comme rapports de presse, gradés bas tant
 qu'ils ne sont pas recoupés.
 
 > **Pas d'interception.** Toute collecte porte sur des flux publics qu'on peut ouvrir
