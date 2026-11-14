@@ -22,20 +22,25 @@ import {
   type OutbreakNotice, type DisplacementYear, type NaturalEvent, type RiverReading,
 } from '@/lib/live/opendata';
 import { useFusionStore } from '@/store/useFusionStore';
+import { fetchSnapshot, SNAPSHOT_META, type Snapshot } from '@/lib/live/snapshot';
 import { asset } from '@/lib/asset';
 
 const MIN = 60_000;
-const CADENCE = { gdelt: 15 * MIN, eonet: 60 * MIN, hydro: 180 * MIN, who: 180 * MIN } as const;
+const CADENCE = { snapshot: 10 * MIN, gdelt: 15 * MIN, eonet: 60 * MIN, hydro: 180 * MIN, who: 180 * MIN } as const;
 
 export interface OpenDataState {
+  snapshot: FetchResult<Snapshot>;
   gdelt: FetchResult<GdeltArticle[]>;
   who: FetchResult<OutbreakNotice[]>;
   displacement: FetchResult<DisplacementYear[]>;
   eonet: FetchResult<NaturalEvent[]>;
   hydro: FetchResult<RiverReading[]>;
   ingested: Set<string>;
+  /** source_ids already handed from the server snapshot to the engine. */
+  snapIngested: Set<string>;
   started: boolean;
 
+  refreshSnapshot: () => Promise<void>;
   refreshGdelt: () => Promise<void>;
   refreshWho: () => Promise<void>;
   refreshDisplacement: () => Promise<void>;
@@ -46,7 +51,8 @@ export interface OpenDataState {
   stopAuto: () => void;
 }
 
-export const OPEN_META: Record<'gdelt' | 'who' | 'displacement' | 'eonet' | 'hydro', LiveSourceMeta> = {
+export const OPEN_META: Record<'snapshot' | 'gdelt' | 'who' | 'displacement' | 'eonet' | 'hydro', LiveSourceMeta> = {
+  snapshot: SNAPSHOT_META,
   gdelt: GDELT_META, who: WHO_META, displacement: DISPLACEMENT_META,
   eonet: EONET_META, hydro: HYDRO_META,
 };
@@ -73,13 +79,32 @@ const settle = <T,>(prev: FetchResult<T>, next: FetchResult<T>): FetchResult<T> 
   next.ok || !prev.data ? next : { ...next, data: prev.data, count: prev.count, newestRecordAt: prev.newestRecordAt };
 
 export const useOpenDataStore = create<OpenDataState>((set, get) => ({
+  snapshot: emptyResult<Snapshot>(),
   gdelt: emptyResult<GdeltArticle[]>(),
   who: emptyResult<OutbreakNotice[]>(),
   displacement: emptyResult<DisplacementYear[]>(),
   eonet: emptyResult<NaturalEvent[]>(),
   hydro: emptyResult<RiverReading[]>(),
   ingested: new Set<string>(),
+  snapIngested: new Set<string>(),
   started: false,
+
+  /* The primary real-time path. Ingests only reports not seen before, so
+     a 30-minute snapshot that mostly repeats costs one small diff. */
+  async refreshSnapshot() {
+    set((s) => ({ snapshot: loading(s.snapshot) }));
+    const res = await fetchSnapshot();
+    set((s) => ({ snapshot: settle(s.snapshot, res) }));
+    const reports = res.data?.reports;
+    if (!res.ok || !reports?.length) return;
+    const seen = get().snapIngested;
+    const fresh = reports.filter((r) => !seen.has(r.source_id));
+    if (!fresh.length) return;
+    useFusionStore.getState().ingestReports(fresh, 'news');
+    const next = new Set(seen);
+    for (const r of fresh) next.add(r.source_id);
+    set({ snapIngested: next });
+  },
 
   async refreshGdelt() {
     set((s) => ({ gdelt: loading(s.gdelt) }));
@@ -118,7 +143,7 @@ export const useOpenDataStore = create<OpenDataState>((set, get) => ({
   async refreshAll() {
     const s = get();
     await Promise.allSettled([
-      s.refreshGdelt(), s.refreshWho(), s.refreshDisplacement(),
+      s.refreshSnapshot(), s.refreshGdelt(), s.refreshWho(), s.refreshDisplacement(),
       s.refreshEonet(), s.refreshHydro(),
     ]);
   },
@@ -127,6 +152,7 @@ export const useOpenDataStore = create<OpenDataState>((set, get) => ({
     if (get().started) return;
     const s = get();
     timers = [
+      setInterval(() => void s.refreshSnapshot(), CADENCE.snapshot),
       setInterval(() => void s.refreshGdelt(), CADENCE.gdelt),
       setInterval(() => void s.refreshEonet(), CADENCE.eonet),
       setInterval(() => void s.refreshHydro(), CADENCE.hydro),
