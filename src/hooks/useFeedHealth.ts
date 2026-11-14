@@ -16,6 +16,7 @@ export interface FeedStatus { id: string; name: string; result: FetchResult<unkn
  */
 export function useFeedHealth(): { feeds: FeedStatus[]; up: number; total: number } {
   const feeds: FeedStatus[] = [
+    { id: 'snapshot',     name: 'Collecteur 24/7', result: useOpenDataStore((s) => s.snapshot) },
     { id: 'gdelt',        name: 'GDELT',        result: useOpenDataStore((s) => s.gdelt) },
     { id: 'reliefweb',    name: 'ReliefWeb',    result: useLiveStore((s) => s.reliefweb) },
     { id: 'who',          name: 'OMS',          result: useOpenDataStore((s) => s.who) },

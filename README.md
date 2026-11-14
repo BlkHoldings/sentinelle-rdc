@@ -11,6 +11,34 @@ Espace d'analyse stratégique fondé sur les preuves — RDC et Grands Lacs.
 > (flux simulé, jeux de données illustratifs, tous étiquetés) s'active dans
 > *Gestion des sources* ou *Paramètres*.
 
+## Collecte 24h/24 (côté serveur)
+
+Le site est statique : seul, il ne collecte que lorsqu'un navigateur est ouvert, et
+il se heurte aux limites CORS (presse congolaise illisible) et au quota par IP de GDELT.
+
+Un **collecteur serveur** (`.github/workflows/collect.yml`, toutes les 30 min) lève ces
+deux limites. Il lit des sources **ouvertes et publiques** — rien n'est intercepté — les
+normalise (`scripts/collect.mjs`) et écrit un instantané sur la branche `data` :
+
+| Fichier | Contenu |
+|---|---|
+| `wire.json` | Rapports collectés (presse + GDELT), les plus récents d'abord |
+| `manifest.json` | État par sous-source + horodatage de collecte |
+
+Le site lit cette branche via `raw.githubusercontent.com` (CORS ouvert, cache court) :
+**données présentes en permanence, sans reconstruction ni serveur dédié.** Si cet hôte
+est bloqué sur un réseau, l'application retombe sur les collectes navigateur.
+
+Sources du collecteur : Radio Okapi, Actualité.cd, 7sur7.cd, ReliefWeb (RDC), UN News,
+GDELT. Toutes alimentent le moteur de fusion comme rapports de presse, gradés bas tant
+qu'ils ne sont pas recoupés.
+
+> **Pas d'interception.** Toute collecte porte sur des flux publics qu'on peut ouvrir
+> dans un navigateur. NKOYI ne capte aucune communication privée (radio, téléphone,
+> messages) : ce serait illégal et hors de portée d'une application web. Le traitement
+> « complexe » est l'analyse OSINT déjà en place : fusion bayésienne, code de l'Amirauté,
+> balayage spatio-temporel sur des signaux ouverts.
+
 ## Sources de données
 
 Vérifiées dans un navigateur réel le 12 novembre 2026. Aucune ne demande de clé, sauf mention.
