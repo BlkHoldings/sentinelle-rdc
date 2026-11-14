@@ -1,43 +1,44 @@
 {
- "generatedAt": "2026-11-14T19:11:25.081Z",
- "startedAt": "2026-11-14T19:10:41.280Z",
- "total": 68,
+ "generatedAt": "2026-11-14T19:18:31.777Z",
+ "startedAt": "2026-11-14T19:17:35.362Z",
+ "total": 61,
  "newestRecordAt": "2026-11-14T18:29:13.000Z",
  "sources": [
   {
    "id": "gdelt",
    "name": "GDELT",
-   "ok": true,
-   "count": 7,
-   "ms": 14085
+   "ok": false,
+   "count": 0,
+   "ms": 11115,
+   "error": "HTTP 429"
   },
   {
    "id": "radio_okapi",
    "name": "Radio Okapi",
    "ok": true,
    "count": 50,
-   "ms": 431
+   "ms": 302
   },
   {
    "id": "actualite",
    "name": "Actualité.cd",
    "ok": true,
    "count": 10,
-   "ms": 1609
+   "ms": 1818
   },
   {
    "id": "reliefweb",
    "name": "ReliefWeb RDC",
    "ok": true,
    "count": 0,
-   "ms": 239
+   "ms": 175
   },
   {
    "id": "un_news",
    "name": "UN News",
    "ok": true,
    "count": 9,
-   "ms": 99
+   "ms": 47
   }
  ],
  "note": "Instantané de sources ouvertes, collecté côté serveur. Aucune interception. Un signalement de presse n’est pas un fait vérifié."
