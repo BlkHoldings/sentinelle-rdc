@@ -241,7 +241,7 @@ function ImageryDetail({ result }: { result: { data: { scenes?: { datetime: stri
   );
 }
 
-function SnapshotDetail({ result }: { result: { data: { manifest?: { sources?: { id: string; name: string; ok: boolean; count: number }[]; generatedAt?: string } } | null } }) {
+function SnapshotDetail({ result }: { result: { data: { manifest?: { sources?: { id: string; name: string; ok: boolean; count: number; configured?: boolean }[]; generatedAt?: string } } | null } }) {
   const man = result.data?.manifest;
   if (!man?.sources?.length) return null;
   return (
@@ -250,9 +250,9 @@ function SnapshotDetail({ result }: { result: { data: { manifest?: { sources?: {
       <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
         {man.sources.map((x) => (
           <div key={x.id} className="flex items-center gap-1 text-3xs">
-            <span className={x.ok ? 'text-grn' : 'text-amb'}>{x.ok ? '●' : '○'}</span>
+            <span className={x.ok ? 'text-grn' : x.configured === false ? 'text-t3' : 'text-amb'}>{x.ok ? '●' : '○'}</span>
             <span className="text-t2 truncate flex-1">{x.name}</span>
-            <span className="font-data text-t3">{x.count}</span>
+            <span className="font-data text-t3">{x.configured === false ? 'à configurer' : x.count}</span>
           </div>
         ))}
       </div>

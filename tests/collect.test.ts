@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   tidyTitle, parseSeenDate, stripHtml, parseFeed, normDate, isDrcRelevant,
-  sourceTypeForUrl, normGdelt, normFeed, buildWire, hostOf,
+  sourceTypeForUrl, normGdelt, normFeed, buildWire, hostOf, normX, stripTcoLinks,
 } from '../scripts/collect-lib.mjs';
 import gdelt from './fixtures/gdelt.json';
 
@@ -116,5 +116,38 @@ describe('wire assembly', () => {
 describe('stripHtml double-encoding', () => {
   it('removes tags that were HTML-entity-encoded in the feed', () => {
     expect(stripHtml('Fait. &lt;span property="x"&gt;bruit&lt;/span&gt; &lt;div&gt;Image media&lt;/div&gt; suite')).toBe('Fait. bruit Image media suite');
+  });
+});
+
+describe('X (Twitter) normalisation', () => {
+  const payload = {
+    data: [
+      { id: '1801', text: 'Affrontements à Goma entre FARDC et M23. https://t.co/abc', author_id: 'u1', created_at: '2026-11-15T06:30:00.000Z', lang: 'fr' },
+      { id: '1802', text: 'Great match last night #football', author_id: 'u2', created_at: '2026-11-15T05:00:00.000Z', lang: 'en' },
+      { id: '1803', text: 'Gunfire near Beni, North Kivu overnight. https://t.co/xyz', author_id: 'u3', created_at: '2026-11-15T04:00:00.000Z', lang: 'en' },
+    ],
+    includes: { users: [
+      { id: 'u1', username: 'KivuAlerte', verified: false },
+      { id: 'u2', username: 'fan', verified: false },
+      { id: 'u3', username: 'ReutersAfrica', verified: true },
+    ] },
+  };
+  it('strips t.co links from the text', () => {
+    expect(stripTcoLinks('Texte https://t.co/abc fin')).toBe('Texte fin');
+  });
+  it('keeps only DRC-relevant posts and grades by account verification', () => {
+    const r = normX(payload);
+    expect(r.map((x) => x.source_id)).toEqual(['x:1801', 'x:1803']); // football dropped
+    expect(r[0].source_type).toBe('twitter_unverified');
+    expect(r[1].source_type).toBe('twitter_verified');
+  });
+  it('builds a real post URL and an @handle', () => {
+    const r = normX(payload);
+    expect(r[0].url).toBe('https://x.com/KivuAlerte/status/1801');
+    expect(r[0].handle).toBe('@KivuAlerte');
+  });
+  it('handles a missing includes block without throwing', () => {
+    expect(normX({ data: [{ id: '9', text: 'Goma clash', author_id: 'zz', lang: 'fr' }] })).toHaveLength(1);
+    expect(normX({})).toEqual([]);
   });
 });

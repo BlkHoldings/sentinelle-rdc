@@ -22,18 +22,18 @@
 
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { normGdelt, normFeed, parseFeed, buildWire } from './collect-lib.mjs';
+import { normGdelt, normFeed, parseFeed, buildWire, normX } from './collect-lib.mjs';
 
 const OUT_DIR = process.env.OUT_DIR || './data-out';
 const UA = 'Mozilla/5.0 (compatible; NKOYI-collector/1.0; +https://github.com/BlkHoldings/sentinelle-rdc)';
 
 /** One fetch with a timeout and up to two retries with backoff. */
-async function get(url, { json = false, timeoutMs = 30_000, retries = 2 } = {}) {
+async function get(url, { json = false, timeoutMs = 30_000, retries = 2, headers = {} } = {}) {
   for (let attempt = 0; ; attempt++) {
     const t0 = Date.now();
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': UA, Accept: json ? 'application/json' : 'application/rss+xml, application/xml, text/xml, */*' },
+        headers: { 'User-Agent': UA, Accept: json ? 'application/json' : 'application/rss+xml, application/xml, text/xml, */*', ...headers },
         signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -81,6 +81,38 @@ async function main() {
       sources.push({ id: 'gdelt', name: 'GDELT', ok: true, count: recs.length, ms: r.ms });
     } else {
       sources.push({ id: 'gdelt', name: 'GDELT', ok: false, count: 0, ms: r.ms, error: r.error });
+    }
+  }
+
+  // X (Twitter) recent search — only when a bearer token is configured
+  // as the X_BEARER_TOKEN secret. Server-only (no browser CORS) and the
+  // search tier is paid, so it stays opt-in and conservative on volume.
+  {
+    const token = process.env.X_BEARER_TOKEN;
+    if (!token) {
+      sources.push({ id: 'x', name: 'X (recherche)', ok: false, count: 0, ms: 0, configured: false, error: 'Non configuré — secret X_BEARER_TOKEN absent.' });
+    } else {
+      const max = Math.max(10, Math.min(100, Number(process.env.X_MAX_RESULTS) || 25));
+      const query = '(RDC OR "RD Congo" OR "North Kivu" OR "South Kivu" OR "Nord-Kivu" OR "Sud-Kivu" '
+        + 'OR Goma OR Bukavu OR Beni OR Bunia OR Uvira OR Ituri OR M23 OR FARDC OR Wazalendo OR MONUSCO) '
+        + '-is:retweet (lang:fr OR lang:en)';
+      const p = new URLSearchParams({
+        query, max_results: String(max),
+        'tweet.fields': 'created_at,lang,public_metrics,author_id',
+        expansions: 'author_id',
+        'user.fields': 'username,name,verified',
+      });
+      const r = await get(`https://api.x.com/2/tweets/search/recent?${p}`, {
+        json: true, timeoutMs: 25_000, retries: 1,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.ok && r.body?.data) {
+        const recs = normX(r.body);
+        lists.push(recs);
+        sources.push({ id: 'x', name: 'X (recherche)', ok: true, count: recs.length, ms: r.ms, configured: true });
+      } else {
+        sources.push({ id: 'x', name: 'X (recherche)', ok: false, count: 0, ms: r.ms, configured: true, error: r.error || 'aucun résultat' });
+      }
     }
   }
 

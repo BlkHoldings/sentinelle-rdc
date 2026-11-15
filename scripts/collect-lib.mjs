@@ -158,6 +158,48 @@ export function normFeed(items, { filter = true } = {}) {
   return out;
 }
 
+/** X (Twitter) API v2 recent-search payload → normalised wire records.
+ *  Server-only: the X API sends no browser-friendly CORS header and the
+ *  search tier needs a paid bearer token. Posts enter the fusion engine
+ *  as the social family, graded low — a verified account is `C`, an
+ *  ordinary one `E` — so a swarm of reposts is discounted, not counted.
+ */
+export function normX(payload, { filter = true } = {}) {
+  const users = new Map();
+  for (const u of payload?.includes?.users ?? []) users.set(u.id, u);
+  const out = [];
+  for (const post of payload?.data ?? []) {
+    const id = post.id;
+    const text = stripTcoLinks(post.text ?? '');
+    if (!id || !text) continue;
+    if (filter && !isDrcRelevant(text)) continue;
+    const author = users.get(post.author_id) ?? {};
+    const handle = author.username ? `@${author.username}` : '';
+    const url = author.username
+      ? `https://x.com/${author.username}/status/${id}`
+      : `https://x.com/i/web/status/${id}`;
+    out.push({
+      source_type: author.verified ? 'twitter_verified' : 'twitter_unverified',
+      source_id: `x:${id}`,
+      handle,
+      url,
+      text,
+      created_at: normDate(post.created_at) || new Date().toISOString(),
+      lang: post.lang === 'fr' ? 'fr' : post.lang === 'en' ? 'en' : 'unknown',
+      collector: 'x',
+    });
+  }
+  return out;
+}
+
+/** Drop the trailing t.co short-links X appends; keep the human text. */
+export function stripTcoLinks(t) {
+  return (t ?? '')
+    .replace(/https?:\/\/t\.co\/\S+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /** Merge, dedupe by source_id, drop anything older than `maxAgeH`,
  *  newest first, capped. */
 export function buildWire(lists, { now = Date.now(), maxAgeH = 96, cap = 500 } = {}) {

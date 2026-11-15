@@ -29,7 +29,28 @@ Le site lit cette branche via `raw.githubusercontent.com` (CORS ouvert, cache co
 **données présentes en permanence, sans reconstruction ni serveur dédié.** Si cet hôte
 est bloqué sur un réseau, l'application retombe sur les collectes navigateur.
 
-Sources du collecteur : Radio Okapi, Actualité.cd, ReliefWeb (RDC), UN News, GDELT. Toutes alimentent le moteur de fusion comme rapports de presse, gradés bas tant
+Sources du collecteur : Radio Okapi, Actualité.cd, ReliefWeb (RDC), UN News, GDELT.
+
+### Activer X (Twitter) — optionnel, clé requise
+
+X s'intègre au collecteur comme famille **« social », gradée bas** (un compte vérifié = C,
+un compte ordinaire = E) : une vague de reposts est décotée, pas comptée. Le navigateur ne
+peut pas appeler l'API X (CORS), et la recherche récente est payante — donc tout passe par
+le collecteur, protégé par un secret.
+
+Pour l'activer :
+
+1. Obtenir un **bearer token** X avec accès à `tweets/search/recent` (offre payante X API).
+2. Dépôt GitHub → **Settings → Secrets and variables → Actions → New repository secret** :
+   nom `X_BEARER_TOKEN`, valeur = le jeton. (Facultatif : `X_MAX_RESULTS`, défaut 25.)
+3. À la collecte suivante, les posts RDC entrent dans le fil, étiquetés « non vérifié ».
+
+Le jeton **n'est jamais** dans le dépôt ni dans le navigateur — uniquement dans les secrets
+Actions. Tant qu'il est absent, X apparaît « à configurer », sans erreur.
+
+> **Quota.** L'offre de base X plafonne le volume mensuel ; à 30 min × 25 posts, vous
+> dépasseriez vite. Réduisez `X_MAX_RESULTS` ou espacez le cron (`collect.yml`) selon votre
+> abonnement. Toutes alimentent le moteur de fusion comme rapports de presse, gradés bas tant
 qu'ils ne sont pas recoupés.
 
 > **Pas d'interception.** Toute collecte porte sur des flux publics qu'on peut ouvrir
