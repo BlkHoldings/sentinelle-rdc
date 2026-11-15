@@ -1,15 +1,15 @@
 {
- "generatedAt": "2026-11-15T10:25:40.835Z",
- "startedAt": "2026-11-15T10:25:22.689Z",
+ "generatedAt": "2026-11-15T17:20:44.687Z",
+ "startedAt": "2026-11-15T17:20:16.484Z",
  "total": 62,
- "newestRecordAt": "2026-11-15T10:20:44.000Z",
+ "newestRecordAt": "2026-11-15T17:00:42.000Z",
  "sources": [
   {
    "id": "gdelt",
    "name": "GDELT",
    "ok": true,
    "count": 1,
-   "ms": 16142
+   "ms": 13565
   },
   {
    "id": "x",
@@ -25,21 +25,21 @@
    "name": "Radio Okapi",
    "ok": true,
    "count": 50,
-   "ms": 434
+   "ms": 391
   },
   {
    "id": "actualite",
    "name": "Actualité.cd",
    "ok": true,
    "count": 10,
-   "ms": 751
+   "ms": 841
   },
   {
    "id": "reliefweb",
    "name": "ReliefWeb RDC",
    "ok": true,
    "count": 0,
-   "ms": 231
+   "ms": 223
   },
   {
    "id": "un_news",
@@ -53,7 +53,7 @@
    "name": "OpenSky (ADS-B)",
    "ok": false,
    "count": 0,
-   "ms": 453,
+   "ms": 487,
    "error": "format inattendu"
   }
  ],
