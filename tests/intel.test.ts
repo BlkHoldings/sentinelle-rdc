@@ -156,7 +156,9 @@ describe('source mix', () => {
 
 describe('triage', () => {
   it('keeps an annotated event in the queue: a note is not a decision', () => {
-    const e = ev({ priority: 60 });
+    // needsTriage ages events out against the wall clock, so this one
+    // must be recent relative to now, not to the fixed test clock.
+    const e = { ...ev({ priority: 60 }), timestamp: new Date(Date.now() - 3_600_000).toISOString() };
     expect(needsTriage(e)).toBe(true);
     expect(needsTriage({ ...e, adjudications: [{ analyst: 'X', action: 'edit', at: iso(0), notes: 'n' }] })).toBe(true);
     expect(needsTriage({ ...e, adjudications: [{ analyst: 'X', action: 'confirm', at: iso(0) }] })).toBe(false);

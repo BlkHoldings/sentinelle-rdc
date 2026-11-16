@@ -91,7 +91,11 @@ Vérifiées dans un navigateur réel le 12 novembre 2026. Aucune ne demande de c
 
 Sources écartées, et pourquoi : **N2YO** (passage satellite) et **Azure Maps** (trafic) demandent une clé pour un intérêt faible ou nul en RDC ; **Cloudflare Radar** demande un jeton (IODA couvre le même besoin gratuitement) ; **Copernicus OData** demande une authentification — le catalogue Sentinel-2 passe par Earth Search à la place.
 
-Fonds de carte : ESRI ArcGIS Online (sans clé). Limites administratives : geoBoundaries / OpenStreetMap (ODbL).
+Carte : MapLibre GL 5 (projection plane ou **globe**). Fond par défaut en **tuiles
+vectorielles** OpenFreeMap (OpenStreetMap, sans clé) — nettes à tout zoom ; le style est
+vérifié avant d'être donné à la carte, avec repli automatique sur un fond raster. Imagerie :
+**Sentinel-2 sans nuages 2024 à 10 m** (EOX, licence CC BY-NC-SA — *usage non commercial*),
+ESRI World Imagery, NASA GIBS. Autres fonds : ESRI ArcGIS Online (sans clé). Limites administratives : geoBoundaries / OpenStreetMap (ODbL).
 
 Les analyseurs sont testés contre des réponses réelles enregistrées (`tests/fixtures`) :
 si un fournisseur change de format, un test échoue au lieu de vider un panneau en silence.
