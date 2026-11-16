@@ -28,7 +28,7 @@
 
 import type { StyleSpecification } from 'maplibre-gl';
 
-export type BasemapId = 'dark' | 'satellite' | 'hybrid' | 'topo' | 'terrain';
+export type BasemapId = 'vector' | 'dark' | 'satellite' | 'hybrid' | 'topo' | 'terrain';
 
 export interface BasemapDef {
   id: BasemapId;
@@ -39,6 +39,8 @@ export interface BasemapDef {
   /** Imagery basemaps need light-on-dark overlays to stay legible. */
   overlayContrast: 'onDark' | 'onLight';
   style: StyleSpecification | string;
+  /** Hosted vector style to try first; `style` is then the fallback. */
+  styleUrl?: string;
   attribution: string;
   /**
    * A single representative asset used to test whether this basemap's host
@@ -115,6 +117,23 @@ function rasterStyle(
 }
 
 export const BASEMAPS: BasemapDef[] = [
+  {
+    id: 'vector',
+    label: 'VECTEUR',
+    hint: 'Tuiles vectorielles OpenStreetMap — nettes à tout zoom, routes et hydrographie détaillées',
+    maxZoom: 19,
+    overlayContrast: 'onDark',
+    /* Vector tiles are the sharper, lighter option: geometry is drawn by
+       the GPU at whatever zoom is asked for instead of upscaling a
+       picture. The hosted style is fetched and checked *before* the map
+       is given it (see resolveStyle); if it cannot be had, the raster
+       style below is used, so a blocked host costs sharpness and never
+       the overlays. */
+    styleUrl: 'https://tiles.openfreemap.org/styles/dark',
+    style: rasterStyle([{ id: 'esri-dark', tiles: [ESRI_DARK], maxzoom: 16 }], 'Esri, © OpenStreetMap contributors'),
+    attribution: 'OpenFreeMap © OpenMapTiles, données © OpenStreetMap contributors',
+    probe: { kind: 'json', url: 'https://tiles.openfreemap.org/styles/dark' },
+  },
   {
     id: 'dark',
     label: 'SOMBRE',
@@ -236,7 +255,7 @@ export function probeBasemap(def: BasemapDef, timeoutMs = 12_000): Promise<boole
 /* The dark vector style leads: it is the theme the overlays were tuned
    against, and it keeps the incidents — not the terrain — as the figure.
    Imagery is one click away. */
-export const DEFAULT_BASEMAP: BasemapId = 'dark';
+export const DEFAULT_BASEMAP: BasemapId = 'vector';
 
 export function basemapById(id: BasemapId): BasemapDef {
   return BASEMAPS.find((b) => b.id === id) ?? BASEMAPS[0];
@@ -255,3 +274,52 @@ export const TERRAIN_EXAGGERATION = {
 } as const;
 
 export type TerrainMode = keyof typeof TERRAIN_EXAGGERATION;
+
+/* ── Style resolution ─────────────────────────────────────────────── */
+
+/* The build draws its own settlement names from the gazetteer; the
+   vector style's town labels would print the same names twice. Country,
+   region, water and road labels are kept. */
+const DUPLICATE_LABELS = /^(place_(city|town|village|suburb|other)|label_(city|town|village|other))/;
+
+function tuneVectorStyle(style: StyleSpecification): StyleSpecification {
+  return {
+    ...style,
+    sources: { ...style.sources, dem: DEM_SOURCE },
+    layers: style.layers
+      .filter((l) => !DUPLICATE_LABELS.test(l.id))
+      .map((l) => {
+        const src = (l as { 'source-layer'?: string })['source-layer'];
+        if (l.type === 'background') return { ...l, paint: { ...l.paint, 'background-color': '#0d1014' } };
+        /* The stock dark style is tuned for a bare map; under overlays its
+           roads and water vanish. Lift them just enough to read as
+           context without competing with the data. */
+        if (l.type === 'line' && src === 'transportation') return { ...l, paint: { ...l.paint, 'line-color': '#465264' } };
+        if (l.type === 'fill' && src === 'water') return { ...l, paint: { ...l.paint, 'fill-color': '#13202e' } };
+        if (l.type === 'line' && src === 'waterway') return { ...l, paint: { ...l.paint, 'line-color': '#1f3347' } };
+        if (l.type === 'line' && src === 'boundary') return { ...l, paint: { ...l.paint, 'line-color': '#6b7482' } };
+        return l;
+      }) as StyleSpecification['layers'],
+  };
+}
+
+/**
+ * The style to hand to the map for a basemap.
+ *
+ * A hosted vector style is fetched here, with a timeout, and only passed
+ * on once it has parsed. Handing MapLibre the URL directly makes that
+ * one request a single point of failure: if it is blocked the map never
+ * finishes loading and no overlay is drawn at all.
+ */
+export async function resolveStyle(def: BasemapDef, timeoutMs = 8_000): Promise<{ style: StyleSpecification | string; fellBack: boolean }> {
+  if (!def.styleUrl) return { style: def.style, fellBack: false };
+  try {
+    const res = await fetch(def.styleUrl, { signal: AbortSignal.timeout(timeoutMs) });
+    if (!res.ok) throw new Error(String(res.status));
+    const json = await res.json() as StyleSpecification;
+    if (!Array.isArray(json.layers) || !json.sources) throw new Error('style invalide');
+    return { style: tuneVectorStyle(json), fellBack: false };
+  } catch {
+    return { style: def.style, fellBack: true };
+  }
+}

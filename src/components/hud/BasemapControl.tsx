@@ -28,6 +28,8 @@ export default function BasemapControl() {
   const setTerrain      = useMapStore((s) => s.setTerrain);
   const hillshade       = useMapStore((s) => s.hillshade);
   const toggleHillshade = useMapStore((s) => s.toggleHillshade);
+  const projection      = useMapStore((s) => s.projection);
+  const setProjection   = useMapStore((s) => s.setProjection);
   const precision       = useMapStore((s) => s.precision);
   const setPrecision    = useMapStore((s) => s.setPrecision);
 
@@ -90,6 +92,16 @@ export default function BasemapControl() {
                   }`}
                 >
                   {TERRAIN_LABEL[m]}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-0.5" role="group" aria-label="Projection">
+              {(['mercator', 'globe'] as const).map((p) => (
+                <button key={p} onClick={() => setProjection(p)} aria-pressed={projection === p} data-testid={`proj-${p}`}
+                  className={`flex-1 py-0.5 text-3xs border transition-colors ${
+                    projection === p ? 'border-cyn text-cyn bg-cyn/15' : 'border-b3 text-t3 hover:text-t2'
+                  }`}>
+                  {p === 'mercator' ? 'CARTE PLANE' : 'GLOBE'}
                 </button>
               ))}
             </div>

@@ -94,7 +94,7 @@ export const LAYER_GROUPS: LayerGroupDef[] = [
   { id: 'tactical',  label: 'SITUATION',        hint: 'Contrôle du terrain et dispositif' },
   { id: 'reference', label: 'RÉFÉRENCE',        hint: 'Géographie fixe — localités, axes, points d’entrée' },
   { id: 'live',      label: 'FLUX TEMPS RÉEL',  hint: 'Upstreams interrogés en continu' },
-  { id: 'satellite', label: 'IMAGERIE SATELLITE', hint: 'NASA GIBS — images du jour précédent, sans clé' },
+  { id: 'satellite', label: 'IMAGERIE SATELLITE', hint: 'Sentinel-2 (10 m) et NASA GIBS — sans clé' },
 ];
 
 export const LAYERS: LayerDef[] = [
@@ -303,6 +303,11 @@ export const LAYERS: LayerDef[] = [
   },
 
   /* ── Satellite imagery ───────────────────────────────────────── */
+  {
+    key: 'sat_s2', label: 'SENTINEL-2 SANS NUAGES (10 m)', group: 'satellite',
+    color: C.grn, origin: 'static', imagery: true,
+    hint: 'Mosaïque annuelle 2024 sans nuages, 10 m — EOX, licence CC BY-NC-SA (usage non commercial)',
+  },
   {
     key: 'sat_true', label: 'COULEURS RÉELLES (VEILLE)', group: 'satellite',
     color: C.grn, origin: 'live', imagery: true,

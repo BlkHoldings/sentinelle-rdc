@@ -84,7 +84,7 @@ export type LayerKey =
   /* National and provincial outlines. */
   | 'bounds'
   /* Real-time satellite imagery and open-data overlays. */
-  | 'sat_true' | 'sat_rain' | 'sat_night' | 'eonet' | 'rivers' | 'aircraft';
+  | 'sat_s2' | 'sat_true' | 'sat_rain' | 'sat_night' | 'eonet' | 'rivers' | 'aircraft';
 
 export interface LayerVisibility extends Record<LayerKey, boolean> {}
 

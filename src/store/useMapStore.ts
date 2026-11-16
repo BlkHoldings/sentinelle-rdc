@@ -46,6 +46,9 @@ interface MapState {
   terrain:         TerrainMode;
   /** Hillshade overlay on top of imagery/vector basemaps. */
   hillshade:       boolean;
+  /** Globe renders the Earth as a sphere at low zoom; identical up close. */
+  projection:      'mercator' | 'globe';
+  setProjection:   (p: 'mercator' | 'globe') => void;
   /** MGRS digits: 3=100 m · 4=10 m · 5=1 m. */
   precision:       3 | 4 | 5;
 
@@ -95,6 +98,7 @@ const DEFAULT_LAYERS: LayerVisibility = {
   eonet:   true,
   rivers:  false,
   aircraft: false,
+  sat_s2: false,
   sat_true: false,
   sat_rain: false,
   sat_night: false,
@@ -119,6 +123,8 @@ export const useMapStore = create<MapState>((set) => ({
   basemap:         DEFAULT_BASEMAP,
   terrain:         'off',
   hillshade:       false,
+  projection:      'mercator',
+  setProjection(p)      { set({ projection: p }); },
   precision:       5,
 
   toggleLayer(key) {

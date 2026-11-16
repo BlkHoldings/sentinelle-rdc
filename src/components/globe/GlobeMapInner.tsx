@@ -18,7 +18,7 @@ import { OSM_CATEGORY_COLOR } from '@/lib/live/osm';
 import type { IsrAssessment } from '@/lib/live/weather';
 import { toMGRSSync, preloadMGRS } from '@/lib/mgrs';
 import { registerFlyTo, registerGetBounds } from '@/lib/mapController';
-import { basemapById, probeBasemap, DEM_SOURCE, TERRAIN_EXAGGERATION } from '@/lib/basemaps';
+import { basemapById, probeBasemap, resolveStyle, DEM_SOURCE, TERRAIN_EXAGGERATION } from '@/lib/basemaps';
 import { clusterPoints, dominant, CLUSTER_MAX_ZOOM } from '@/lib/cluster';
 import { C } from '@/lib/layers';
 import { asset } from '@/lib/asset';
@@ -30,6 +30,9 @@ import { MIL_POSITIONS } from '@/data/military';
 import { DRONE_ISR } from '@/data/drones';
 import { M23_ZONES_GEOJSON } from '@/data/zones';
 import type { IntelEvent, LayerKey } from '@/types/intel';
+
+/** EOX Sentinel-2 cloudless mosaic, 10 m, annual composite. */
+const S2_CLOUDLESS = 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg';
 
 /* Full DRC viewport */
 const INITIAL_VIEW = {
@@ -205,6 +208,23 @@ export default function GlobeMapInner() {
   const [tileError, setTileError] = useState(false);
 
   const basemap = basemapById(basemapId);
+  const projection = useMapStore((s) => s.projection);
+
+  /* The style actually given to the map. Hosted vector styles are
+     resolved first; until then the previous style stays up. */
+  const [mapStyle, setMapStyle] = useState<Awaited<ReturnType<typeof resolveStyle>>['style'] | null>(
+    basemap.styleUrl ? null : basemap.style,
+  );
+  const [styleFellBack, setStyleFellBack] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    resolveStyle(basemap).then((r) => {
+      if (cancelled) return;
+      setMapStyle(r.style);
+      setStyleFellBack(r.fellBack);
+    });
+    return () => { cancelled = true; };
+  }, [basemap]);
 
   /* SECRET-source overlays (drone / mil) hidden under lower class filters */
   const secretVisible = classFilter === 'TOUS' || classFilter === 'SECRET';
@@ -759,10 +779,15 @@ export default function GlobeMapInner() {
     'step', ['get', 'confidence'], C.alert, 0.45, C.amb, 0.75, C.grn,
   ] as unknown as string;
 
+  if (!mapStyle) {
+    return <div className="absolute inset-0 bg-b0" role="status" aria-label="Chargement de la carte" />;
+  }
+
   return (
     <Map
       ref={mapRef}
-      mapStyle={basemap.style}
+      mapStyle={mapStyle!}
+      projection={projection}
       initialViewState={INITIAL_VIEW}
       maxZoom={basemap.maxZoom}
       maxPitch={85}
@@ -782,7 +807,7 @@ export default function GlobeMapInner() {
 
       {/* Tile host unreachable — say so rather than showing a black map
           with live overlays floating on it. */}
-      {tileError && (
+      {(tileError || styleFellBack) && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-hud
                         border border-amb/50 bg-b1/95 px-3 py-2 max-w-sm text-center shadow-float">
           <div className="text-amb text-2xs font-bold tracking-wider">
@@ -810,6 +835,14 @@ export default function GlobeMapInner() {
       {/* ══ Draw order, bottom to top: areas → lines → uncertainty →
              raw points → fused points → DOM markers. Areas first so no
              polygon ever covers the point it contains. ══ */}
+
+      {/* Sentinel-2 cloudless mosaic — 10 m, annual composite */}
+      {on('sat_s2') && (
+        <Source id="sat-s2-src" type="raster" tiles={[S2_CLOUDLESS]} tileSize={256} maxzoom={14}
+          attribution="Sentinel-2 cloudless 2024 — EOX IT Services GmbH (CC BY-NC-SA 4.0)">
+          <Layer id="sat-s2-layer" type="raster" paint={{ 'raster-opacity': 0.95 * op('sat_s2') }} />
+        </Source>
+      )}
 
       {/* Satellite imagery, directly above the basemap and under every
           overlay. Tile URLs carry the image date, so the layer is the

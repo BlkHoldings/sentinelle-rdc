@@ -16,6 +16,9 @@
    "assets": {
     "thumbnail": {
      "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/PT/2026/11/S2B_35MPT_20261112_0_L2A/preview.jpg"
+    },
+    "visual": {
+     "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/PT/2026/11/S2B_35MPT_20261112_0_L2A/TCI.tif"
     }
    }
   },
@@ -35,6 +38,9 @@
    "assets": {
     "thumbnail": {
      "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/QT/2026/11/S2B_35MQT_20261112_0_L2A/preview.jpg"
+    },
+    "visual": {
+     "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/QT/2026/11/S2B_35MQT_20261112_0_L2A/TCI.tif"
     }
    }
   },
@@ -54,6 +60,9 @@
    "assets": {
     "thumbnail": {
      "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/PU/2026/11/S2B_35MPU_20261112_0_L2A/preview.jpg"
+    },
+    "visual": {
+     "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/M/PU/2026/11/S2B_35MPU_20261112_0_L2A/TCI.tif"
     }
    }
   }
