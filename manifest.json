@@ -1,16 +1,15 @@
 {
- "generatedAt": "2026-11-21T12:54:12.804Z",
- "startedAt": "2026-11-21T12:53:16.193Z",
+ "generatedAt": "2026-11-21T19:55:38.997Z",
+ "startedAt": "2026-11-21T19:55:06.336Z",
  "total": 76,
- "newestRecordAt": "2026-11-21T12:02:36.000Z",
+ "newestRecordAt": "2026-11-21T19:50:41.000Z",
  "sources": [
   {
    "id": "gdelt",
    "name": "GDELT",
-   "ok": false,
-   "count": 0,
-   "ms": 9781,
-   "error": "HTTP 429"
+   "ok": true,
+   "count": 16,
+   "ms": 18855
   },
   {
    "id": "x",
@@ -26,35 +25,35 @@
    "name": "Radio Okapi",
    "ok": true,
    "count": 50,
-   "ms": 344
+   "ms": 275
   },
   {
    "id": "actualite",
    "name": "Actualité.cd",
    "ok": true,
    "count": 10,
-   "ms": 1582
+   "ms": 634
   },
   {
    "id": "reliefweb",
    "name": "ReliefWeb RDC",
    "ok": true,
-   "count": 20,
-   "ms": 512
+   "count": 0,
+   "ms": 12
   },
   {
    "id": "un_news",
    "name": "UN News",
    "ok": true,
    "count": 9,
-   "ms": 115
+   "ms": 27
   },
   {
    "id": "opensky",
    "name": "OpenSky (ADS-B)",
    "ok": true,
    "count": 1,
-   "ms": 521
+   "ms": 303
   }
  ],
  "note": "Instantané de sources ouvertes, collecté côté serveur. Aucune interception. Un signalement de presse n’est pas un fait vérifié."
