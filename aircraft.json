@@ -1,1 +1,1 @@
-{"generatedAt":"2026-11-23T22:10:13.713Z","total":0,"aircraft":[],"note":"Aviation publique (ADS-B) au-dessus de la zone. Données de sécurité aérienne, pas de surveillance d’individus."}
+{"generatedAt":"2026-11-24T06:16:08.474Z","total":1,"aircraft":[{"icao":"090020","callsign":"SOR410","country":"Angola","lon":13.0992,"lat":-8.3935,"alt":5486.4,"onGround":false,"velocity":117.14,"heading":342.36}],"note":"Aviation publique (ADS-B) au-dessus de la zone. Données de sécurité aérienne, pas de surveillance d’individus."}
