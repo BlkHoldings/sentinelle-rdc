@@ -1,1 +1,1 @@
-{"generatedAt":"2026-11-26T03:56:40.938Z","total":0,"aircraft":[],"note":"Aviation publique (ADS-B) au-dessus de la zone. Données de sécurité aérienne, pas de surveillance d’individus."}
+{"generatedAt":"2026-11-26T13:32:45.142Z","total":1,"aircraft":[{"icao":"09011f","callsign":"DTA123","country":"Angola","lon":13.3365,"lat":-8.4338,"alt":4107.18,"onGround":false,"velocity":180.47,"heading":143.23}],"note":"Aviation publique (ADS-B) au-dessus de la zone. Données de sécurité aérienne, pas de surveillance d’individus."}
